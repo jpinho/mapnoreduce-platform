@@ -53,6 +53,12 @@
     <Compile Include="CommandParserTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PuppetMasterLib\PuppetMasterLib.csproj">
+      <Project>{677ebbcd-8869-4af9-93aa-bbb641c1e0f9}</Project>
+      <Name>PuppetMasterLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
