@@ -1,0 +1,1 @@
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\ClientUserApp\bin\Debug\ClientUserApp.exe.config

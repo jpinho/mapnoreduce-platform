@@ -1,0 +1,1 @@
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\MapNoReduceServer\bin\Debug\MapNoReduceServer.exe.config

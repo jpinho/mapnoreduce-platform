@@ -1,0 +1,8 @@
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\PuppetMasterUI.exe.config
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\PuppetMasterUI.exe
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\PuppetMasterUI.pdb
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.csprojResolveAssemblyReference.cache
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.Properties.Resources.resources
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.csproj.GenerateResource.Cache
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.exe
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.pdb
