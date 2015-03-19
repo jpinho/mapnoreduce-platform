@@ -7,6 +7,7 @@ namespace PuppetMasterLib
 {
     public interface ICommand
     {
-        void execute();
+        void Execute();
+        string ToString();
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PuppetMasterLib.Commands
 {
-    public class SubmitJob: ICommand
+    public class SubmitJob : ICommand
     {
         public const string NAME = "submit";
 
@@ -16,9 +16,12 @@ namespace PuppetMasterLib.Commands
         public int Splits { get; set; }
         public string MapFunctionPath { get; set; }
 
-        public void execute()
-        {
-            throw new NotImplementedException();
+        public void Execute() {
+            //TODO: Implement me.
+        }
+
+        public override string ToString() {
+            return NAME;
         }
     }
 }

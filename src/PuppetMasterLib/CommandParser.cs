@@ -63,74 +63,69 @@ namespace PuppetMasterLib
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        parsedCommands.Add(new Commands.Wait()
-                        {
+                        parsedCommands.Add(new Commands.Wait() {
                             Secs = secs
                         });
                         break;
-                   case Commands.Status.NAME:
+                    case Commands.Status.NAME:
                         parsedCommands.Add(new Commands.Status());
                         break;
-                   case Commands.SlowWorker.NAME:
+                    case Commands.SlowWorker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        parsedCommands.Add(new Commands.SlowWorker()
-                        {
+                        parsedCommands.Add(new Commands.SlowWorker() {
                             WorkerId = workerId
                         });
                         break;
-                   case Commands.FreezeWorker.NAME:
+                    case Commands.FreezeWorker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        parsedCommands.Add(new Commands.FreezeWorker()
-                        {
+                        parsedCommands.Add(new Commands.FreezeWorker() {
                             WorkerId = workerId
                         });
                         break;
-                   case Commands.UnfreezeWorker.NAME:
+                    case Commands.UnfreezeWorker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        parsedCommands.Add(new Commands.UnfreezeWorker()
-                        {
+                        parsedCommands.Add(new Commands.UnfreezeWorker() {
                             WorkerId = workerId
                         });
                         break;
-                   case Commands.FreezeJobTracker.NAME:
+                    case Commands.FreezeJobTracker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        parsedCommands.Add(new Commands.FreezeJobTracker()
-                        {
+                        parsedCommands.Add(new Commands.FreezeJobTracker() {
                             WorkerId = workerId
                         });
                         break;
-                   case Commands.UnfreezeJobTracker.NAME:
+                    case Commands.UnfreezeJobTracker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        parsedCommands.Add(new Commands.UnfreezeJobTracker()
-                        {
+                        parsedCommands.Add(new Commands.UnfreezeJobTracker() {
                             WorkerId = workerId
                         });
                         break;
-                    default:
-                        throw new UnrecognizedCommandException(string.Format(UNRECOGNIZED_COMMAND_EXCEPTION, cmd));
+                    //default:
+                    //quando não percebes o comando por agora não lances excepção, ignora apenas.
+                    //throw new UnrecognizedCommandException(string.Format(UNRECOGNIZED_COMMAND_EXCEPTION, cmd));
                 }
-
             }
+
             return parsedCommands;
         }
     }

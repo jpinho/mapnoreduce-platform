@@ -10,8 +10,12 @@ namespace PuppetMasterLib.Commands
         public const string NAME = "wait";
         public int Secs { get; set; }
 
-        public void execute() {
-            throw new NotImplementedException();
+        public void Execute() {
+            //TODO: Implement me.
+        }
+
+        public override string ToString() {
+            return NAME;
         }
     }
 }

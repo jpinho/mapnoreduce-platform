@@ -15,8 +15,12 @@ namespace PuppetMasterLib.Commands
         public string ServiceURL { get; set; }
         public string EntryURL { get; set; }
 
-        public void execute() {
-            throw new NotImplementedException();
+        public void Execute() {
+            //TODO: Implement me.
+        }
+
+        public override string ToString() {
+            return NAME;
         }
     }
 }
