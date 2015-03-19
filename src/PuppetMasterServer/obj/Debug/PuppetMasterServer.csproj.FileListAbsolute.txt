@@ -1,5 +1,8 @@
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterServer\bin\Debug\PuppetMasterServer.exe.config
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterServer\bin\Debug\PuppetMasterServer.exe
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterServer\bin\Debug\PuppetMasterServer.pdb
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterServer\bin\Debug\PuppetMasterLib.dll
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterServer\bin\Debug\PuppetMasterLib.pdb
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterServer\obj\Debug\PuppetMasterServer.csprojResolveAssemblyReference.cache
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterServer\obj\Debug\PuppetMasterServer.exe
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterServer\obj\Debug\PuppetMasterServer.pdb

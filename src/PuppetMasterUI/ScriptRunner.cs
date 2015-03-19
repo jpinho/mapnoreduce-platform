@@ -21,6 +21,9 @@ namespace PuppetMasterUI
             NEW_SCRIPT_TAB = tpNewScript.Name;
             ofdOpenFile.InitialDirectory = Path.Combine(Environment.CurrentDirectory, "Scripts");
             sfdSaveFile.InitialDirectory = Path.Combine(Environment.CurrentDirectory, "Scripts");
+            bwScriptWorker.DoWork += ScriptWorker_DoWork;
+            bwScriptWorker.ProgressChanged += ScriptWorker_ProgressChanged;
+            bwScriptWorker.RunWorkerCompleted += ScriptWorker_RunWorkerCompleted;
         }
 
         private void tsOpenScript_Click(object sender, EventArgs e) {
@@ -30,9 +33,17 @@ namespace PuppetMasterUI
 
                 TextBox txtScript = new TextBox() {
                     Text = fileScript.ReadToEnd(),
-                    Dock = DockStyle.Fill,
-                    Multiline = true,
-                    ScrollBars = ScrollBars.Both
+                    Dock = txtScripts.Dock,
+                    Multiline = txtScripts.Multiline,
+                    ScrollBars = txtScripts.ScrollBars,
+                    Font = txtScripts.Font,
+                    ForeColor = txtScripts.ForeColor,
+                    BackColor = txtScripts.BackColor,
+                    Anchor = txtScripts.Anchor,
+                    CharacterCasing = txtScripts.CharacterCasing,
+                    AcceptsReturn = txtScripts.AcceptsReturn,
+                    AcceptsTab = txtScripts.AcceptsTab,
+                    AccessibleRole = AccessibleRole.Text
                 };
 
                 tpScript.Controls.Add(txtScript);
@@ -50,14 +61,14 @@ namespace PuppetMasterUI
         }
 
         private void tsSaveScript_Click(object sender, EventArgs e) {
-            if (tcScriptContainer.SelectedTab != null && tcScriptContainer.SelectedTab.Name == NEW_SCRIPT_TAB){
+            if (tcScriptContainer.SelectedTab != null && tcScriptContainer.SelectedTab.Name == NEW_SCRIPT_TAB) {
                 sfdSaveFile.FileName = "Script_" + DateTime.Now.ToString("ddMMyyyy_HHmmss") + ".txt";
                 if (sfdSaveFile.ShowDialog() == DialogResult.OK) {
                     using (StreamWriter fileNewScript = new StreamWriter(sfdSaveFile.FileName)) {
                         fileNewScript.Write(txtScripts.Text);
                     }
                 }
-            } else { 
+            } else {
                 sfdSaveFile.FileName = tcScriptContainer.SelectedTab.Name;
                 if (sfdSaveFile.ShowDialog() == DialogResult.OK) {
                     using (StreamWriter fileNewScript = new StreamWriter(sfdSaveFile.FileName)) {
@@ -68,7 +79,21 @@ namespace PuppetMasterUI
         }
 
         private void tsRunScript_Click(object sender, EventArgs e) {
-            new LongRunningOperation().ShowDialog();
+            bwScriptWorker.RunWorkerAsync(tcScriptContainer.SelectedTab.Text);
         }
-    }   
+
+        void ScriptWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
+            throw new NotImplementedException();
+        }
+
+        void ScriptWorker_ProgressChanged(object sender, ProgressChangedEventArgs e) {
+            throw new NotImplementedException();
+        }
+
+        void ScriptWorker_DoWork(object sender, DoWorkEventArgs e) {
+            string script = e.Argument as string;
+            LongRunningOperation frmLRO = new LongRunningOperation();
+
+        }
+    }
 }

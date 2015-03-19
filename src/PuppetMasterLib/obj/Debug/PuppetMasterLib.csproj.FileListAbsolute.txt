@@ -1,5 +1,4 @@
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterLib\bin\Debug\PuppetMasterLib.dll
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterLib\bin\Debug\PuppetMasterLib.pdb
-\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterLib\obj\Debug\PuppetMasterLib.csprojResolveAssemblyReference.cache
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterLib\obj\Debug\PuppetMasterLib.dll
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterLib\obj\Debug\PuppetMasterLib.pdb

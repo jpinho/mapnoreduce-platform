@@ -29,17 +29,18 @@
             this.tsTopNavigation = new System.Windows.Forms.ToolStrip();
             this.tsOpenScript = new System.Windows.Forms.ToolStripButton();
             this.tsSaveScript = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsSeparatorOne = new System.Windows.Forms.ToolStripSeparator();
             this.tsRunScript = new System.Windows.Forms.ToolStripButton();
             this.tsRunScriptStep = new System.Windows.Forms.ToolStripButton();
             this.tsStop = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsSeparatorTwo = new System.Windows.Forms.ToolStripSeparator();
             this.tsCleanScript = new System.Windows.Forms.ToolStripButton();
             this.ofdOpenFile = new System.Windows.Forms.OpenFileDialog();
             this.sfdSaveFile = new System.Windows.Forms.SaveFileDialog();
             this.tcScriptContainer = new System.Windows.Forms.TabControl();
             this.tpNewScript = new System.Windows.Forms.TabPage();
             this.txtScripts = new System.Windows.Forms.TextBox();
+            this.bwScriptWorker = new System.ComponentModel.BackgroundWorker();
             this.tsTopNavigation.SuspendLayout();
             this.tcScriptContainer.SuspendLayout();
             this.tpNewScript.SuspendLayout();
@@ -50,16 +51,16 @@
             this.tsTopNavigation.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsOpenScript,
             this.tsSaveScript,
-            this.toolStripSeparator1,
+            this.tsSeparatorOne,
             this.tsRunScript,
             this.tsRunScriptStep,
             this.tsStop,
-            this.toolStripSeparator2,
+            this.tsSeparatorTwo,
             this.tsCleanScript});
             this.tsTopNavigation.Location = new System.Drawing.Point(0, 0);
             this.tsTopNavigation.Name = "tsTopNavigation";
             this.tsTopNavigation.Padding = new System.Windows.Forms.Padding(0);
-            this.tsTopNavigation.Size = new System.Drawing.Size(887, 25);
+            this.tsTopNavigation.Size = new System.Drawing.Size(878, 25);
             this.tsTopNavigation.TabIndex = 1;
             this.tsTopNavigation.Text = "Top Navigation";
             // 
@@ -83,10 +84,10 @@
             this.tsSaveScript.Text = "Save Script";
             this.tsSaveScript.Click += new System.EventHandler(this.tsSaveScript_Click);
             // 
-            // toolStripSeparator1
+            // tsSeparatorOne
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            this.tsSeparatorOne.Name = "tsSeparatorOne";
+            this.tsSeparatorOne.Size = new System.Drawing.Size(6, 25);
             // 
             // tsRunScript
             // 
@@ -116,10 +117,10 @@
             this.tsStop.Size = new System.Drawing.Size(23, 22);
             this.tsStop.Text = "Stop Script";
             // 
-            // toolStripSeparator2
+            // tsSeparatorTwo
             // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            this.tsSeparatorTwo.Name = "tsSeparatorTwo";
+            this.tsSeparatorTwo.Size = new System.Drawing.Size(6, 25);
             // 
             // tsCleanScript
             // 
@@ -142,13 +143,15 @@
             // 
             // tcScriptContainer
             // 
+            this.tcScriptContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tcScriptContainer.Controls.Add(this.tpNewScript);
-            this.tcScriptContainer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tcScriptContainer.Location = new System.Drawing.Point(0, 0);
+            this.tcScriptContainer.Location = new System.Drawing.Point(0, 27);
             this.tcScriptContainer.Name = "tcScriptContainer";
             this.tcScriptContainer.Padding = new System.Drawing.Point(6, 5);
             this.tcScriptContainer.SelectedIndex = 0;
-            this.tcScriptContainer.Size = new System.Drawing.Size(887, 535);
+            this.tcScriptContainer.Size = new System.Drawing.Size(878, 530);
             this.tcScriptContainer.TabIndex = 5;
             // 
             // tpNewScript
@@ -157,25 +160,54 @@
             this.tpNewScript.Location = new System.Drawing.Point(4, 26);
             this.tpNewScript.Name = "tpNewScript";
             this.tpNewScript.Padding = new System.Windows.Forms.Padding(3);
-            this.tpNewScript.Size = new System.Drawing.Size(879, 505);
+            this.tpNewScript.Size = new System.Drawing.Size(870, 500);
             this.tpNewScript.TabIndex = 0;
             this.tpNewScript.Text = "New Script";
             this.tpNewScript.UseVisualStyleBackColor = true;
             // 
             // txtScripts
             // 
+            this.txtScripts.AcceptsReturn = true;
+            this.txtScripts.AcceptsTab = true;
+            this.txtScripts.AccessibleRole = System.Windows.Forms.AccessibleRole.Text;
+            this.txtScripts.AllowDrop = true;
+            this.txtScripts.AutoCompleteCustomSource.AddRange(new string[] {
+            "WORKER",
+            "SUBMIT",
+            "WAIT",
+            "SLOWW",
+            "STATUS",
+            "FREEZEW",
+            "UNFREEZEW",
+            "FREEZEC",
+            "UNFREEZEC"});
+            this.txtScripts.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.txtScripts.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.txtScripts.BackColor = System.Drawing.Color.Black;
+            this.txtScripts.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtScripts.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
             this.txtScripts.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtScripts.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtScripts.ForeColor = System.Drawing.Color.Lavender;
+            this.txtScripts.HideSelection = false;
             this.txtScripts.Location = new System.Drawing.Point(3, 3);
             this.txtScripts.Multiline = true;
             this.txtScripts.Name = "txtScripts";
-            this.txtScripts.Size = new System.Drawing.Size(873, 499);
+            this.txtScripts.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtScripts.Size = new System.Drawing.Size(864, 494);
             this.txtScripts.TabIndex = 0;
+            this.txtScripts.Text = "% TYPE YOUR SCRIPT HERE!";
+            // 
+            // bwScriptWorker
+            // 
+            this.bwScriptWorker.WorkerReportsProgress = true;
+            this.bwScriptWorker.WorkerSupportsCancellation = true;
             // 
             // ScriptRunner
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(887, 535);
+            this.ClientSize = new System.Drawing.Size(878, 557);
             this.Controls.Add(this.tsTopNavigation);
             this.Controls.Add(this.tcScriptContainer);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -203,13 +235,14 @@
         private System.Windows.Forms.ToolStripButton tsStop;
         private System.Windows.Forms.ToolStripButton tsCleanScript;
         private System.Windows.Forms.ToolStripButton tsSaveScript;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripSeparator tsSeparatorOne;
+        private System.Windows.Forms.ToolStripSeparator tsSeparatorTwo;
         private System.Windows.Forms.OpenFileDialog ofdOpenFile;
         private System.Windows.Forms.SaveFileDialog sfdSaveFile;
         private System.Windows.Forms.TabControl tcScriptContainer;
         private System.Windows.Forms.TabPage tpNewScript;
         private System.Windows.Forms.TextBox txtScripts;
+        private System.ComponentModel.BackgroundWorker bwScriptWorker;
     }
 }
 

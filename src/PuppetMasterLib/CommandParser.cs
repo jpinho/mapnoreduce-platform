@@ -130,9 +130,9 @@ namespace PuppetMasterLib
                         /*throw new UnrecognizedCommandException(cmd);*/
                         break;
                 }
-
-                return parsedCommands;
             }
+
+            return parsedCommands;
         }
     }
 }

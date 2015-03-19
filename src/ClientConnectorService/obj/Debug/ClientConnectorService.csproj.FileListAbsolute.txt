@@ -1,6 +1,5 @@
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\ClientConnectorService\bin\Debug\ClientConnectorService.exe.config
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\ClientConnectorService\bin\Debug\ClientConnectorService.exe
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\ClientConnectorService\bin\Debug\ClientConnectorService.pdb
-\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\ClientConnectorService\obj\Debug\ClientConnectorService.csprojResolveAssemblyReference.cache
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\ClientConnectorService\obj\Debug\ClientConnectorService.exe
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\ClientConnectorService\obj\Debug\ClientConnectorService.pdb

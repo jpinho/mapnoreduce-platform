@@ -41,6 +41,8 @@
   <ItemGroup>
     <Compile Include="CommandParser.cs" />
     <Compile Include="CommandInvalidParameterException.cs" />
+    <Compile Include="Commands\CreateWorker.cs" />
+    <Compile Include="ICommand.cs" />
     <Compile Include="IMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

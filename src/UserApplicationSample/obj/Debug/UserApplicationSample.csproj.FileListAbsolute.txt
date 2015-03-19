@@ -1,6 +1,5 @@
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\UserApplicationSample\bin\Debug\UserApplicationSample.exe.config
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\UserApplicationSample\bin\Debug\UserApplicationSample.exe
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\UserApplicationSample\bin\Debug\UserApplicationSample.pdb
-\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\UserApplicationSample\obj\Debug\UserApplicationSample.csprojResolveAssemblyReference.cache
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\UserApplicationSample\obj\Debug\UserApplicationSample.exe
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\UserApplicationSample\obj\Debug\UserApplicationSample.pdb

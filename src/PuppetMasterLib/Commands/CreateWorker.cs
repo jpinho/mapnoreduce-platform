@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PuppetMasterLib.Commands
 {
-    public class CreateWorker: ICommand
+    public class CreateWorker:ICommand
     {
         public const string NAME = "worker";
 
