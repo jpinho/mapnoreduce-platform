@@ -12,3 +12,17 @@
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\Scripts\Script002.txt
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\Scripts\Script001.txt
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.LongRunningOperation.resources
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\PuppetMasterUI.exe.config
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\Scripts\Script003.txt
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\Scripts\Script004.txt
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\Scripts\Script002.txt
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\Scripts\Script001.txt
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\PuppetMasterUI.exe
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\PuppetMasterUI.pdb
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.csprojResolveAssemblyReference.cache
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.LongRunningOperation.resources
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.Properties.Resources.resources
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.ScriptRunner.resources
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.csproj.GenerateResource.Cache
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.exe
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.pdb

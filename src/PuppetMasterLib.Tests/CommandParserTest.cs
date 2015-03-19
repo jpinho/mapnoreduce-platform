@@ -15,11 +15,10 @@ namespace PuppetMasterLib.Tests
 
             // arrange
             //bool createWorkerSuccess = false;
-            string script = @"
-                WORKER 1 <PUPPETMASTER-URL> <SERVICE-URL> <ENTRY-URL>
-                SUBMIT <ENTRY-URL> <FILE> <OUTPUT> 10 <MAP>
-                %potato
-                WAIT 5";
+            string script = @"WORKER 1 <PUPPETMASTER-URL> <SERVICE-URL> <ENTRY-URL>
+SUBMIT <ENTRY-URL> <FILE> <OUTPUT> 10 <MAP>
+%potato
+WAIT 5";
 
             CommandParser cmdParser = new CommandParser() {
                 //CreateWorker = delegate(int workerId, string puppetMasterUrl, string serviceUrl, string entryUrl){

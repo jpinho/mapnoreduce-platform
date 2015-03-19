@@ -10,6 +10,7 @@ namespace PuppetMasterLib
     public class CommandParser
     {
         const string COMMAND_TYPE_EXCEPTION = "The {0} command {1} parameter received is invalid, {2} type expected.";
+        const string UNRECOGNIZED_COMMAND_EXCEPTION = "The {0} command is not recognized.";
         private string regexStripComments = "(^(%[^\n]*\n?))|(\n[ \t]*%[^\n]*)|(\n(?=\n))";
 
         public List<ICommand> run(string script) {
@@ -40,99 +41,97 @@ namespace PuppetMasterLib
                         });
 
                         break;
-                    //case Commands.SubmitJob.NAME
-                    case "submit":
+                    case Commands.SubmitJob.NAME:
                         int splits;
                         try {
                             splits = int.Parse(keyWords[4]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[4], "Integer"), e);
                         }
-                        //new Thread(
-                        //    new ThreadStart(delegate() {
-                        //    SubmitJob(keyWords[1] /*EntryUrl*/, keyWords[2] /*FilePath*/, keyWords[3] /*OutputPath*/, splits, keyWords[5] /*MapFunctionPath*/);
-                        //})).Start();
+                        parsedCommands.Add(new Commands.SubmitJob() {
+                            EntryURL = keyWords[1],
+                            FilePath = keyWords[2],
+                            OutputPath = keyWords[3],
+                            Splits = splits,
+                            MapFunctionPath = keyWords[5]
+                        });
                         break;
-                    case "wait":
+                    case Commands.Wait.NAME:
                         int secs;
                         try {
                             secs = int.Parse(keyWords[1]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        //new Thread(
-                        //    new ThreadStart(delegate() {
-                        //    Wait(secs);
-                        //})).Start();
+                        parsedCommands.Add(new Commands.Wait()
+                        {
+                            Secs = secs
+                        });
                         break;
-                    case "status":
-                        //new Thread(
-                        //    new ThreadStart(delegate() {
-                        //    GetStatus();
-                        //})).Start();
+                   case Commands.Status.NAME:
+                        parsedCommands.Add(new Commands.Status());
                         break;
-                    case "sloww":
+                   case Commands.SlowWorker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        //new Thread(
-                        //    new ThreadStart(delegate() {
-                        //    SlowWorker(workerId);
-                        //})).Start();
+                        parsedCommands.Add(new Commands.SlowWorker()
+                        {
+                            WorkerId = workerId
+                        });
                         break;
-                    case "freezew":
+                   case Commands.FreezeWorker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        //new Thread(
-                        //    new ThreadStart(delegate() {
-                        //    FreezeWorker(workerId);
-                        //})).Start();
+                        parsedCommands.Add(new Commands.FreezeWorker()
+                        {
+                            WorkerId = workerId
+                        });
                         break;
-                    case "unfreezew":
+                   case Commands.UnfreezeWorker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        //new Thread(
-                        //    new ThreadStart(delegate() {
-                        //    UnfreezeWorker(workerId);
-                        //})).Start();
+                        parsedCommands.Add(new Commands.UnfreezeWorker()
+                        {
+                            WorkerId = workerId
+                        });
                         break;
-                    case "freezec":
+                   case Commands.FreezeJobTracker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        //new Thread(
-                        //    new ThreadStart(delegate() {
-                        //    FreezeJobTracker(workerId);
-                        //})).Start();
+                        parsedCommands.Add(new Commands.FreezeJobTracker()
+                        {
+                            WorkerId = workerId
+                        });
                         break;
-                    case "unfreezec":
+                   case Commands.UnfreezeJobTracker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        //new Thread(
-                        //    new ThreadStart(delegate() {
-                        //    UnfreezeJobTracker(workerId);
-                        //})).Start();
+                        parsedCommands.Add(new Commands.UnfreezeJobTracker()
+                        {
+                            WorkerId = workerId
+                        });
                         break;
                     default:
-                        /*throw new UnrecognizedCommandException(cmd);*/
-                        break;
+                        throw new UnrecognizedCommandException(string.Format(UNRECOGNIZED_COMMAND_EXCEPTION, cmd));
                 }
 
-                return parsedCommands;
             }
+            return parsedCommands;
         }
     }
 }

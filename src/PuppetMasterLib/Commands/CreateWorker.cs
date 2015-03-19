@@ -15,8 +15,9 @@ namespace PuppetMasterLib.Commands
         public string ServiceURL { get; set; }
         public string EntryURL { get; set; }
 
-        void execute() { 
-            //TODO: Implement create worker method.
+        public T execute<T>()
+        {
+            throw new NotImplementedException();
         }
     }
 }
