@@ -3,3 +3,8 @@
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\UserApplicationSample\bin\Debug\UserApplicationSample.pdb
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\UserApplicationSample\obj\Debug\UserApplicationSample.exe
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\UserApplicationSample\obj\Debug\UserApplicationSample.pdb
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\UserApplicationSample\bin\Debug\UserApplicationSample.exe.config
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\UserApplicationSample\bin\Debug\UserApplicationSample.exe
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\UserApplicationSample\bin\Debug\UserApplicationSample.pdb
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\UserApplicationSample\obj\Debug\UserApplicationSample.exe
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\UserApplicationSample\obj\Debug\UserApplicationSample.pdb

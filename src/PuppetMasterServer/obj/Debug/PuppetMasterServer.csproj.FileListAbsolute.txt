@@ -6,3 +6,11 @@
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterServer\obj\Debug\PuppetMasterServer.csprojResolveAssemblyReference.cache
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterServer\obj\Debug\PuppetMasterServer.exe
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterServer\obj\Debug\PuppetMasterServer.pdb
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterServer\bin\Debug\PuppetMasterServer.exe.config
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterServer\bin\Debug\PuppetMasterServer.exe
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterServer\bin\Debug\PuppetMasterServer.pdb
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterServer\bin\Debug\PuppetMasterLib.dll
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterServer\bin\Debug\PuppetMasterLib.pdb
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterServer\obj\Debug\PuppetMasterServer.csprojResolveAssemblyReference.cache
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterServer\obj\Debug\PuppetMasterServer.exe
+C:\Users\Puuky\Desktop\Bitbucket\mapnoreduce-platform\src\PuppetMasterServer\obj\Debug\PuppetMasterServer.pdb

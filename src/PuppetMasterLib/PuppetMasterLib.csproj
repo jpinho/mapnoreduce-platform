@@ -41,10 +41,19 @@
   <ItemGroup>
     <Compile Include="CommandParser.cs" />
     <Compile Include="CommandInvalidParameterException.cs" />
+    <Compile Include="Commands\UnfreezeJobTracker.cs" />
+    <Compile Include="Commands\FreezeJobTracker.cs" />
+    <Compile Include="Commands\UnfreezeWorker.cs" />
+    <Compile Include="Commands\FreezeWorker.cs" />
+    <Compile Include="Commands\SubmitJob.cs" />
     <Compile Include="Commands\CreateWorker.cs" />
+    <Compile Include="Commands\Status.cs" />
+    <Compile Include="Commands\SlowWorker.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="IMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Commands\Wait.cs" />
+    <Compile Include="UnrecognizedCommandException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
