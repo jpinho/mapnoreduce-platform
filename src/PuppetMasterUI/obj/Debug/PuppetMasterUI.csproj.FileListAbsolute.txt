@@ -6,3 +6,9 @@
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.csproj.GenerateResource.Cache
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.exe
 \\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.pdb
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.ScriptRunner.resources
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\Scripts\Script003.txt
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\Scripts\Script004.txt
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\Scripts\Script002.txt
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\bin\Debug\Scripts\Script001.txt
+\\psf\Home\Documents\Workspace\mapnoreduce-platform\src\PuppetMasterUI\obj\Debug\PuppetMasterUI.LongRunningOperation.resources

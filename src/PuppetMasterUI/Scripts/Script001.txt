@@ -1,0 +1,78 @@
+﻿%%
+% Script 001
+% 
+% Date: 17/03/15
+% Author: João Pinho
+%% 
+
+
+%% 
+% Contacts the Pup- petMaster at the PUPPETMASTER-URL to 
+% creates a worker process with an identifier <ID> that exposes 
+% its services at <SERVICE-URL>. If an <ENTRY-URL> is provided, 
+% the new worker should notify the set of existing workers that 
+% it has started by calling the worker listening at <ENTRY-URL>. 
+% Since this command can be used to create local or remote workers, 
+% it will be simpler to implement it as a call to the local (or remote) 
+% Puppet- Master’s job creation service.
+%%
+WORKER <ID> <PUPPETMASTER-URL> <SERVICE-URL> <ENTRY-URL>
+
+%% 
+% Creates an application on the local node. The application submits a job 
+% to the PADIMapNoReduce platform by system by contacting the worker at <ENTRY-URL>. 
+% The job is defined by the following parameters:
+% – <FILE> is the path to the input file. The file will be subdivided into <S> splits 
+%   across the machines in W.
+% – <OUTPUT> is the path to an output directory on the local filesystem of the application, 
+%   which will store one output file for each split of the input file name “S1.out”, “S2.out”, . . ., “S.out”.
+% – <S>, i.e. the number of splits of the input file, which corresponds to the total 
+%   number of worker tasks to be executed.
+% – The name of the class implementing the IMap interface.
+%%
+SUBMIT <ENTRY-URL> <FILE> <OUTPUT> <S> <MAP>
+
+%%
+% Makes the PuppetMaster stop the execution of commands of the script
+% for <SECS> seconds.
+%%
+WAIT <SECS>
+
+%%
+% Makes all workers and job trackers of the PADIMapNoReduce system print their 
+% current status. The report shall allow to determine the state of progress of each 
+% map task at every node of the platform, as well as the current phase of execution 
+% of the job (e.g., transfer of the input/output data, computing, etc.). 
+% The status command should present brief information about the state of the 
+% system (who is present, who is in charge of coordination, which nodes are presumed failed). 
+% Status information can be printed on each nodes’ console and does not need to be 
+% centralized at the PuppetMaster.
+%%
+STATUS
+
+%%
+% Injects the specified delay in the worker processes with the <ID> identifier.
+%%
+SLOWW <ID> <delay-in-seconds>
+
+%%
+% Disables the communication of a worker and pauses its map computa- tion in order to 
+% simulate the worker’s failure.
+%%
+FREEZEW <ID>
+
+%%
+% Undoes the e↵ects of a previous FREEZEW command.
+%%
+UNFREEZEW <ID>
+
+%%
+% Disables the communication of the job tracker aspect of a worker node
+% in order to simulate its failures.
+%%
+FREEZEC <ID>
+
+%%
+% Undoes the e↵ects of a previous FREEZEC command.
+%%
+UNFREEZEC <ID>
