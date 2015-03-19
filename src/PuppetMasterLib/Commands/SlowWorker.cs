@@ -10,6 +10,7 @@ namespace PuppetMasterLib.Commands
         public const string NAME = "sloww";
 
         public int WorkerId { get; set; }
+        
         public T execute<T>()
         {
             throw new NotImplementedException();

@@ -11,9 +11,9 @@ namespace PuppetMasterLib
     {
         const string COMMAND_TYPE_EXCEPTION = "The {0} command {1} parameter received is invalid, {2} type expected.";
         const string UNRECOGNIZED_COMMAND_EXCEPTION = "The {0} command is not recognized.";
-        private string regexStripComments = "(^(%[^\n]*\n?))|(\n[ \t]*%[^\n]*)|(\n(?=\n))";
+        private static string regexStripComments = "(^(%[^\n]*\n?))|(\n[ \t]*%[^\n]*)|(\n(?=\n))";
 
-        public List<ICommand> run(string script) {
+        public static List<ICommand> Run(string script) {
             Regex regex = new Regex(regexStripComments);
             String cleanScript = regex.Replace(script, "");
 

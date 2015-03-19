@@ -20,17 +20,10 @@ SUBMIT <ENTRY-URL> <FILE> <OUTPUT> 10 <MAP>
 %potato
 WAIT 5";
 
-            CommandParser cmdParser = new CommandParser() {
-                //CreateWorker = delegate(int workerId, string puppetMasterUrl, string serviceUrl, string entryUrl){
-                //    createWorkerSuccess = true;
-                //    Debug.WriteLine("Hello, hello, hello!");
-                //}
-            };
-
             List<ICommand> commands;
             try {
                 // act
-                commands = cmdParser.run(script);
+                commands = CommandParser.Run(script);
             } catch (CommandInvalidParameterException) {
                 Assert.IsTrue(true);
                 return;
