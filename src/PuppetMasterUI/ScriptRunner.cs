@@ -117,7 +117,11 @@ namespace PuppetMasterUI
             LongRunningOperation frmLRO = new LongRunningOperation();
             List<ICommand> commands = CommandParser.Run(script);
 
-            foreach (ICommand cmd in commands)
+
+
+            foreach (ICommand cmd in commands) {
+                
+            }
         }
     }
 }

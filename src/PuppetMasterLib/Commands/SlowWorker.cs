@@ -8,11 +8,9 @@ namespace PuppetMasterLib.Commands
     public class SlowWorker : ICommand
     {
         public const string NAME = "sloww";
-
         public int WorkerId { get; set; }
-        
-        public T execute<T>()
-        {
+
+        public void execute() {
             throw new NotImplementedException();
         }
     }

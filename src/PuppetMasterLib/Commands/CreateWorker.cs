@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PuppetMasterLib.Commands
 {
-    public class CreateWorker:ICommand
+    public class CreateWorker : ICommand
     {
         public const string NAME = "worker";
 
@@ -15,8 +15,7 @@ namespace PuppetMasterLib.Commands
         public string ServiceURL { get; set; }
         public string EntryURL { get; set; }
 
-        public T execute<T>()
-        {
+        public void execute() {
             throw new NotImplementedException();
         }
     }

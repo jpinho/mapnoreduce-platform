@@ -8,10 +8,9 @@ namespace PuppetMasterLib.Commands
     public class FreezeWorker : ICommand
     {
         public const string NAME = "freezew";
-
         public int WorkerId { get; set; }
-        public T execute<T>()
-        {
+
+        public void execute() {
             throw new NotImplementedException();
         }
     }

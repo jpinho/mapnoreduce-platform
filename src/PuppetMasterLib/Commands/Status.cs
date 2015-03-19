@@ -9,7 +9,7 @@ namespace PuppetMasterLib.Commands
     {
         public const string NAME = "status";
 
-        public T execute<T>()
+        public void execute()
         {
             throw new NotImplementedException();
         }

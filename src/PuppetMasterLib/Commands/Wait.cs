@@ -8,10 +8,9 @@ namespace PuppetMasterLib.Commands
     public class Wait : ICommand
     {
         public const string NAME = "wait";
-
         public int Secs { get; set; }
-        public T execute<T>()
-        {
+
+        public void execute() {
             throw new NotImplementedException();
         }
     }

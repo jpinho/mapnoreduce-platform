@@ -16,7 +16,7 @@ namespace PuppetMasterLib.Commands
         public int Splits { get; set; }
         public string MapFunctionPath { get; set; }
 
-        public T execute<T>()
+        public void execute()
         {
             throw new NotImplementedException();
         }

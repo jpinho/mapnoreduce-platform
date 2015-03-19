@@ -7,6 +7,6 @@ namespace PuppetMasterLib
 {
     public interface ICommand
     {
-        
+        void execute();
     }
 }
