@@ -147,7 +147,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tcScriptContainer.Controls.Add(this.tpNewScript);
-            this.tcScriptContainer.Location = new System.Drawing.Point(0, 27);
+            this.tcScriptContainer.Location = new System.Drawing.Point(0, 26);
             this.tcScriptContainer.Name = "tcScriptContainer";
             this.tcScriptContainer.Padding = new System.Drawing.Point(6, 5);
             this.tcScriptContainer.SelectedIndex = 0;
@@ -211,11 +211,11 @@
             this.Controls.Add(this.tsTopNavigation);
             this.Controls.Add(this.tcScriptContainer);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.IsMdiContainer = true;
             this.Name = "ScriptRunner";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Puppet Master / Script Runner";
-            this.TopMost = true;
             this.tsTopNavigation.ResumeLayout(false);
             this.tsTopNavigation.PerformLayout();
             this.tcScriptContainer.ResumeLayout(false);

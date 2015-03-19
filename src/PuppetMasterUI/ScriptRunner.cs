@@ -18,110 +18,133 @@ namespace PuppetMasterUI
     {
         private readonly string NEW_SCRIPT_TAB;
 
-        public ScriptRunner()
-        {
+        public ScriptRunner() {
             InitializeComponent();
             NEW_SCRIPT_TAB = tpNewScript.Name;
             ofdOpenFile.InitialDirectory = Path.Combine(Environment.CurrentDirectory, "Scripts");
             sfdSaveFile.InitialDirectory = Path.Combine(Environment.CurrentDirectory, "Scripts");
             bwScriptWorker.DoWork += ScriptWorker_DoWork;
-            bwScriptWorker.ProgressChanged += ScriptWorker_ProgressChanged;
-            bwScriptWorker.RunWorkerCompleted += ScriptWorker_RunWorkerCompleted;
         }
 
-        private void tsOpenScript_Click(object sender, EventArgs e)
-        {
-            if (ofdOpenFile.ShowDialog() == DialogResult.OK)
-            {
-                StreamReader fileScript = new StreamReader(ofdOpenFile.OpenFile());
-                TabPage tpScript = new TabPage(ofdOpenFile.SafeFileName) {Name = ofdOpenFile.SafeFileName};
+        private void tsOpenScript_Click(object sender, EventArgs e) {
+            if (ofdOpenFile.ShowDialog() == DialogResult.OK) {
+                using (StreamReader fileScript = new StreamReader(ofdOpenFile.OpenFile())) {
+                    TabPage tpScript = new TabPage(ofdOpenFile.SafeFileName) { Name = ofdOpenFile.SafeFileName };
 
-                TextBox txtScript = new TextBox()
-                {
-                    Text = fileScript.ReadToEnd(),
-                    Dock = txtScripts.Dock,
-                    Multiline = txtScripts.Multiline,
-                    ScrollBars = txtScripts.ScrollBars,
-                    Font = txtScripts.Font,
-                    ForeColor = txtScripts.ForeColor,
-                    BackColor = txtScripts.BackColor,
-                    Anchor = txtScripts.Anchor,
-                    CharacterCasing = txtScripts.CharacterCasing,
-                    AcceptsReturn = txtScripts.AcceptsReturn,
-                    AcceptsTab = txtScripts.AcceptsTab,
-                    AccessibleRole = AccessibleRole.Text
-                };
+                    TextBox txtScript = new TextBox() {
+                        Text = fileScript.ReadToEnd(),
+                        Dock = txtScripts.Dock,
+                        Multiline = txtScripts.Multiline,
+                        ScrollBars = txtScripts.ScrollBars,
+                        Font = txtScripts.Font,
+                        ForeColor = txtScripts.ForeColor,
+                        BackColor = txtScripts.BackColor,
+                        Anchor = txtScripts.Anchor,
+                        CharacterCasing = txtScripts.CharacterCasing,
+                        AcceptsReturn = txtScripts.AcceptsReturn,
+                        AcceptsTab = txtScripts.AcceptsTab,
+                        AccessibleRole = AccessibleRole.Text
+                    };
 
-                tpScript.Controls.Add(txtScript);
-                tcScriptContainer.TabPages.Add(tpScript);
-                tcScriptContainer.SelectedTab = tpScript;
+                    tpScript.Controls.Add(txtScript);
+                    tcScriptContainer.TabPages.Add(tpScript);
+                    tcScriptContainer.SelectedTab = tpScript;
+                }
             }
         }
 
-        private void tsCleanScript_Click(object sender, EventArgs e)
-        {
-            if (tcScriptContainer.SelectedTab != null && tcScriptContainer.SelectedTab.Name != NEW_SCRIPT_TAB)
-            {
+        private void tsCleanScript_Click(object sender, EventArgs e) {
+            if (tcScriptContainer.SelectedTab != null && tcScriptContainer.SelectedTab.Name != NEW_SCRIPT_TAB) {
                 tcScriptContainer.TabPages.Remove(tcScriptContainer.SelectedTab);
                 tcScriptContainer.SelectedIndex = tcScriptContainer.TabPages.Count - 1;
-            }
-            else
+            } else
                 txtScripts.Text = string.Empty;
         }
 
-        private void tsSaveScript_Click(object sender, EventArgs e)
-        {
-            if (tcScriptContainer.SelectedTab != null && tcScriptContainer.SelectedTab.Name == NEW_SCRIPT_TAB)
-            {
+        private void tsSaveScript_Click(object sender, EventArgs e) {
+            if (tcScriptContainer.SelectedTab != null && tcScriptContainer.SelectedTab.Name == NEW_SCRIPT_TAB) {
                 sfdSaveFile.FileName = "Script_" + DateTime.Now.ToString("ddMMyyyy_HHmmss") + ".txt";
-                if (sfdSaveFile.ShowDialog() == DialogResult.OK)
-                {
-                    using (StreamWriter fileNewScript = new StreamWriter(sfdSaveFile.FileName))
-                    {
+                if (sfdSaveFile.ShowDialog() == DialogResult.OK) {
+                    using (StreamWriter fileNewScript = new StreamWriter(sfdSaveFile.FileName)) {
                         fileNewScript.Write(txtScripts.Text);
                     }
                 }
-            }
-            else
-            {
+            } else {
                 sfdSaveFile.FileName = tcScriptContainer.SelectedTab.Name;
-                if (sfdSaveFile.ShowDialog() == DialogResult.OK)
-                {
-                    using (StreamWriter fileNewScript = new StreamWriter(sfdSaveFile.FileName))
-                    {
+                if (sfdSaveFile.ShowDialog() == DialogResult.OK) {
+                    using (StreamWriter fileNewScript = new StreamWriter(sfdSaveFile.FileName)) {
                         fileNewScript.Write((tcScriptContainer.SelectedTab.Controls[0] as TextBox).Text);
                     }
                 }
             }
         }
 
-        private void tsRunScript_Click(object sender, EventArgs e)
-        {
-            bwScriptWorker.RunWorkerAsync(tcScriptContainer.SelectedTab.Text);
+        private void tsRunScript_Click(object sender, EventArgs e) {
+            tsRunScript.Enabled = false;
+            tsRunScriptStep.Enabled = false;
+            tsStop.Enabled = false;
 
+            LongRunningOperation operationStatus = new LongRunningOperation();
+            bwScriptWorker.RunWorkerAsync(new Tuple<LongRunningOperation, string>(operationStatus, (tcScriptContainer.SelectedTab.Controls[0] as TextBox).Text));
+            operationStatus.ShowDialog();
+
+            tsRunScript.Enabled = true;
+            tsRunScriptStep.Enabled = true;
+            tsStop.Enabled = true;
         }
 
-        private void ScriptWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
+        private void ScriptWorker_DoWork(object sender, DoWorkEventArgs e) {
+            Tuple<LongRunningOperation, string> state = e.Argument as Tuple<LongRunningOperation, string>;
+            string script = state.Item2;
+            List<ICommand> commands = null;
+            LongRunningOperation operationStatus = state.Item1;
+            int errorsCount = 0;
 
-        private void ScriptWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
+            while (!operationStatus.IsHandleCreated)
+                Thread.Sleep(500);
 
-        private void ScriptWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            string script = e.Argument as string;
-            LongRunningOperation frmLRO = new LongRunningOperation();
-            List<ICommand> commands = CommandParser.Run(script);
+            try {
+                commands = CommandParser.Run(script);
+            } catch (Exception ex) {
+                operationStatus.Invoke(new MethodInvoker(delegate() {
+                    MessageBox.Show("Error while processing script - " + ex.Message + " -->> " + ex.StackTrace);
+                }));
+                operationStatus.Invoke(new MethodInvoker(delegate() {
+                    operationStatus.DialogResult = System.Windows.Forms.DialogResult.Abort;
+                }));
+                return;
+            }
 
+            operationStatus.Invoke(new MethodInvoker(delegate() {
+                operationStatus.OperationsCount = commands.Count;
+            }));
 
 
             foreach (ICommand cmd in commands) {
-                
+                string operation = cmd.ToString().ToUpper();
+
+                try {
+                    operationStatus.Invoke(new MethodInvoker(delegate() {
+                        operationStatus.ReportProgress("Executing '" + operation + "' command...", true);
+                    }));
+
+                    cmd.Execute();
+                    Thread.Sleep(1000);
+
+                    operationStatus.Invoke(new MethodInvoker(delegate() {
+                        operationStatus.ReportProgress(operation + " executed successfully!");
+                    }));
+                } catch (Exception ex) {
+                    errorsCount++;
+                    operationStatus.Invoke(new MethodInvoker(delegate() {
+                        operationStatus.ReportProgress(operation + " failed due to an error '" + ex.Message + "'.");
+                    }));
+                }
             }
+
+            operationStatus.Invoke(new MethodInvoker(delegate() {
+                operationStatus.ReportProgress("Script completed" + (errorsCount > 0 ? ", with errors!" : "."));
+            }));
         }
     }
 }
