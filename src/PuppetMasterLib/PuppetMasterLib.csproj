@@ -54,6 +54,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Commands\Wait.cs" />
     <Compile Include="Exceptions\UnrecognizedCommandException.cs" />
+    <Compile Include="Worker.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ClientConnectorService\ClientConnectorService.csproj">

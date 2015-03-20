@@ -197,7 +197,7 @@ namespace PuppetMasterUI
         }
 
         private void tsmiSubmit_Click(object sender, EventArgs e) {
-            GetCurrentTextBox().Text += "SUBMIT <ENTRY-URL> <FILE> <OUTPUT> <S> <MAP>";
+            GetCurrentTextBox().Text += "SUBMIT <ENTRY-URL> <FILE> <OUTPUT> <S> <MAP> <DLL>";
         }
 
         private void tsmiWait_Click(object sender, EventArgs e) {

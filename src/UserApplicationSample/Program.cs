@@ -45,14 +45,15 @@ namespace UserApplicationSample
             string ouput = args[3];
             int nSplits = Int32.Parse(args[4]);
             string map = args[5];
+            string dll = args[6];
 
-            Start(entryURL, file, ouput, nSplits, map);
+            Start(entryURL, file, ouput, nSplits, map, dll);
         }
 
-        public static void Start(string EntryURL, string FilePath, string OutputPath, int Splits, string MapFunctionPath) {
+        public static void Start(string EntryURL, string FilePath, string OutputPath, int Splits, string MapFunctionPath, string Dll) {
             Console.WriteLine("User App started as:");
-            Console.WriteLine("> ./UserApp -EntryURL={0} -FilePath={1} -OutputPath={2} -Splits={3} -MapFunctionPath={4}",
-                EntryURL, FilePath, OutputPath, Splits.ToString(), MapFunctionPath);
+            Console.WriteLine("> ./UserApp -EntryURL={0} -FilePath={1} -OutputPath={2} -Splits={3} -MapFunctionPath={4} -Dll={5}",
+                EntryURL, FilePath, OutputPath, Splits.ToString(), MapFunctionPath, Dll);
         }
     }
 }

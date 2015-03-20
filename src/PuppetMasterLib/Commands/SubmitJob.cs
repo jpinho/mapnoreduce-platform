@@ -19,6 +19,7 @@ namespace PuppetMasterLib.Commands
         public string OutputPath { get; set; }
         public int Splits { get; set; }
         public string MapFunctionPath { get; set; }
+        public string Dll { get; set; }
 
         public void Execute() {
             new Thread(new ThreadStart(delegate() {
@@ -29,7 +30,8 @@ namespace PuppetMasterLib.Commands
                     FilePath,
                     OutputPath,
                     Splits,
-                    MapFunctionPath);
+                    MapFunctionPath,
+                    Dll);
             })).Start();
         }
 

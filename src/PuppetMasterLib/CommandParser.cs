@@ -55,7 +55,9 @@ namespace PuppetMasterLib
                             FilePath = keyWords[2],
                             OutputPath = keyWords[3],
                             Splits = splits,
-                            MapFunctionPath = keyWords[5]
+                            MapFunctionPath = keyWords[5],
+                            Dll = keyWords[6]
+
                         });
                         break;
                     case Commands.Wait.NAME:
