@@ -40,6 +40,16 @@
             this.tpNewScript = new System.Windows.Forms.TabPage();
             this.txtScripts = new System.Windows.Forms.TextBox();
             this.bwScriptWorker = new System.ComponentModel.BackgroundWorker();
+            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsmiWorker = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiSubmit = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiWait = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiStatus = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiSlowW = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiFreezeW = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiUnFreezeW = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsFreezeC = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsUnFreezeC = new System.Windows.Forms.ToolStripMenuItem();
             this.tsTopNavigation.SuspendLayout();
             this.tcScriptContainer.SuspendLayout();
             this.tpNewScript.SuspendLayout();
@@ -53,8 +63,9 @@
             this.tsSeparatorOne,
             this.tsRunScript,
             this.tsRunScriptStep,
+            this.tsCleanScript,
             this.tsSeparatorTwo,
-            this.tsCleanScript});
+            this.toolStripDropDownButton1});
             this.tsTopNavigation.Location = new System.Drawing.Point(0, 0);
             this.tsTopNavigation.Name = "tsTopNavigation";
             this.tsTopNavigation.Padding = new System.Windows.Forms.Padding(0);
@@ -193,6 +204,88 @@
             this.bwScriptWorker.WorkerReportsProgress = true;
             this.bwScriptWorker.WorkerSupportsCancellation = true;
             // 
+            // toolStripDropDownButton1
+            // 
+            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsmiWorker,
+            this.tsmiSubmit,
+            this.tsmiWait,
+            this.tsmiStatus,
+            this.tsmiSlowW,
+            this.tsmiFreezeW,
+            this.tsmiUnFreezeW,
+            this.tsFreezeC,
+            this.tsUnFreezeC});
+            this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
+            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(115, 22);
+            this.toolStripDropDownButton1.Text = "Command Helper";
+            // 
+            // tsmiWorker
+            // 
+            this.tsmiWorker.Name = "tsmiWorker";
+            this.tsmiWorker.Size = new System.Drawing.Size(152, 22);
+            this.tsmiWorker.Text = "WORKER";
+            this.tsmiWorker.Click += new System.EventHandler(this.tsmiWorker_Click);
+            // 
+            // tsmiSubmit
+            // 
+            this.tsmiSubmit.Name = "tsmiSubmit";
+            this.tsmiSubmit.Size = new System.Drawing.Size(152, 22);
+            this.tsmiSubmit.Text = "SUBMIT";
+            this.tsmiSubmit.Click += new System.EventHandler(this.tsmiSubmit_Click);
+            // 
+            // tsmiWait
+            // 
+            this.tsmiWait.Name = "tsmiWait";
+            this.tsmiWait.Size = new System.Drawing.Size(152, 22);
+            this.tsmiWait.Text = "WAIT";
+            this.tsmiWait.Click += new System.EventHandler(this.tsmiWait_Click);
+            // 
+            // tsmiStatus
+            // 
+            this.tsmiStatus.Name = "tsmiStatus";
+            this.tsmiStatus.Size = new System.Drawing.Size(152, 22);
+            this.tsmiStatus.Text = "STATUS";
+            this.tsmiStatus.Click += new System.EventHandler(this.tsmiStatus_Click);
+            // 
+            // tsmiSlowW
+            // 
+            this.tsmiSlowW.Name = "tsmiSlowW";
+            this.tsmiSlowW.Size = new System.Drawing.Size(152, 22);
+            this.tsmiSlowW.Text = "SLOWW";
+            this.tsmiSlowW.Click += new System.EventHandler(this.tsmiSlowW_Click);
+            // 
+            // tsmiFreezeW
+            // 
+            this.tsmiFreezeW.Name = "tsmiFreezeW";
+            this.tsmiFreezeW.Size = new System.Drawing.Size(152, 22);
+            this.tsmiFreezeW.Text = "FREEZEW";
+            this.tsmiFreezeW.Click += new System.EventHandler(this.tsmiFreezeW_Click);
+            // 
+            // tsmiUnFreezeW
+            // 
+            this.tsmiUnFreezeW.Name = "tsmiUnFreezeW";
+            this.tsmiUnFreezeW.Size = new System.Drawing.Size(152, 22);
+            this.tsmiUnFreezeW.Text = "UNFREEZEW";
+            this.tsmiUnFreezeW.Click += new System.EventHandler(this.tsmiUnFreezeW_Click);
+            // 
+            // tsFreezeC
+            // 
+            this.tsFreezeC.Name = "tsFreezeC";
+            this.tsFreezeC.Size = new System.Drawing.Size(152, 22);
+            this.tsFreezeC.Text = "FREEZEC";
+            this.tsFreezeC.Click += new System.EventHandler(this.tsFreezeC_Click);
+            // 
+            // tsUnFreezeC
+            // 
+            this.tsUnFreezeC.Name = "tsUnFreezeC";
+            this.tsUnFreezeC.Size = new System.Drawing.Size(152, 22);
+            this.tsUnFreezeC.Text = "UNFREEZEC";
+            this.tsUnFreezeC.Click += new System.EventHandler(this.tsUnFreezeC_Click);
+            // 
             // ScriptRunner
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -232,6 +325,16 @@
         private System.Windows.Forms.TabPage tpNewScript;
         private System.Windows.Forms.TextBox txtScripts;
         private System.ComponentModel.BackgroundWorker bwScriptWorker;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
+        private System.Windows.Forms.ToolStripMenuItem tsmiWorker;
+        private System.Windows.Forms.ToolStripMenuItem tsmiSubmit;
+        private System.Windows.Forms.ToolStripMenuItem tsmiWait;
+        private System.Windows.Forms.ToolStripMenuItem tsmiStatus;
+        private System.Windows.Forms.ToolStripMenuItem tsmiSlowW;
+        private System.Windows.Forms.ToolStripMenuItem tsmiFreezeW;
+        private System.Windows.Forms.ToolStripMenuItem tsmiUnFreezeW;
+        private System.Windows.Forms.ToolStripMenuItem tsFreezeC;
+        private System.Windows.Forms.ToolStripMenuItem tsUnFreezeC;
     }
 }
 

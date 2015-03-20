@@ -21,7 +21,7 @@ namespace PuppetMasterLib.Commands
         public void Execute() {
             new Thread(new ThreadStart(delegate() {
                 ConsoleHelper.CreateConsole();
-                UserApplicationSample.Program.Main(
+                UserApplicationSample.Program.Start(
                     EntryURL,
                     FilePath,
                     OutputPath,

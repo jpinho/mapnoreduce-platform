@@ -177,14 +177,54 @@ namespace PuppetMasterUI
             tsRunScriptStep.Enabled = false;
 
             LongRunningOperation operationStatus = new LongRunningOperation(stepByStep);
-            
+
             bwScriptWorker.RunWorkerAsync(new Tuple<LongRunningOperation, string>(
-                operationStatus, 
+                operationStatus,
                 (tcScriptContainer.SelectedTab.Controls[0] as TextBox).Text));
-            
+
             operationStatus.ShowDialog();
             tsRunScript.Enabled = true;
             tsRunScriptStep.Enabled = true;
+        }
+
+        private TextBox GetCurrentTextBox() {
+            return tcScriptContainer.SelectedTab.Controls[0] as TextBox;
+        }
+
+        private void tsmiWorker_Click(object sender, EventArgs e) {
+            GetCurrentTextBox().Text += "WORKER <ID> <PUPPETMASTER-URL> <SERVICE-URL> <ENTRY-URL>";
+        }
+
+        private void tsmiSubmit_Click(object sender, EventArgs e) {
+            GetCurrentTextBox().Text += "SUBMIT <ENTRY-URL> <FILE> <OUTPUT> <S> <MAP>";
+        }
+
+        private void tsmiWait_Click(object sender, EventArgs e) {
+            GetCurrentTextBox().Text += "WAIT <SECS>";
+        }
+
+        private void tsmiStatus_Click(object sender, EventArgs e) {
+            GetCurrentTextBox().Text += "STATUS";
+        }
+
+        private void tsmiSlowW_Click(object sender, EventArgs e) {
+            GetCurrentTextBox().Text += "SLOWW <ID> <delay-in-seconds>";
+        }
+
+        private void tsmiFreezeW_Click(object sender, EventArgs e) {
+            GetCurrentTextBox().Text += "FREEZEW <ID>";
+        }
+
+        private void tsmiUnFreezeW_Click(object sender, EventArgs e) {
+            GetCurrentTextBox().Text += "UNFREEZEW <ID>";
+        }
+
+        private void tsFreezeC_Click(object sender, EventArgs e) {
+            GetCurrentTextBox().Text += "FREEZEC <ID>";
+        }
+
+        private void tsUnFreezeC_Click(object sender, EventArgs e) {
+            GetCurrentTextBox().Text += "UNFREEZEC <ID>";
         }
     }
 }
