@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using PuppetMasterLib.Helpers;
+using SharedTypes;
 
 namespace PuppetMasterLib.Commands
 {
@@ -22,6 +23,7 @@ namespace PuppetMasterLib.Commands
         public void Execute() {
             new Thread(new ThreadStart(delegate() {
                 ConsoleHelper.CreateConsole();
+                ClientConnectorService.Program.Start();
                 UserApplicationSample.Program.Start(
                     EntryURL,
                     FilePath,

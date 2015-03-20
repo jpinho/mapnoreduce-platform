@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Specialized;
 
-namespace PuppetMasterLib
+namespace SharedTypes
 {
     public interface IMap
     {

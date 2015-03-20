@@ -34,6 +34,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -51,9 +52,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PuppetMasterLib\PuppetMasterLib.csproj">
-      <Project>{677ebbcd-8869-4af9-93aa-bbb641c1e0f9}</Project>
-      <Name>PuppetMasterLib</Name>
+    <ProjectReference Include="..\SharedTypes\SharedTypes.csproj">
+      <Project>{5e7f4752-7d18-4da6-a243-eb5f7f631c7d}</Project>
+      <Name>SharedTypes</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

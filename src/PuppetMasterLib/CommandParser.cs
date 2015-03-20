@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Text.RegularExpressions;
 using PuppetMasterLib.Exceptions;
+using SharedTypes;
 
 namespace PuppetMasterLib
 {

@@ -9,8 +9,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Threading;
-using PuppetMasterLib;
+using SharedTypes;
 using PuppetMasterLib.Commands;
+using PuppetMasterLib;
 
 namespace PuppetMasterUI
 {

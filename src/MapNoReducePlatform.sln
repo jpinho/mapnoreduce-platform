@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unit Tests", "Unit Tests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuppetMasterLib.Tests", "PuppetMasterLib.Tests\PuppetMasterLib.Tests.csproj", "{084C9871-4ADC-4698-AF71-278A115B88E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedTypes", "SharedTypes\SharedTypes.csproj", "{5E7F4752-7D18-4DA6-A243-EB5F7F631C7D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{084C9871-4ADC-4698-AF71-278A115B88E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{084C9871-4ADC-4698-AF71-278A115B88E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{084C9871-4ADC-4698-AF71-278A115B88E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E7F4752-7D18-4DA6-A243-EB5F7F631C7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E7F4752-7D18-4DA6-A243-EB5F7F631C7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E7F4752-7D18-4DA6-A243-EB5F7F631C7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E7F4752-7D18-4DA6-A243-EB5F7F631C7D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

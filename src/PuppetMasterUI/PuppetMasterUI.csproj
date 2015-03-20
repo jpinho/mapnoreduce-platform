@@ -108,6 +108,10 @@
       <Project>{677ebbcd-8869-4af9-93aa-bbb641c1e0f9}</Project>
       <Name>PuppetMasterLib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SharedTypes\SharedTypes.csproj">
+      <Project>{5e7f4752-7d18-4da6-a243-eb5f7f631c7d}</Project>
+      <Name>SharedTypes</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
