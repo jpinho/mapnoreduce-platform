@@ -4,6 +4,7 @@ using PuppetMasterLib;
 using System.Diagnostics;
 using System.Threading;
 using System.Collections.Generic;
+using PuppetMasterLib.Exceptions;
 
 namespace PuppetMasterLib.Tests
 {

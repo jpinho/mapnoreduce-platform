@@ -41,7 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandParser.cs" />
-    <Compile Include="CommandInvalidParameterException.cs" />
+    <Compile Include="Exceptions\CommandInvalidParameterException.cs" />
     <Compile Include="Commands\UnfreezeJobTracker.cs" />
     <Compile Include="Commands\FreezeJobTracker.cs" />
     <Compile Include="Commands\UnfreezeWorker.cs" />
@@ -50,12 +50,12 @@
     <Compile Include="Commands\CreateWorker.cs" />
     <Compile Include="Commands\Status.cs" />
     <Compile Include="Commands\SlowWorker.cs" />
-    <Compile Include="ConsoleHelper.cs" />
+    <Compile Include="Helpers\ConsoleHelper.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="IMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Commands\Wait.cs" />
-    <Compile Include="UnrecognizedCommandException.cs" />
+    <Compile Include="Exceptions\UnrecognizedCommandException.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UserApplicationSample\UserApplicationSample.csproj">
