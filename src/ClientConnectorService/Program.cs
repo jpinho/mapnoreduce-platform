@@ -56,7 +56,6 @@ namespace ClientConnectorService
             ChannelServices.RegisterChannel(channel, true);
 
             T service = new T();
-            //RemotingServices.Marshal(service, serviceName, service.GetType());
             RemotingConfiguration.RegisterWellKnownServiceType(
                 service.GetType(), serviceName,
                 WellKnownObjectMode.SingleCall);
