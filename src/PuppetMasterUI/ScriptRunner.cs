@@ -80,17 +80,11 @@ namespace PuppetMasterUI
         }
 
         private void tsRunScript_Click(object sender, EventArgs e) {
-            tsRunScript.Enabled = false;
-            tsRunScriptStep.Enabled = false;
-            tsStop.Enabled = false;
+            RunScript(false);
+        }
 
-            LongRunningOperation operationStatus = new LongRunningOperation();
-            bwScriptWorker.RunWorkerAsync(new Tuple<LongRunningOperation, string>(operationStatus, (tcScriptContainer.SelectedTab.Controls[0] as TextBox).Text));
-            operationStatus.ShowDialog();
-
-            tsRunScript.Enabled = true;
-            tsRunScriptStep.Enabled = true;
-            tsStop.Enabled = true;
+        private void tsRunScriptStep_Click(object sender, EventArgs e) {
+            RunScript(true);
         }
 
         private void ScriptWorker_DoWork(object sender, DoWorkEventArgs e) {
@@ -119,32 +113,78 @@ namespace PuppetMasterUI
                 operationStatus.OperationsCount = commands.Count;
             }));
 
+            if (!operationStatus.SteppedOperation) {
+                foreach (ICommand cmd in commands) {
+                    string operation = cmd.ToString().ToUpper();
 
-            foreach (ICommand cmd in commands) {
-                string operation = cmd.ToString().ToUpper();
+                    try {
+                        operationStatus.Invoke(new MethodInvoker(delegate() {
+                            operationStatus.ReportProgress("Executing '" + operation + "' command...", true);
+                        }));
 
-                try {
-                    operationStatus.Invoke(new MethodInvoker(delegate() {
-                        operationStatus.ReportProgress("Executing '" + operation + "' command...", true);
-                    }));
+                        cmd.Execute();
+                        Thread.Sleep(1000);
 
-                    cmd.Execute();
-                    Thread.Sleep(1000);
-
-                    operationStatus.Invoke(new MethodInvoker(delegate() {
-                        operationStatus.ReportProgress(operation + " executed successfully!");
-                    }));
-                } catch (Exception ex) {
-                    errorsCount++;
-                    operationStatus.Invoke(new MethodInvoker(delegate() {
-                        operationStatus.ReportProgress(operation + " failed due to an error '" + ex.Message + "'.");
-                    }));
+                        operationStatus.Invoke(new MethodInvoker(delegate() {
+                            operationStatus.ReportProgress(operation + " executed successfully!");
+                        }));
+                    } catch (Exception ex) {
+                        errorsCount++;
+                        operationStatus.Invoke(new MethodInvoker(delegate() {
+                            operationStatus.ReportProgress(operation + " failed due to an error '" + ex.Message + "'.");
+                        }));
+                    }
                 }
-            }
 
-            operationStatus.Invoke(new MethodInvoker(delegate() {
-                operationStatus.ReportProgress("Script completed" + (errorsCount > 0 ? ", with errors!" : "."));
-            }));
+                operationStatus.Invoke(new MethodInvoker(delegate() {
+                    operationStatus.ReportProgress("Script completed" + (errorsCount > 0 ? ", with errors!" : "."));
+                }));
+            } else {
+                Queue<ICommand> qCommands = new Queue<ICommand>(commands);
+                operationStatus.ExecuteNextCommand += new EventHandler(delegate(object src, EventArgs args) {
+                    ICommand cmd = qCommands.Dequeue();
+                    string operation = cmd.ToString().ToUpper();
+
+                    try {
+                        operationStatus.Invoke(new MethodInvoker(delegate() {
+                            operationStatus.ReportProgress("Executing '" + operation + "' command...", true);
+                        }));
+
+                        cmd.Execute();
+                        Thread.Sleep(1000);
+
+                        operationStatus.Invoke(new MethodInvoker(delegate() {
+                            operationStatus.ReportProgress(operation + " executed successfully!");
+                        }));
+                    } catch (Exception ex) {
+                        errorsCount++;
+                        operationStatus.Invoke(new MethodInvoker(delegate() {
+                            operationStatus.ReportProgress(operation + " failed due to an error '" + ex.Message + "'.");
+                        }));
+                    } finally {
+                        if (qCommands.Count == 0) {
+                            operationStatus.Invoke(new MethodInvoker(delegate() {
+                                operationStatus.ReportProgress("Script completed" + (errorsCount > 0 ? ", with errors!" : "."));
+                            }));
+                        }
+                    }
+                });
+            }
+        }
+
+        private void RunScript(bool stepByStep) {
+            tsRunScript.Enabled = false;
+            tsRunScriptStep.Enabled = false;
+
+            LongRunningOperation operationStatus = new LongRunningOperation(stepByStep);
+            
+            bwScriptWorker.RunWorkerAsync(new Tuple<LongRunningOperation, string>(
+                operationStatus, 
+                (tcScriptContainer.SelectedTab.Controls[0] as TextBox).Text));
+            
+            operationStatus.ShowDialog();
+            tsRunScript.Enabled = true;
+            tsRunScriptStep.Enabled = true;
         }
     }
 }

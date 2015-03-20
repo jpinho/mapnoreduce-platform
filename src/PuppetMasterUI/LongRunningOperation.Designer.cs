@@ -31,11 +31,13 @@
             this.btnAbort = new System.Windows.Forms.Button();
             this.lblOperationStatus = new System.Windows.Forms.Label();
             this.pbOperationStatus = new System.Windows.Forms.ProgressBar();
+            this.btnRunStep = new System.Windows.Forms.Button();
             this.grpRunStatus.SuspendLayout();
             this.SuspendLayout();
             // 
             // grpRunStatus
             // 
+            this.grpRunStatus.Controls.Add(this.btnRunStep);
             this.grpRunStatus.Controls.Add(this.btnClose);
             this.grpRunStatus.Controls.Add(this.txtLog);
             this.grpRunStatus.Controls.Add(this.btnAbort);
@@ -116,8 +118,25 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.pbOperationStatus.Location = new System.Drawing.Point(15, 49);
             this.pbOperationStatus.Name = "pbOperationStatus";
-            this.pbOperationStatus.Size = new System.Drawing.Size(486, 23);
+            this.pbOperationStatus.Size = new System.Drawing.Size(485, 23);
             this.pbOperationStatus.TabIndex = 8;
+            // 
+            // btnRunStep
+            // 
+            this.btnRunStep.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRunStep.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.btnRunStep.FlatAppearance.BorderColor = System.Drawing.Color.DimGray;
+            this.btnRunStep.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRunStep.Font = new System.Drawing.Font("Tahoma", 7F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnRunStep.ForeColor = System.Drawing.Color.Black;
+            this.btnRunStep.Location = new System.Drawing.Point(433, 49);
+            this.btnRunStep.Name = "btnRunStep";
+            this.btnRunStep.Size = new System.Drawing.Size(67, 23);
+            this.btnRunStep.TabIndex = 14;
+            this.btnRunStep.Text = "STEP";
+            this.btnRunStep.UseVisualStyleBackColor = false;
+            this.btnRunStep.Visible = false;
+            this.btnRunStep.Click += new System.EventHandler(this.btnRunStep_Click);
             // 
             // LongRunningOperation
             // 
@@ -147,5 +166,6 @@
         private System.Windows.Forms.Button btnAbort;
         private System.Windows.Forms.TextBox txtLog;
         private System.Windows.Forms.Button btnClose;
+        private System.Windows.Forms.Button btnRunStep;
     }
 }

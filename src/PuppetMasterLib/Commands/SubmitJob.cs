@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace PuppetMasterLib.Commands
 {
@@ -17,7 +19,15 @@ namespace PuppetMasterLib.Commands
         public string MapFunctionPath { get; set; }
 
         public void Execute() {
-            //TODO: Implement me.
+            new Thread(new ThreadStart(delegate() {
+                ConsoleHelper.CreateConsole();
+                UserApplicationSample.Program.Main(
+                    EntryURL,
+                    FilePath,
+                    OutputPath,
+                    Splits,
+                    MapFunctionPath);
+            })).Start();
         }
 
         public override string ToString() {

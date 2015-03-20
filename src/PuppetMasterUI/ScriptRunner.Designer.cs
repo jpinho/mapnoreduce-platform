@@ -32,7 +32,6 @@
             this.tsSeparatorOne = new System.Windows.Forms.ToolStripSeparator();
             this.tsRunScript = new System.Windows.Forms.ToolStripButton();
             this.tsRunScriptStep = new System.Windows.Forms.ToolStripButton();
-            this.tsStop = new System.Windows.Forms.ToolStripButton();
             this.tsSeparatorTwo = new System.Windows.Forms.ToolStripSeparator();
             this.tsCleanScript = new System.Windows.Forms.ToolStripButton();
             this.ofdOpenFile = new System.Windows.Forms.OpenFileDialog();
@@ -54,7 +53,6 @@
             this.tsSeparatorOne,
             this.tsRunScript,
             this.tsRunScriptStep,
-            this.tsStop,
             this.tsSeparatorTwo,
             this.tsCleanScript});
             this.tsTopNavigation.Location = new System.Drawing.Point(0, 0);
@@ -107,15 +105,7 @@
             this.tsRunScriptStep.Name = "tsRunScriptStep";
             this.tsRunScriptStep.Size = new System.Drawing.Size(23, 22);
             this.tsRunScriptStep.Text = "Run Script Step-by-Step";
-            // 
-            // tsStop
-            // 
-            this.tsStop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsStop.Image = ((System.Drawing.Image)(resources.GetObject("tsStop.Image")));
-            this.tsStop.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsStop.Name = "tsStop";
-            this.tsStop.Size = new System.Drawing.Size(23, 22);
-            this.tsStop.Text = "Stop Script";
+            this.tsRunScriptStep.Click += new System.EventHandler(this.tsRunScriptStep_Click);
             // 
             // tsSeparatorTwo
             // 
@@ -232,7 +222,6 @@
         private System.Windows.Forms.ToolStripButton tsOpenScript;
         private System.Windows.Forms.ToolStripButton tsRunScript;
         private System.Windows.Forms.ToolStripButton tsRunScriptStep;
-        private System.Windows.Forms.ToolStripButton tsStop;
         private System.Windows.Forms.ToolStripButton tsCleanScript;
         private System.Windows.Forms.ToolStripButton tsSaveScript;
         private System.Windows.Forms.ToolStripSeparator tsSeparatorOne;
