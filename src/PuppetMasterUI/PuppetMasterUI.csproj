@@ -108,6 +108,10 @@
       <Project>{677ebbcd-8869-4af9-93aa-bbb641c1e0f9}</Project>
       <Name>PuppetMasterLib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PuppetMasterServer\PuppetMasterServer.csproj">
+      <Project>{73e63fcb-677c-46da-bfb8-f0c813b6f116}</Project>
+      <Name>PuppetMasterServer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SharedTypes\SharedTypes.csproj">
       <Project>{5e7f4752-7d18-4da6-a243-eb5f7f631c7d}</Project>
       <Name>SharedTypes</Name>

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using PuppetMasterServer;
+using System.Threading;
 
 namespace PuppetMasterUI
 {
@@ -16,6 +18,11 @@ namespace PuppetMasterUI
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new ScriptRunner());
+
+            new Thread(new ThreadStart(delegate()
+            {
+                PuppetMasterServer.Program.Start();
+            })).Start();
         }
     }
 }

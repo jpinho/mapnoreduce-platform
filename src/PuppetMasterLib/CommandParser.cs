@@ -34,13 +34,24 @@ namespace PuppetMasterLib
                             throw new CommandInvalidParameterException(
                                 string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-
-                        parsedCommands.Add(new Commands.CreateWorker() {
-                            WorkerId = workerId,
-                            PuppetMasterURL = keyWords[2],
-                            ServiceURL = keyWords[3],
-                            EntryURL = keyWords[4]
-                        });
+                        if (keyWords.Length == 5)
+                        {
+                            parsedCommands.Add(new Commands.CreateWorker()
+                            {
+                                WorkerId = workerId,
+                                PuppetMasterURL = keyWords[2],
+                                ServiceURL = keyWords[3],
+                                EntryURL = keyWords[4]
+                            });
+                        }
+                        else if (keyWords.Length == 4) {
+                            parsedCommands.Add(new Commands.CreateWorker()
+                            {
+                                WorkerId = workerId,
+                                PuppetMasterURL = keyWords[2],
+                                ServiceURL = keyWords[3]
+                            });
+                        }
 
                         break;
                     case Commands.SubmitJob.NAME:
@@ -50,15 +61,16 @@ namespace PuppetMasterLib
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[4], "Integer"), e);
                         }
-                        parsedCommands.Add(new Commands.SubmitJob() {
+                        parsedCommands.Add(new Commands.SubmitJob()
+                        {
                             EntryURL = keyWords[1],
                             FilePath = keyWords[2],
                             OutputPath = keyWords[3],
                             Splits = splits,
                             MapFunctionPath = keyWords[5],
                             Dll = keyWords[6]
-
                         });
+                        
                         break;
                     case Commands.Wait.NAME:
                         int secs;

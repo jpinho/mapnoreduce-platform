@@ -48,7 +48,8 @@ namespace PuppetMasterUI
             if (incOperationNumber) ++currentOperation;
             lblOperationStatus.Visible = true;
             lblOperationStatus.Text = string.Format(EXECUTING_OPERATION, currentOperation, OperationsCount, operation);
-            pbOperationStatus.Value = ((int)Math.Round(((double)currentOperation / (double)OperationsCount) * 100.0, 0) % 101);
+            if (OperationsCount > 0)
+                pbOperationStatus.Value = ((int)Math.Round(((double)currentOperation / (double)OperationsCount) * 100.0, 0) % 101);
             txtLog.Text += "[" + DateTime.Now.ToString("dd/MM/yy HH:mm:ss") + "] " + lblOperationStatus.Text + Environment.NewLine;
             txtLog.Select(txtLog.Text.Length - 1, 1);
             txtLog.ScrollToCaret();
