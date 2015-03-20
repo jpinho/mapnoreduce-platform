@@ -51,6 +51,9 @@
     <Compile Include="Commands\Status.cs" />
     <Compile Include="Commands\SlowWorker.cs" />
     <Compile Include="Helpers\ConsoleHelper.cs" />
+    <Compile Include="IClientOutputReceiverService.cs" />
+    <Compile Include="IClientService.cs" />
+    <Compile Include="IClientSplitProviderService.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="IMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

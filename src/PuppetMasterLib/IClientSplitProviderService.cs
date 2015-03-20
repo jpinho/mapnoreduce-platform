@@ -2,15 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ClientConnectorService
 {
-    class Program
+    public interface IClientSplitProviderService
     {
-        static void Main(string[] args) {
-        }
-
-
+        string GetFileSplit(string filename, int splitNumber);
     }
 }

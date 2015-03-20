@@ -2,15 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ClientConnectorService
 {
-    class Program
+    public interface IClientOutputReceiverService
     {
-        static void Main(string[] args) {
-        }
-
-
+        void ReceiveMapOutputFragment(string filename, string result, int splitNumber);
     }
 }
