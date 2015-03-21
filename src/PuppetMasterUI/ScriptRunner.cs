@@ -103,8 +103,6 @@ namespace PuppetMasterUI
             } catch (Exception ex) {
                 operationStatus.Invoke(new MethodInvoker(delegate() {
                     MessageBox.Show("Error while processing script - " + ex.Message + " -->> " + ex.StackTrace);
-                }));
-                operationStatus.Invoke(new MethodInvoker(delegate() {
                     operationStatus.DialogResult = System.Windows.Forms.DialogResult.Abort;
                 }));
                 return;

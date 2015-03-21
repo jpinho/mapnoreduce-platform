@@ -26,39 +26,10 @@ namespace ClientConnectorService
         public static void Start() {
             Console.WriteLine("Bootstrapping Client Services\n");
 
-            Console.WriteLine("MapNoReduce Client Service available at 'tcp://localhost:9005/MNRP-ClientService'");
-            new Thread(new ThreadStart(delegate() {
-                CreateService<ClientService>(9005, "MNRP-ClientService");
-            })).Start();
-
-            Console.WriteLine("MapNoReduce Client Service available at 'tcp://localhost:9006/MNRP-ClientOutputReceiverService'");
-            new Thread(new ThreadStart(delegate() {
-                CreateService<ClientSplitProviderService>(9006, "MNRP-ClientOutputReceiverService");
-            })).Start();
-
-            Console.WriteLine("MapNoReduce Client Service available at 'tcp://localhost:9007/MNRP-ClientSplitProviderService'");
-            new Thread(new ThreadStart(delegate() {
-                CreateService<ClientOutputReceiverService>(9007, "MNRP-ClientSplitProviderService");
-            })).Start();
-
-            Console.WriteLine();
-        }
-
-        static void CreateService<T>(int port, string serviceName) where T : MarshalByRefObject, new() {
-            BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
-
-            IDictionary props = new Hashtable();
-            props["port"] = port;
-            props["typeFilterLevel"] = TypeFilterLevel.Full;
-            props["name"] = serviceName;
-
-            TcpChannel channel = new TcpChannel(props, null, provider);
-            ChannelServices.RegisterChannel(channel, true);
-
-            T service = new T();
-            RemotingConfiguration.RegisterWellKnownServiceType(
-                service.GetType(), serviceName,
-                WellKnownObjectMode.SingleCall);
+            int portNumber = 9005;
+            ClientService service = new ClientService();
+            ClientHelper.CreateService<ClientService>(service, service.ToString(), portNumber);
+            Console.WriteLine("MapNoReduce Client Service available at 'tcp://localhost:" + portNumber + "/" + service.ToString() + "'.\n");
         }
     }
 }

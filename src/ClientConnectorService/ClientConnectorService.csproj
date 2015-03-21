@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientHelper.cs" />
     <Compile Include="ClientOutputReceiverService.cs" />
     <Compile Include="ClientSplitProviderService.cs" />
     <Compile Include="ClientService.cs" />
