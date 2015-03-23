@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using PuppetMasterServer;
+using PlatformServer;
 using System.Threading;
 
 namespace PuppetMasterUI
@@ -21,7 +21,7 @@ namespace PuppetMasterUI
 
             new Thread(new ThreadStart(delegate()
             {
-                PuppetMasterServer.Program.Start();
+                PlatformServer.Program.Start();
             })).Start();
         }
     }

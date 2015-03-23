@@ -54,6 +54,7 @@ namespace UserApplicationSample
             Console.WriteLine("User App started as:");
             Console.WriteLine("> ./UserApp -EntryURL={0} -FilePath={1} -OutputPath={2} -Splits={3} -MapFunctionPath={4} -Dll={5}",
                 EntryURL, FilePath, OutputPath, Splits.ToString(), MapFunctionPath, Dll);
+            System.Threading.Thread.Sleep(5000);
         }
     }
 }

@@ -11,7 +11,7 @@ using System.Runtime.Serialization.Formatters;
 using System.Threading;
 
 
-namespace PuppetMasterServer
+namespace PlatformServer
 {
     public class Program
     {
