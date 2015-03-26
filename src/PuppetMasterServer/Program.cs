@@ -1,15 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Collections;
-using System.Threading.Tasks;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Serialization.Formatters;
+using System.Text;
 using System.Threading;
-
+using System.Threading.Tasks;
 
 namespace PuppetMasterServer
 {
@@ -26,7 +25,7 @@ namespace PuppetMasterServer
             })).Start();
         }
 
-        static void CreateService<T>(int port, string serviceName) where T : MarshalByRefObject, new() {
+        private static void CreateService<T>(int port, string serviceName) where T : MarshalByRefObject, new() {
             BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
 
             IDictionary props = new Hashtable();
@@ -40,7 +39,7 @@ namespace PuppetMasterServer
             T service = new T();
             RemotingConfiguration.RegisterWellKnownServiceType(
                 service.GetType(), serviceName,
-                WellKnownObjectMode.SingleCall);
+                WellKnownObjectMode.Singleton);
         }
     }
 }

@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuppetMasterLib.Tests", "Pu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedTypes", "SharedTypes\SharedTypes.csproj", "{5E7F4752-7D18-4DA6-A243-EB5F7F631C7D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientConnectorService.Tests", "ClientConnectorService.Tests\ClientConnectorService.Tests.csproj", "{6B88C5D1-87B3-4861-9445-B87907F1E25E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,11 +55,16 @@ Global
 		{5E7F4752-7D18-4DA6-A243-EB5F7F631C7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E7F4752-7D18-4DA6-A243-EB5F7F631C7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E7F4752-7D18-4DA6-A243-EB5F7F631C7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B88C5D1-87B3-4861-9445-B87907F1E25E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B88C5D1-87B3-4861-9445-B87907F1E25E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B88C5D1-87B3-4861-9445-B87907F1E25E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B88C5D1-87B3-4861-9445-B87907F1E25E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{084C9871-4ADC-4698-AF71-278A115B88E9} = {D3A6E2AB-034B-48AA-AC90-929FB996CB54}
+		{6B88C5D1-87B3-4861-9445-B87907F1E25E} = {D3A6E2AB-034B-48AA-AC90-929FB996CB54}
 	EndGlobalSection
 EndGlobal

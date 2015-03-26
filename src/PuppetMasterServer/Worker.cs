@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PuppetMasterServer
 {
-    class Worker
+    internal class Worker
     {
         public int WorkerId { get; set; }
 
         public Worker() {
-            Console.WriteLine("Faz de conta que criei um worker.");
+            Debug.WriteLine("Faz de conta que criei um worker.");
         }
     }
 }
