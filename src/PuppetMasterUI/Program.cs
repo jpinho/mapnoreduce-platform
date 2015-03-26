@@ -1,4 +1,4 @@
-﻿using PuppetMasterServer;
+﻿using PlatformServer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace PuppetMasterUI
         [STAThread]
         private static void Main() {
             new Thread(new ThreadStart(delegate() {
-                PuppetMasterServer.Program.Start();
+                PlatformServer.Program.Start();
             })).Start();
 
             Application.EnableVisualStyles();
