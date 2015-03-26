@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.Remoting;
 using SharedTypes;
 
-namespace PuppetMasterServer
+namespace PlatformServer
 {
     public class PuppetMasterService : MarshalByRefObject, IPuppetMasterService
     {

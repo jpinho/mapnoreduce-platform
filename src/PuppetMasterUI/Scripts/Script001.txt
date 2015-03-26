@@ -16,7 +16,7 @@
 % it will be simpler to implement it as a call to the local (or remote) 
 % Puppet- Master’s job creation service.
 %%
-WORKER <ID> <PUPPETMASTER-URL> <SERVICE-URL> <ENTRY-URL>
+WORKER 1 <PUPPETMASTER-URL> <SERVICE-URL> <ENTRY-URL>
 
 %% 
 % Creates an application on the local node. The application submits a job 
@@ -30,13 +30,13 @@ WORKER <ID> <PUPPETMASTER-URL> <SERVICE-URL> <ENTRY-URL>
 %   number of worker tasks to be executed.
 % – The name of the class implementing the IMap interface.
 %%
-SUBMIT <ENTRY-URL> <FILE> <OUTPUT> <S> <MAP>
+SUBMIT <ENTRY-URL> <FILE> <OUTPUT> 10 <MAP> <DLL>
 
 %%
 % Makes the PuppetMaster stop the execution of commands of the script
 % for <SECS> seconds.
 %%
-WAIT <SECS>
+WAIT 2000
 
 %%
 % Makes all workers and job trackers of the PADIMapNoReduce system print their 
@@ -53,26 +53,26 @@ STATUS
 %%
 % Injects the specified delay in the worker processes with the <ID> identifier.
 %%
-SLOWW <ID> <delay-in-seconds>
+SLOWW 1 1000
 
 %%
 % Disables the communication of a worker and pauses its map computa- tion in order to 
 % simulate the worker’s failure.
 %%
-FREEZEW <ID>
+FREEZEW 1
 
 %%
 % Undoes the e↵ects of a previous FREEZEW command.
 %%
-UNFREEZEW <ID>
+UNFREEZEW 1
 
 %%
 % Disables the communication of the job tracker aspect of a worker node
 % in order to simulate its failures.
 %%
-FREEZEC <ID>
+FREEZEC 1
 
 %%
 % Undoes the e↵ects of a previous FREEZEC command.
 %%
-UNFREEZEC <ID>
+UNFREEZEC 1

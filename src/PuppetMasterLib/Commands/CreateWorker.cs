@@ -9,7 +9,6 @@ using System.Runtime.Remoting.Messaging;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Remoting.Channels;
 using System.Net.Sockets;
-using SharedTypes;
 
 namespace PuppetMasterLib.Commands
 {

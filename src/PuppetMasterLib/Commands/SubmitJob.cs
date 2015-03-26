@@ -24,6 +24,7 @@ namespace PuppetMasterLib.Commands
         public void Execute() {
             new Thread(new ThreadStart(delegate() {
                 ConsoleHelper.CreateConsole();
+
                 ClientConnectorService.Program.Start();
                 UserApplicationSample.Program.Start(
                     EntryURL,
@@ -32,6 +33,8 @@ namespace PuppetMasterLib.Commands
                     Splits,
                     MapFunctionPath,
                     Dll);
+
+                ConsoleHelper.FreeConsole();
             })).Start();
         }
 

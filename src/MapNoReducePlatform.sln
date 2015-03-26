@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientConnectorService", "C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserApplicationSample", "UserApplicationSample\UserApplicationSample.csproj", "{1E0396AA-5CD5-4367-B5C6-D4C1D4CED445}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuppetMasterServer", "PuppetMasterServer\PuppetMasterServer.csproj", "{73E63FCB-677C-46DA-BFB8-F0C813B6F116}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlatformServer", "PuppetMasterServer\PlatformServer.csproj", "{73E63FCB-677C-46DA-BFB8-F0C813B6F116}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unit Tests", "Unit Tests", "{D3A6E2AB-034B-48AA-AC90-929FB996CB54}"
 EndProject
