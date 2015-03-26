@@ -1,10 +1,11 @@
-﻿using System;
+﻿using SharedTypes;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SharedTypes;
-using System.IO;
+
 namespace ClientConnectorService
 {
     public class ClientSplitProviderService : MarshalByRefObject, IClientSplitProviderService
@@ -36,6 +37,10 @@ namespace ClientConnectorService
                     splitContent = new List<string>();
                 }
             }
+
+            // adds last split (if incomplete)
+            if (splitContent.Count >= 0)
+                lstSplits.Add(String.Join("\n", splitContent));
 
             // saves the splits of the file on the store
             splitsStore.Add(filePath, lstSplits);
