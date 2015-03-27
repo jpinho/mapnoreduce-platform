@@ -1,6 +1,7 @@
 # MapNoReduce Platform #
 
 Note: Check this in **[BitBucket Cards](http://www.bitbucketcards.com)**!
+#
 
 The goal of this project is to design and implement MapNoReduce, a simplified implementation of the MapReduce middleware and programming model. MapReduce was introduced by Google in 2004 and is currently one of the most popular approaches for large scale data analytics also thanks to the availability of high quality open-source implementations (e.g., Hadoop).
 
