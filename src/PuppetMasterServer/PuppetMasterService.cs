@@ -1,18 +1,21 @@
-﻿using System;
+﻿using SharedTypes;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Remoting;
 using System.Text;
 using System.Threading.Tasks;
-using System.Runtime.Remoting;
-using SharedTypes;
 
 namespace PlatformServer
 {
     public class PuppetMasterService : MarshalByRefObject, IPuppetMasterService
     {
-        public void createWorker()
-        {
-            Worker w = new Worker();
+        private List<Worker> workers = new List<Worker>();
+
+        public void createWorker() {
+            Debug.WriteLine("New worker created at Puppet Master.");
+            workers.Add(new Worker());
         }
     }
 }
