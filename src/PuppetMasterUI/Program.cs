@@ -17,7 +17,7 @@ namespace PuppetMasterUI
         private static void Main() {
             new Thread(new ThreadStart(delegate() {
                 Debug.WriteLine("Starting Puppe tMaster Service... give it some seconds to start.");
-                PlatformServer.PuppetMasterService.Run();
+                PlatformCore.PuppetMasterService.Run();
             })).Start();
 
             Application.EnableVisualStyles();

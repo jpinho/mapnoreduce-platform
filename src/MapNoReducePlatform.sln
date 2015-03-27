@@ -7,11 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuppetMasterUI", "PuppetMas
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuppetMasterLib", "PuppetMasterLib\PuppetMasterLib.csproj", "{677EBBCD-8869-4AF9-93AA-BBB641C1E0F9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientConnectorService", "ClientConnectorService\ClientConnectorService.csproj", "{977AC474-EBA7-41F9-89C2-10FE1E81D202}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientServices", "ClientConnectorService\ClientServices.csproj", "{977AC474-EBA7-41F9-89C2-10FE1E81D202}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserApplicationSample", "UserApplicationSample\UserApplicationSample.csproj", "{1E0396AA-5CD5-4367-B5C6-D4C1D4CED445}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlatformServer", "PuppetMasterServer\PlatformServer.csproj", "{73E63FCB-677C-46DA-BFB8-F0C813B6F116}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlatformCore", "PuppetMasterServer\PlatformCore.csproj", "{73E63FCB-677C-46DA-BFB8-F0C813B6F116}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unit Tests", "Unit Tests", "{D3A6E2AB-034B-48AA-AC90-929FB996CB54}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedTypes", "SharedTypes\SharedTypes.csproj", "{5E7F4752-7D18-4DA6-A243-EB5F7F631C7D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientConnectorService.Tests", "ClientConnectorService.Tests\ClientConnectorService.Tests.csproj", "{6B88C5D1-87B3-4861-9445-B87907F1E25E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserMappersLib", "UserMappersLib\UserMappersLib.csproj", "{0C171823-0A5D-4BAE-BA55-0142C09E3D0C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,10 @@ Global
 		{6B88C5D1-87B3-4861-9445-B87907F1E25E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B88C5D1-87B3-4861-9445-B87907F1E25E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B88C5D1-87B3-4861-9445-B87907F1E25E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C171823-0A5D-4BAE-BA55-0142C09E3D0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C171823-0A5D-4BAE-BA55-0142C09E3D0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C171823-0A5D-4BAE-BA55-0142C09E3D0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C171823-0A5D-4BAE-BA55-0142C09E3D0C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

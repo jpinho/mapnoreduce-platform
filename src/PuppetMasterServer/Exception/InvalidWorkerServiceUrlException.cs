@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PlatformServer
+namespace PlatformCore.Exceptions
 {
     public class InvalidWorkerServiceUrlException : Exception
     {

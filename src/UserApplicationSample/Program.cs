@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ClientServices;
+using SharedTypes;
 
 namespace UserApplicationSample
 {
@@ -18,17 +21,20 @@ namespace UserApplicationSample
             string file = args[2];
             string ouput = args[3];
             int nSplits = Int32.Parse(args[4]);
-            string map = args[5];
-            string dll = args[6];
+            string mapClassName = args[5];
+            string assemblyFilePath = args[6];
 
-            Start(entryURL, file, ouput, nSplits, map, dll);
+            ExecuteMapJob(entryURL, file, ouput, nSplits, mapClassName, assemblyFilePath);
         }
 
-        public static void Start(string EntryURL, string FilePath, string OutputPath, int Splits, string MapFunctionPath, string Dll) {
-            Console.WriteLine("User App started as:");
-            Console.WriteLine("> ./UserApp -EntryURL={0} -FilePath={1} -OutputPath={2} -Splits={3} -MapFunctionPath={4} -Dll={5}",
-                EntryURL, FilePath, OutputPath, Splits.ToString(), MapFunctionPath, Dll);
-            System.Threading.Thread.Sleep(5000);
+        public static void ExecuteMapJob(string entryURL, string filePath, string outputPath, int splits, string mapClassName, string assemblyFilePath) {
+            Console.WriteLine("User Application, started with the following parameters:\n"
+                + "-EntryURL={0} -FilePath={1} -OutputPath={2} -Splits={3} -MapClassName={4} -AssemblyFilePath={5}",
+                entryURL, filePath, outputPath, splits.ToString(), mapClassName, assemblyFilePath);
+
+            ClientService client = new ClientService();
+            client.Init(entryURL);
+            client.Submit(filePath, splits, outputPath, mapClassName, assemblyFilePath);
         }
     }
 }

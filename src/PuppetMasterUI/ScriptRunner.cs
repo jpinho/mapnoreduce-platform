@@ -228,12 +228,12 @@ namespace PuppetMasterUI
         }
 
         private void tsDdbMonitoring_Click(object sender, EventArgs e) {
-            if (!PlatformServer.PuppetMasterService.IsInitialized)
+            if (!PlatformCore.PuppetMasterService.IsInitialized)
                 MessageBox.Show("Puppet Master Server status: Offline.");
 
             IPuppetMasterService pMaster = (IPuppetMasterService)Activator.GetObject(
                 typeof(IPuppetMasterService),
-                PlatformServer.PuppetMasterService.GetMasterURL().ToLowerInvariant());
+                PlatformCore.PuppetMasterService.GetMasterURL().ToLowerInvariant());
 
             string workerURLs = string.Empty;
             foreach (KeyValuePair<int, IWorker> entry in pMaster.GetWorkers())
@@ -242,7 +242,7 @@ namespace PuppetMasterUI
 
             string message = string.Format(
                 Resources.PuppetMasterServerStatusMessage.ToUpperInvariant()
-                , PlatformServer.PuppetMasterService.GetMasterURL()
+                , PlatformCore.PuppetMasterService.GetMasterURL()
                 , pMaster.GetWorkers().Count
                 , workerURLs);
 

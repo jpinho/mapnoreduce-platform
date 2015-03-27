@@ -8,9 +8,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PlatformServer
+namespace SharedTypes
 {
-    public class Helper
+    public class RemotingHelper
     {
         public static T CreateService<T>(int port, string serviceName) where T : MarshalByRefObject, new() {
             BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
@@ -29,6 +29,10 @@ namespace PlatformServer
                 WellKnownObjectMode.Singleton);
 
             return service;
+        }
+
+        public static T GetRemoteObject<T>(string serviceName, string serviceURL) {
+            return (T)Activator.GetObject(typeof(T), serviceURL);
         }
     }
 }

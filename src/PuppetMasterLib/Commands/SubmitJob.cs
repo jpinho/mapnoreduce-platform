@@ -18,23 +18,19 @@ namespace PuppetMasterLib.Commands
         public string FilePath { get; set; }
         public string OutputPath { get; set; }
         public int Splits { get; set; }
-        public string MapFunctionPath { get; set; }
-        public string Dll { get; set; }
+        public string MapClassName { get; set; }
+        public string AssemblyFilePath { get; set; }
 
         public void Execute() {
             new Thread(new ThreadStart(delegate() {
                 ConsoleHelper.CreateConsole();
-
-                ClientConnectorService.Program.Start();
-                UserApplicationSample.Program.Start(
-                    EntryURL,
-                    FilePath,
-                    OutputPath,
-                    Splits,
-                    MapFunctionPath,
-                    Dll);
-
-                ConsoleHelper.FreeConsole();
+                try {
+                    UserApplicationSample.Program.ExecuteMapJob(
+                        EntryURL, FilePath, OutputPath, Splits,
+                        MapClassName, AssemblyFilePath);
+                } finally {
+                    ConsoleHelper.FreeConsole();
+                }
             })).Start();
         }
 

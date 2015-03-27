@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PlatformCore")]
+[assembly: AssemblyTitle("UserMappersLib")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("PlatformCore")]
+[assembly: AssemblyProduct("UserMappersLib")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("ca91e908-5b8f-41d1-9d2d-fd436ff78666")]
+[assembly: Guid("cd621afa-81d0-4afd-bc49-8b4d8875100e")]
 
 // Version information for an assembly consists of the following four values:
 //

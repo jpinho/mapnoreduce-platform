@@ -1,11 +1,11 @@
-﻿using PuppetMasterLib.Exceptions;
-using SharedTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using PuppetMasterLib.Exceptions;
+using SharedTypes;
 
 namespace PuppetMasterLib
 {
@@ -63,8 +63,8 @@ namespace PuppetMasterLib
                             FilePath = keyWords[2],
                             OutputPath = keyWords[3],
                             Splits = splits,
-                            MapFunctionPath = keyWords[5],
-                            Dll = keyWords[6]
+                            MapClassName = keyWords[5],
+                            AssemblyFilePath = keyWords[6]
                         });
 
                         break;

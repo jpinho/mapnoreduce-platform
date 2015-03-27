@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections.Specialized;
 
 namespace SharedTypes
 {
     public interface IMap
     {
-        HashSet<KeyValuePair<String, String>> Map(String key, String value);
+        IList<KeyValuePair<String, String>> Map(string fileLine);
     }
 }

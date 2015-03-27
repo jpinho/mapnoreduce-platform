@@ -53,9 +53,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ClientConnectorService\ClientConnectorService.csproj">
+    <ProjectReference Include="..\ClientConnectorService\ClientServices.csproj">
       <Project>{977ac474-eba7-41f9-89c2-10fe1e81d202}</Project>
-      <Name>ClientConnectorService</Name>
+      <Name>ClientServices</Name>
     </ProjectReference>
     <ProjectReference Include="..\SharedTypes\SharedTypes.csproj">
       <Project>{5e7f4752-7d18-4da6-a243-eb5f7f631c7d}</Project>
