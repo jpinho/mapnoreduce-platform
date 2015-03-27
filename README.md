@@ -1,7 +1,5 @@
 # MapNoReduce Platform #
 
-NOTE: For project Issue Tracking boards-based version follow this [link](http://www.bitbucketcards.com).
-
 The goal of this project is to design and implement MapNoReduce, a simplified implementation of the MapReduce middleware and programming model. MapReduce was introduced by Google in 2004 and is currently one of the most popular approaches for large scale data analytics also thanks to the availability of high quality open-source implementations (e.g., Hadoop).
 
 When using the MapReduce paradigm, the computation takes a set of input key/value pairs, and produces a set of output key/value pairs. MapReduce users express the computation as two functions: Map and Reduce. For simplicity, in this project students will only implement the Map part of MapReduce. The Map function (different for each application), is written by the user and takes an input set of key/value pairs and produces a set of key/value pairs. In the case of MapNoReduce, the input key/value pairs are extracted from input files. The keys are the numbers of the line of the file being read and the values are the content of those lines.
@@ -19,6 +17,8 @@ In the original MapReduce implementation there is a centralised component, calle
 * Install Visual Studio 2013
 * Launch Puppet Master UI, which launches a Puppet Master Server Daemon in background
 * You are ready!
+
+**NOTE: For project Issue Tracking boards-based version follow this [link](http://www.bitbucketcards.com).**
 
 ### Contribution guidelines ###
 
