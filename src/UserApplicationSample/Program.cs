@@ -8,33 +8,7 @@ namespace UserApplicationSample
 {
     public class Program
     {
-        static string HELP = @"
-##############################
-#  User Application Sample
-#  Version: 1.0
-##############################
-
- Parameters:
-
-    <ENTRY-URL>     The URL of a worker node to which the client can connect to submit jobs.
-
-    <FILE>          Is the path to the input file. 
-                    The file will be subdivided into <S> splits across the machines in W.
-
-    <OUTPUT>        Is the path to an output directory on the local filesystem of the application, 
-                    which will store one output file for each split of the input file name 'S1.out', 
-                    'S2.out', ..., 'S.out'.
-
-    <S>             The number of splits of the input file, which corresponds to the total number 
-                    of worker tasks to be executed.
-
-    <MAP>           The name of the class implementing the IMap interface.
-
- Usage Example:
-
-    UserApplicationSample.exe <ENTRY-URL> <FILE> <OUTPUT> <S> <MAP>
-
-";
+        private static string HELP = Resources.HelpMessage;
 
         public static void Main(string[] args) {
             if (args.Length == 1)

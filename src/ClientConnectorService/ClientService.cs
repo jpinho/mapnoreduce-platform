@@ -1,10 +1,10 @@
-﻿using System;
+﻿using SharedTypes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting;
 using System.Text;
 using System.Threading.Tasks;
-using System.Runtime.Remoting;
-using SharedTypes;
 
 namespace ClientConnectorService
 {
@@ -30,7 +30,7 @@ namespace ClientConnectorService
         public void Submit(string filePath, int nSplits, string outputDir, IMap mapFunction) {
             this.splitProviderService.SplitAndSave(filePath, nSplits);
 
-            //TODO: There can be no file being processed twice at the same time. 
+            //TODO: There can be no file being processed twice at the same time.
             // This is File1 cannot be processed if it is currently being processed (corner case!).
         }
     }

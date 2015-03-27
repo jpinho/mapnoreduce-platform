@@ -1,18 +1,18 @@
-﻿using System;
+﻿using PuppetMasterLib.Exceptions;
+using SharedTypes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Text.RegularExpressions;
-using PuppetMasterLib.Exceptions;
-using SharedTypes;
+using System.Threading;
 
 namespace PuppetMasterLib
 {
     public class CommandParser
     {
-        const string COMMAND_TYPE_EXCEPTION = "The {0} command {1} parameter received is invalid, {2} type expected.";
-        const string UNRECOGNIZED_COMMAND_EXCEPTION = "The {0} command is not recognized.";
+        private const string COMMAND_TYPE_EXCEPTION = "The {0} command {1} parameter received is invalid, {2} type expected.";
+        private const string UNRECOGNIZED_COMMAND_EXCEPTION = "The {0} command is not recognized.";
         private static string regexStripComments = "(^(%[^\n]*\n?))|(\n[ \t]*%[^\n]*)|(\n(?=\n))";
 
         public static List<ICommand> Run(string script) {
@@ -50,6 +50,7 @@ namespace PuppetMasterLib
                         }
 
                         break;
+
                     case Commands.SubmitJob.NAME:
                         int splits;
                         try {
@@ -67,6 +68,7 @@ namespace PuppetMasterLib
                         });
 
                         break;
+
                     case Commands.Wait.NAME:
                         int secs;
                         try {
@@ -78,9 +80,11 @@ namespace PuppetMasterLib
                             Secs = secs
                         });
                         break;
+
                     case Commands.Status.NAME:
                         parsedCommands.Add(new Commands.Status());
                         break;
+
                     case Commands.SlowWorker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
@@ -91,6 +95,7 @@ namespace PuppetMasterLib
                             WorkerId = workerId
                         });
                         break;
+
                     case Commands.FreezeWorker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
@@ -101,6 +106,7 @@ namespace PuppetMasterLib
                             WorkerId = workerId
                         });
                         break;
+
                     case Commands.UnfreezeWorker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
@@ -111,6 +117,7 @@ namespace PuppetMasterLib
                             WorkerId = workerId
                         });
                         break;
+
                     case Commands.FreezeJobTracker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
@@ -121,6 +128,7 @@ namespace PuppetMasterLib
                             WorkerId = workerId
                         });
                         break;
+
                     case Commands.UnfreezeJobTracker.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);

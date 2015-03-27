@@ -15,31 +15,13 @@ namespace PlatformServer
     public class Program
     {
         public static void Main(string[] args) {
-            Start();
-            Console.ReadKey();
-        }
-
-        public static void Start() {
             new Thread(new ThreadStart(delegate() {
-                CreateService<PuppetMasterService>(9008, "MNRP-PuppetMasterService");
+                PuppetMasterService.Run();
             })).Start();
-        }
 
-        private static void CreateService<T>(int port, string serviceName) where T : MarshalByRefObject, new() {
-            BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
-
-            IDictionary props = new Hashtable();
-            props["port"] = port;
-            props["typeFilterLevel"] = TypeFilterLevel.Full;
-            props["name"] = serviceName;
-
-            TcpChannel channel = new TcpChannel(props, null, provider);
-            ChannelServices.RegisterChannel(channel, true);
-
-            T service = new T();
-            RemotingConfiguration.RegisterWellKnownServiceType(
-                service.GetType(), serviceName,
-                WellKnownObjectMode.Singleton);
+            Console.WriteLine("PuppetMasterService being started... give it a couple seconds!");
+            Console.WriteLine("Press any key to exit.");
+            Console.ReadKey();
         }
     }
 }

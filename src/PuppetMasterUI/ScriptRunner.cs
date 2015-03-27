@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO;
-using System.Threading;
-using SharedTypes;
-using PuppetMasterLib.Commands;
 using PuppetMasterLib;
+using PuppetMasterLib.Commands;
+using PuppetMasterUI.Properties;
+using SharedTypes;
 
 namespace PuppetMasterUI
 {
@@ -224,6 +225,29 @@ namespace PuppetMasterUI
 
         private void tsUnFreezeC_Click(object sender, EventArgs e) {
             GetCurrentTextBox().Text += "UNFREEZEC <ID>";
+        }
+
+        private void tsDdbMonitoring_Click(object sender, EventArgs e) {
+            if (!PlatformServer.PuppetMasterService.IsInitialized)
+                MessageBox.Show("Puppet Master Server status: Offline.");
+
+            IPuppetMasterService pMaster = (IPuppetMasterService)Activator.GetObject(
+                typeof(IPuppetMasterService),
+                PlatformServer.PuppetMasterService.GetMasterURL().ToLowerInvariant());
+
+            string workerURLs = string.Empty;
+            foreach (KeyValuePair<int, IWorker> entry in pMaster.GetWorkers())
+                workerURLs += string.Format("          Worker{0}: [{1}]\n",
+                    entry.Key, entry.Value.GetWorkerURL().ToLowerInvariant());
+
+            string message = string.Format(
+                Resources.PuppetMasterServerStatusMessage.ToUpperInvariant()
+                , PlatformServer.PuppetMasterService.GetMasterURL()
+                , pMaster.GetWorkers().Count
+                , workerURLs);
+
+            MessageBox.Show(message, "[~] Puppet Master Server Monitor [~]",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

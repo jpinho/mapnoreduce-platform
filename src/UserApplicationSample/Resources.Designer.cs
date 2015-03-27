@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PuppetMasterUI.Properties {
+namespace UserApplicationSample {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace PuppetMasterUI.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PuppetMasterUI.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("UserApplicationSample.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,19 +61,24 @@ namespace PuppetMasterUI.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to     puppet master status: online
+        ///   Looks up a localized string similar to ##############################
+        ///#  User Application Sample
+        ///#  Version: 1.0
+        ///##############################
         ///
-        ///    summary:
+        /// Parameters:
         ///
-        ///    - master server url:
-        ///          {0}
+        ///    &lt;ENTRY-URL&gt;     The URL of a worker node to which the client can connect to submit jobs.
         ///
-        ///    - worker instances ({1}):
-        ///{2}.
+        ///    &lt;FILE&gt;          Is the path to the input file.
+        ///                    The file will be subdivided into &lt;S&gt; splits across the machines in W.
+        ///
+        ///    &lt;OUTPUT&gt;        Is the path to an output directory on the local filesystem of the application,
+        ///                    which will store one out [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string PuppetMasterServerStatusMessage {
+        internal static string HelpMessage {
             get {
-                return ResourceManager.GetString("PuppetMasterServerStatusMessage", resourceCulture);
+                return ResourceManager.GetString("HelpMessage", resourceCulture);
             }
         }
     }

@@ -22,7 +22,7 @@ namespace PuppetMasterLib.Commands
 
         public string ServiceURL { get; set; }
 
-        public string EntryURL { get; set; } /*optional*/
+        public string EntryURL { get; set; }
 
         public void Execute() {
             /* contact puppetMaster at PuppetMasterURL */
@@ -31,8 +31,8 @@ namespace PuppetMasterLib.Commands
                 PuppetMasterURL);
 
             /* asks him to create a worker with the given WorkerId
-             * and expose its service at ServiceURL*/
-            pMaster.createWorker();
+             * and expose its service at ServiceURL */
+            pMaster.CreateWorker(WorkerId, ServiceURL, EntryURL);
 
             /*if EntryURL
              *      notify existing workers
