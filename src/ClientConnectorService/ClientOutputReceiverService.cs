@@ -24,5 +24,15 @@ namespace ClientServices
             mapResultStore[filePath].Add(new KeyValuePair<int, string>(splitNumber, result));
             //TODO: trigger event to notify the receival of a new result from a file and to alert that the worker finished that split.
         }
+
+        internal string[] GetMapResult() {
+            //TODO
+            return null;
+        }
+
+        internal bool IsMapResultReady(string filePath, int nSplits) {
+            //TODO
+            return false;
+        }
     }
 }

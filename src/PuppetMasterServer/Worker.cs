@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Channels;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using SharedTypes;
 
@@ -26,15 +27,25 @@ namespace PlatformCore
             this.ServiceName = serviceName;
         }
 
-        public bool ExecuteMapJob(string dataToProcess, byte[] code, string className) {
-            Assembly assembly = Assembly.Load(code);
+        #region IWorker Members
+
+        public void ReceiveMapJob(string filePath, int nSplits, byte[] mapAssemblyCode, string mapClassName) {
+            //TODO
+            Thread.Sleep(10 * 1000);
+        }
+
+        public bool ExecuteMapJob(IJobTask task) {
+            // TODO: ask client split provider for split data (task.SplitProviderURL, task.SplitNumber)
+            string data = "";
+
+            Assembly assembly = Assembly.Load(task.MapFunctionAssembly);
 
             foreach (Type type in assembly.GetTypes()) {
                 if (type.IsClass == true) {
-                    if (type.FullName.EndsWith("." + className)) {
+                    if (type.FullName.EndsWith("." + task.MapClassName)) {
                         object mapperClassObj = Activator.CreateInstance(type);
 
-                        object[] args = new object[] { dataToProcess };
+                        object[] args = new object[] { data };
                         object resultObject = type.InvokeMember("Map",
                           BindingFlags.Default | BindingFlags.InvokeMethod,
                                null,
@@ -52,6 +63,8 @@ namespace PlatformCore
             }
             return false;
         }
+
+        #endregion IWorker Members
 
         /// <summary>
         /// Returns the worker service URL.

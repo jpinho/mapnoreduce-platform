@@ -9,6 +9,7 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Serialization.Formatters;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using SharedTypes;
 
@@ -55,8 +56,20 @@ namespace ClientServices
         public void Submit(string filePath, int nSplits, string outputDir, string mapClassName, string assemblyFilePath) {
             this.cspSvc.SplitAndSave(filePath, nSplits);
 
-            byte[] code = File.ReadAllBytes(assemblyFilePath);
-            //TODO: submit job to worker at EntryURL
+            byte[] mapAssemblyCode = File.ReadAllBytes(assemblyFilePath);
+            string serviceName = Util.GetServiceName(EntryURL);
+
+            IWorker masterWorker = RemotingHelper.GetRemoteObject<IWorker>(serviceName, EntryURL);
+            masterWorker.ReceiveMapJob(filePath, nSplits, mapAssemblyCode, mapClassName);
+
+            while (!corSvc.IsMapResultReady(filePath, nSplits)) {
+                Thread.Sleep(5000);
+            }
+
+            string[] result = corSvc.GetMapResult();
+            using (StreamWriter outFile = File.CreateText(Path.Combine(outputDir, filePath + ".out"))) {
+                outFile.Write(String.Join("\n", result));
+            }
         }
 
         public string GetSplitProviderServiceURL() {

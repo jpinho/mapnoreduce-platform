@@ -14,8 +14,6 @@ namespace PlatformCore
 {
     public class PuppetMasterService : MarshalByRefObject, IPuppetMasterService
     {
-        public const string REGEX_GET_PORT = @":([0-9]{2,5})\/";
-        public const string REGEX_GET_PATH = @":[0-9]{2,5}\/(.+)";
         public const int SERVER_PORT = 9008;
         public const string SERVER_NAME = "MNRP-PuppetMasterService";
 
@@ -25,17 +23,11 @@ namespace PlatformCore
         public static bool IsInitialized { get; private set; }
 
         public void CreateWorker(int workerId, string serviceURL, string entryURL) {
-            MatchCollection portMatches = new Regex(REGEX_GET_PORT).Matches(serviceURL);
-            MatchCollection serviceNameMatches = new Regex(REGEX_GET_PATH).Matches(serviceURL);
+            int servicePort = Util.GetHostPort(serviceURL);
+            string serviceName = Util.GetServiceName(serviceURL);
 
-            bool portMatched = portMatches.Count > 0 && portMatches[0].Groups.Count > 0;
-            bool serviceMatched = serviceNameMatches.Count > 0 && serviceNameMatches[0].Groups.Count > 0;
-
-            if (!(portMatched && serviceMatched))
+            if (servicePort == 0 && string.IsNullOrWhiteSpace(serviceName))
                 throw new InvalidWorkerServiceUrlException(workerId, serviceURL);
-
-            int servicePort = int.Parse(portMatches[0].Groups[1].Value);
-            string serviceName = serviceNameMatches[0].Groups[1].Value.Trim();
 
             Worker worker = new Worker(workerId, servicePort, serviceName);
             worker.Run();
