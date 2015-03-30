@@ -35,9 +35,13 @@ namespace PlatformCore
         }
 
         public bool ExecuteMapJob(IJobTask task) {
-            // TODO: ask client split provider for split data (task.SplitProviderURL, task.SplitNumber)
-            string data = "";
+            
+            IClientSplitProviderService splitProvider = (IClientSplitProviderService)Activator.GetObject(
+              typeof(IClientSplitProviderService),
+              task.SplitProviderURL);
 
+            string data = splitProvider.GetFileSplit(task.FileName, int.Parse(task.SplitNumber));
+     
             Assembly assembly = Assembly.Load(task.MapFunctionAssembly);
 
             foreach (Type type in assembly.GetTypes()) {

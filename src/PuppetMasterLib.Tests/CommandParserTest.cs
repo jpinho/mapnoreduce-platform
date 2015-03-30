@@ -18,7 +18,7 @@ namespace PuppetMasterLib.Tests
             // arrange
             //bool createWorkerSuccess = false;
             string script = @"WORKER 1 <PUPPETMASTER-URL> <SERVICE-URL> <ENTRY-URL>
-SUBMIT <ENTRY-URL> <FILE> <OUTPUT> 10 <MAP>
+SUBMIT <ENTRY-URL> <FILE> <OUTPUT> 10 <MAP> <DLL>
 %potato
 WAIT 5";
 
