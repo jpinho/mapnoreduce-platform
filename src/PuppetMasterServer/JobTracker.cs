@@ -9,28 +9,32 @@ namespace PlatformCore
     internal class JobTracker : MarshalByRefObject, IJobTracker
     {
         private Worker worker;
-        private object p;
-
         public enum JobTrackerStatus { ACTIVE, PASSIVE };
+        private JobTrackerStatus mode = JobTrackerStatus.PASSIVE;
         private List<IWorker> activeWorkers = new List<IWorker>();
+        private DateTime lastHeartBeat = DateTime.UtcNow.Date;
 
-        public JobTracker(Worker worker, JobTrackerStatus p) {
+        public JobTracker(Worker worker, JobTrackerStatus mode)
+        {
+            this.activeWorkers = worker.getActiveWorkers();
             this.worker = worker;
-            this.p = p;
-            this.activeWorkers = worker.GetActiveWorkers();
+            this.mode = mode;
         }
 
-        internal void Start() {
-            if (Enum.Equals(p, JobTrackerStatus.ACTIVE)) {
+        internal void Start()
+        {
+            if (Enum.Equals(mode, JobTrackerStatus.ACTIVE)){
             }
         }
 
-        public void alive(string wid) {
-
+        public void Alive(string wid)
+        {
+            
         }
 
-        public void complete(string wid) {
-
+        public void Complete(string wid)
+        {
+            
         }
     }
 }
