@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IJobTask.cs" />
+    <Compile Include="IJobTracker.cs" />
     <Compile Include="RemotingHelper.cs" />
     <Compile Include="IClientOutputReceiverService.cs" />
     <Compile Include="IPuppetMasterService.cs" />

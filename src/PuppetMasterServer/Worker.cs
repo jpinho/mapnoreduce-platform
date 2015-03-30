@@ -13,36 +13,31 @@ namespace PlatformCore
 {
     public class Worker : MarshalByRefObject, IWorker
     {
-        public int WorkerId { get; private set; }
-        public int HostPort { get; private set; }
-        public string ServiceName { get; private set; }
-        public bool IsInitialized { get; private set; }
-        public JobTracker tracker = null;
+        private JobTracker tracker = null;
+
+        public int WorkerId { get; set; }
+        public Uri ServiceUrl { get; set; }
+
         public Worker() {
         }
 
-        public Worker(int workerId, int hostPort, string serviceName) {
-            this.WorkerId = workerId;
-            this.HostPort = hostPort;
-            this.ServiceName = serviceName;
+        public Worker(int workerId, Uri serviceUrl) {
+            WorkerId = workerId;
+            ServiceUrl = serviceUrl;
         }
-
 
         #region IWorker Members
 
-
         public void ReceiveMapJob(string filePath, int nSplits, byte[] mapAssemblyCode, string mapClassName) {
-            new Thread(new ThreadStart(delegate
-            {
+            new Thread(new ThreadStart(delegate {
                 tracker = new JobTracker(this, JobTracker.JobTrackerStatus.ACTIVE);
                 tracker.start();
             })).Start();
         }
 
         public bool ExecuteMapJob(IJobTask task) {
-            
-            new Thread(new ThreadStart(delegate
-            {
+
+            new Thread(new ThreadStart(delegate {
                 tracker = new JobTracker(this, JobTracker.JobTrackerStatus.PASSIVE);
                 tracker.start();
             })).Start();
@@ -52,7 +47,7 @@ namespace PlatformCore
               task.SplitProviderURL);
 
             string data = splitProvider.GetFileSplit(task.FileName, int.Parse(task.SplitNumber));
-     
+
             Assembly assembly = Assembly.Load(task.MapFunctionAssembly);
 
             foreach (Type type in assembly.GetTypes()) {
@@ -81,25 +76,13 @@ namespace PlatformCore
 
         #endregion IWorker Members
 
-        /// <summary>
-        /// Returns the worker service URL.
-        /// </summary>
-        public string GetWorkerURL() {
-            if (!IsInitialized)
-                return null;
-            return string.Format("tcp://localhost:{0}/{1}",
-                HostPort, ServiceName);
+        internal static Worker Run(int workerId, Uri serviceUrl) {
+            var wrk = new Worker(workerId, serviceUrl);
+            RemotingHelper.CreateService(wrk, serviceUrl);
+            return wrk;
         }
 
-        internal void Run() {
-            if (IsInitialized)
-                return;
-            RemotingHelper.CreateService<Worker>(HostPort, ServiceName);
-            IsInitialized = true;
-        }
-
-        internal new List<IWorker> getActiveWorkers()
-        {
+        internal List<IWorker> GetActiveWorkers() {
             throw new NotImplementedException();
         }
     }

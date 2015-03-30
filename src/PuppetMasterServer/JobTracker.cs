@@ -1,42 +1,36 @@
-﻿using SharedTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SharedTypes;
 
 namespace PlatformCore
 {
-    class JobTracker : MarshalByRefObject, IJobTracker
+    internal class JobTracker : MarshalByRefObject, IJobTracker
     {
         private Worker worker;
         private object p;
+
         public enum JobTrackerStatus { ACTIVE, PASSIVE };
         private List<IWorker> activeWorkers = new List<IWorker>();
 
-
-        public JobTracker(Worker worker, JobTrackerStatus p)
-        {
+        public JobTracker(Worker worker, JobTrackerStatus p) {
             this.worker = worker;
             this.p = p;
-            this.activeWorkers = worker.getActiveWorkers();
+            this.activeWorkers = worker.GetActiveWorkers();
         }
 
-
-
-        internal void Start()
-        {
-            if (Enum.Equals(p, JobTrackerStatus.ACTIVE)){
+        internal void Start() {
+            if (Enum.Equals(p, JobTrackerStatus.ACTIVE)) {
             }
         }
 
-        public void alive(string wid)
-        {
-            
+        public void alive(string wid) {
+
         }
 
-        public void complete(string wid)
-        {
-            
+        public void complete(string wid) {
+
         }
     }
 }
