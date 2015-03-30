@@ -23,21 +23,30 @@ namespace ClientServices
 
         private ClientOutputReceiverService corSvc;
         private ClientSplitProviderService cspSvc;
+        public string EntryUrl { get; set; }
         public bool IsStarted { get; private set; }
-        public string EntryURL { get; set; }
 
-        public void Init(string entryURL) {
+        public string GetOutputReceiverServiceUrl() {
+            return corSvc.ServiceURL;
+        }
+
+        public string GetSplitProviderServiceUrl() {
+            return cspSvc.ServiceURL;
+        }
+
+        public void Init(string entryUrl) {
             if (IsStarted)
                 return;
 
-            EntryURL = entryURL;
-            BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
-            provider.TypeFilterLevel = TypeFilterLevel.Full;
+            EntryUrl = entryUrl;
+            var provider = new BinaryServerFormatterSinkProvider {
+                TypeFilterLevel = TypeFilterLevel.Full
+            };
 
             IDictionary props = new Hashtable();
             props["port"] = CLIENT_CHANNEL_PORT;
 
-            TcpChannel channel = new TcpChannel(props, null, provider);
+            var channel = new TcpChannel(props, null, provider);
             ChannelServices.RegisterChannel(channel, true);
 
             corSvc = new ClientOutputReceiverService(
@@ -54,30 +63,20 @@ namespace ClientServices
         }
 
         public void Submit(string filePath, int nSplits, string outputDir, string mapClassName, string assemblyFilePath) {
-            this.cspSvc.SplitAndSave(filePath, nSplits);
+            cspSvc.SplitAndSave(filePath, nSplits);
 
             byte[] mapAssemblyCode = File.ReadAllBytes(assemblyFilePath);
-            string serviceName = Util.GetServiceName(EntryURL);
-
-            IWorker masterWorker = RemotingHelper.GetRemoteObject<IWorker>(serviceName, EntryURL);
+            var masterWorker = RemotingHelper.GetRemoteObject<IWorker>(EntryUrl);
             masterWorker.ReceiveMapJob(filePath, nSplits, mapAssemblyCode, mapClassName);
 
             while (!corSvc.IsMapResultReady(filePath, nSplits)) {
                 Thread.Sleep(5000);
             }
 
-            string[] result = corSvc.GetMapResult();
-            using (StreamWriter outFile = File.CreateText(Path.Combine(outputDir, filePath + ".out"))) {
+            var result = corSvc.GetMapResult();
+            using (var outFile = File.CreateText(Path.Combine(outputDir, filePath + ".out"))) {
                 outFile.Write(String.Join("\n", result));
             }
-        }
-
-        public string GetSplitProviderServiceURL() {
-            return cspSvc.ServiceURL;
-        }
-
-        public string GetOutputReceiverServiceURL() {
-            return corSvc.ServiceURL;
         }
     }
 }

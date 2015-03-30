@@ -16,7 +16,7 @@ namespace PuppetMasterUI
         [STAThread]
         private static void Main() {
             new Thread(new ThreadStart(delegate() {
-                Debug.WriteLine("Starting Puppe tMaster Service... give it some seconds to start.");
+                Debug.WriteLine("Starting Puppet Master Service... give it some seconds to start.");
                 PlatformCore.PuppetMasterService.Run();
             })).Start();
 

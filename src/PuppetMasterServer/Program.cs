@@ -15,12 +15,8 @@ namespace PlatformCore
     public class Program
     {
         public static void Main(string[] args) {
-            new Thread(new ThreadStart(delegate() {
-                PuppetMasterService.Run();
-            })).Start();
-
-            Console.WriteLine("PuppetMasterService being started... give it a couple seconds!");
-            Console.WriteLine("Press any key to exit.");
+            new Thread(new ThreadStart(PuppetMasterService.Run)).Start();
+            Console.WriteLine("Puppet Master Service started!\nPress any key to exit.");
             Console.ReadKey();
         }
     }

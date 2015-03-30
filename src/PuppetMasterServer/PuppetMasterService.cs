@@ -14,67 +14,35 @@ namespace PlatformCore
 {
     public class PuppetMasterService : MarshalByRefObject, IPuppetMasterService
     {
-        public const int SERVER_PORT = 9008;
-        public const string SERVER_NAME = "MNRP-PuppetMasterService";
+        private readonly Dictionary<int, IWorker> workers = new Dictionary<int, IWorker>();
+        public static readonly Uri ServiceUrl = new Uri("tcp://localhost:9008/MNRP-PuppetMasterService");
 
-        private Dictionary<int, IWorker> workers = new Dictionary<int, IWorker>();
-        private static PuppetMasterService serviceInstance;
-
-        public static bool IsInitialized { get; private set; }
-
-        public void CreateWorker(int workerId, string serviceURL, string entryURL) {
-            int servicePort = Util.GetHostPort(serviceURL);
-            string serviceName = Util.GetServiceName(serviceURL);
-
-            if (servicePort == 0 && string.IsNullOrWhiteSpace(serviceName))
-                throw new InvalidWorkerServiceUrlException(workerId, serviceURL);
-
-            Worker worker = new Worker(workerId, servicePort, serviceName);
-            worker.Run();
+        public void CreateWorker(int workerId, string serviceUrl, string entryUrl) {
+            var worker = Worker.Run(workerId, new Uri(serviceUrl));
             workers.Add(workerId, worker);
 
-            Debug.WriteLine(string.Format(
-                "New worker created at Puppet Master: id '{0}', port '{1}', service name '{2}', url '{3}'."
-                , workerId
-                , servicePort
-                , serviceName
-                , worker.GetWorkerURL()));
+            Debug.WriteLine(string.Format("New worker created: id '{0}', url '{1}'."
+                , workerId, worker.ServiceUrl));
 
-            if (!string.IsNullOrWhiteSpace(entryURL))
-                NotityWorkerCreation(worker);
+            if (!string.IsNullOrWhiteSpace(entryUrl))
+                NotifyWorkerCreation(worker);
         }
 
         public Dictionary<int, IWorker> GetWorkers() {
             return workers;
         }
 
-        private void NotityWorkerCreation(Worker worker) {
+        private void NotifyWorkerCreation(Worker worker) {
             Debug.WriteLine("Sends notification to worker at ENTRY_URL informing worker creation.");
-            //TODO: Contact ENTRY_URL worker.
+            //TODO: Contact worker at ENTRY_URL and announce new worker available.
         }
 
         /// <summary>
-        /// Servers a Marshled Puppet Master object at a specific IChannel under ChannelServices.
-        /// Such service is runned as a singleton, multiple Puppet Master object marshalls are not supported.
+        /// Serves a Marshalled Puppet Master object at a specific IChannel under ChannelServices.
         /// </summary>
         public static void Run() {
-            if (IsInitialized)
-                return;
-
-            serviceInstance = RemotingHelper.CreateService<PuppetMasterService>(
-                PuppetMasterService.SERVER_PORT,
-                PuppetMasterService.SERVER_NAME);
-
-            IsInitialized = true;
-        }
-
-        public static string GetMasterURL() {
-            if (!IsInitialized)
-                return null;
-
-            return string.Format("tcp://localhost:{0}/{1}",
-                PuppetMasterService.SERVER_PORT,
-                PuppetMasterService.SERVER_NAME);
+            PuppetMasterService service = new PuppetMasterService();
+            RemotingHelper.CreateService(service, ServiceUrl);
         }
     }
 }

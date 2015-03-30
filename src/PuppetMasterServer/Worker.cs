@@ -7,31 +7,22 @@ using System.Runtime.Remoting.Channels;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using PuppetMasterLib.Commands;
 using SharedTypes;
 
 namespace PlatformCore
 {
     public class Worker : MarshalByRefObject, IWorker
     {
-        public int WorkerId { get; private set; }
-        public int HostPort { get; private set; }
-        public string ServiceName { get; private set; }
-        public bool IsInitialized { get; private set; }
+        public Uri ServiceUrl { get; set; }
+        public int WorkerId { get; set; }
 
         public Worker() {
         }
 
-        public Worker(int workerId, int hostPort, string serviceName) {
-            this.WorkerId = workerId;
-            this.HostPort = hostPort;
-            this.ServiceName = serviceName;
-        }
-
-        #region IWorker Members
-
-        public void ReceiveMapJob(string filePath, int nSplits, byte[] mapAssemblyCode, string mapClassName) {
-            //TODO
-            Thread.Sleep(10 * 1000);
+        public Worker(int workerId, Uri serviceUrl) {
+            WorkerId = workerId;
+            ServiceUrl = serviceUrl;
         }
 
         public bool ExecuteMapJob(IJobTask task) {
@@ -53,9 +44,9 @@ namespace PlatformCore
                                args);
                         IList<KeyValuePair<string, string>> result = (IList<KeyValuePair<string, string>>)resultObject;
 
-                        Console.WriteLine("Map call result was: ");
+                        Debug.WriteLine("Map call result was: ");
                         foreach (KeyValuePair<string, string> p in result) {
-                            Console.WriteLine("key: " + p.Key + ", value: " + p.Value);
+                            Debug.WriteLine("key: " + p.Key + ", value: " + p.Value);
                         }
                         return true;
                     }
@@ -64,23 +55,16 @@ namespace PlatformCore
             return false;
         }
 
-        #endregion IWorker Members
-
-        /// <summary>
-        /// Returns the worker service URL.
-        /// </summary>
-        public string GetWorkerURL() {
-            if (!IsInitialized)
-                return null;
-            return string.Format("tcp://localhost:{0}/{1}",
-                HostPort, ServiceName);
+        public void ReceiveMapJob(string filePath, int nSplits, byte[] mapAssemblyCode, string mapClassName) {
+            //TODO
+            Thread.Sleep(10 * 1000);
         }
 
-        internal void Run() {
-            if (IsInitialized)
-                return;
-            RemotingHelper.CreateService<Worker>(HostPort, ServiceName);
-            IsInitialized = true;
+        internal static Worker Run(int workerId, Uri serviceUrl) {
+            Worker worker = new Worker(workerId, serviceUrl);
+            RemotingHelper.CreateService(worker, serviceUrl);
+            Debug.Write(string.Format("Creating new worker. Worker service will be listenning at '{0}'.", serviceUrl));
+            return worker;
         }
     }
 }

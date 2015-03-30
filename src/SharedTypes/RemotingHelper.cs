@@ -12,27 +12,30 @@ namespace SharedTypes
 {
     public class RemotingHelper
     {
-        public static T CreateService<T>(int port, string serviceName) where T : MarshalByRefObject, new() {
-            BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
-
-            IDictionary props = new Hashtable();
-            props["port"] = port;
-            props["typeFilterLevel"] = TypeFilterLevel.Full;
-            props["name"] = serviceName;
-
-            TcpChannel channel = new TcpChannel(props, null, provider);
-            ChannelServices.RegisterChannel(channel, true);
-
-            T service = new T();
-            RemotingConfiguration.RegisterWellKnownServiceType(
-                service.GetType(), serviceName,
-                WellKnownObjectMode.Singleton);
-
-            return service;
+        public static void CreateService(Object remoteObject, Uri serviceUrl) {
+            CreateService(remoteObject, serviceUrl, false);
         }
 
-        public static T GetRemoteObject<T>(string serviceName, string serviceURL) {
-            return (T)Activator.GetObject(typeof(T), serviceURL);
+        public static void CreateService(Object remoteObject, Uri serviceUrl, bool registerChannel) {
+            if (!registerChannel) {
+                BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
+
+                IDictionary props = new Hashtable();
+                props["port"] = serviceUrl.Port;
+                props["typeFilterLevel"] = TypeFilterLevel.Full;
+                props["name"] = serviceUrl.AbsolutePath;
+
+                TcpChannel channel = new TcpChannel(props, null, provider);
+                ChannelServices.RegisterChannel(channel, true);
+            }
+
+            RemotingConfiguration.RegisterWellKnownServiceType(
+                remoteObject.GetType(), serviceUrl.AbsolutePath,
+                WellKnownObjectMode.Singleton);
+        }
+
+        public static T GetRemoteObject<T>(string serviceUrl) {
+            return (T)Activator.GetObject(typeof(T), serviceUrl);
         }
     }
 }

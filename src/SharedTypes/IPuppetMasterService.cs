@@ -7,7 +7,7 @@ namespace SharedTypes
 {
     public interface IPuppetMasterService
     {
-        void CreateWorker(int workerId, string serviceURL, string entryURL);
+        void CreateWorker(int workerId, string serviceUrl, string entryURL);
 
         Dictionary<int, IWorker> GetWorkers();
     }
