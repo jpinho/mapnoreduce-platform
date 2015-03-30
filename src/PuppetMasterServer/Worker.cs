@@ -7,28 +7,52 @@ using System.Runtime.Remoting.Channels;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using PuppetMasterLib.Commands;
 using SharedTypes;
 
 namespace PlatformCore
 {
     public class Worker : MarshalByRefObject, IWorker
     {
-        public Uri ServiceUrl { get; set; }
-        public int WorkerId { get; set; }
-
+        public int WorkerId { get; private set; }
+        public int HostPort { get; private set; }
+        public string ServiceName { get; private set; }
+        public bool IsInitialized { get; private set; }
+        public JobTracker tracker = null;
         public Worker() {
         }
 
-        public Worker(int workerId, Uri serviceUrl) {
-            WorkerId = workerId;
-            ServiceUrl = serviceUrl;
+        public Worker(int workerId, int hostPort, string serviceName) {
+            this.WorkerId = workerId;
+            this.HostPort = hostPort;
+            this.ServiceName = serviceName;
+        }
+
+
+        #region IWorker Members
+
+
+        public void ReceiveMapJob(string filePath, int nSplits, byte[] mapAssemblyCode, string mapClassName) {
+            new Thread(new ThreadStart(delegate
+            {
+                tracker = new JobTracker(this, JobTracker.JobTrackerStatus.ACTIVE);
+                tracker.start();
+            })).Start();
         }
 
         public bool ExecuteMapJob(IJobTask task) {
-            // TODO: ask client split provider for split data (task.SplitProviderURL, task.SplitNumber)
-            string data = "";
+            
+            new Thread(new ThreadStart(delegate
+            {
+                tracker = new JobTracker(this, JobTracker.JobTrackerStatus.PASSIVE);
+                tracker.start();
+            })).Start();
 
+            IClientSplitProviderService splitProvider = (IClientSplitProviderService)Activator.GetObject(
+              typeof(IClientSplitProviderService),
+              task.SplitProviderURL);
+
+            string data = splitProvider.GetFileSplit(task.FileName, int.Parse(task.SplitNumber));
+     
             Assembly assembly = Assembly.Load(task.MapFunctionAssembly);
 
             foreach (Type type in assembly.GetTypes()) {
@@ -44,9 +68,9 @@ namespace PlatformCore
                                args);
                         IList<KeyValuePair<string, string>> result = (IList<KeyValuePair<string, string>>)resultObject;
 
-                        Debug.WriteLine("Map call result was: ");
+                        Console.WriteLine("Map call result was: ");
                         foreach (KeyValuePair<string, string> p in result) {
-                            Debug.WriteLine("key: " + p.Key + ", value: " + p.Value);
+                            Console.WriteLine("key: " + p.Key + ", value: " + p.Value);
                         }
                         return true;
                     }
@@ -55,16 +79,28 @@ namespace PlatformCore
             return false;
         }
 
-        public void ReceiveMapJob(string filePath, int nSplits, byte[] mapAssemblyCode, string mapClassName) {
-            //TODO
-            Thread.Sleep(10 * 1000);
+        #endregion IWorker Members
+
+        /// <summary>
+        /// Returns the worker service URL.
+        /// </summary>
+        public string GetWorkerURL() {
+            if (!IsInitialized)
+                return null;
+            return string.Format("tcp://localhost:{0}/{1}",
+                HostPort, ServiceName);
         }
 
-        internal static Worker Run(int workerId, Uri serviceUrl) {
-            Worker worker = new Worker(workerId, serviceUrl);
-            RemotingHelper.CreateService(worker, serviceUrl);
-            Debug.Write(string.Format("Creating new worker. Worker service will be listenning at '{0}'.", serviceUrl));
-            return worker;
+        internal void Run() {
+            if (IsInitialized)
+                return;
+            RemotingHelper.CreateService<Worker>(HostPort, ServiceName);
+            IsInitialized = true;
+        }
+
+        internal new List<IWorker> getActiveWorkers()
+        {
+            throw new NotImplementedException();
         }
     }
 }

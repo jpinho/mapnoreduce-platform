@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuppetMasterUI", "PuppetMasterUI\PuppetMasterUI.csproj", "{12DB87CF-99F8-4ABD-816A-8993B51FEE19}"
 EndProject
@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PuppetMasterLib.Tests", "Pu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedTypes", "SharedTypes\SharedTypes.csproj", "{5E7F4752-7D18-4DA6-A243-EB5F7F631C7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientConnectorService.Tests", "ClientConnectorService.Tests\ClientConnectorService.Tests.csproj", "{6B88C5D1-87B3-4861-9445-B87907F1E25E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientServices.Tests", "ClientConnectorService.Tests\ClientServices.Tests.csproj", "{6B88C5D1-87B3-4861-9445-B87907F1E25E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserMappersLib", "UserMappersLib\UserMappersLib.csproj", "{0C171823-0A5D-4BAE-BA55-0142C09E3D0C}"
 EndProject
