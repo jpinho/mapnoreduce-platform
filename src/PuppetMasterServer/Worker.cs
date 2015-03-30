@@ -17,7 +17,7 @@ namespace PlatformCore
         public int HostPort { get; private set; }
         public string ServiceName { get; private set; }
         public bool IsInitialized { get; private set; }
-
+        public JobTracker tracker = null;
         public Worker() {
         }
 
@@ -27,15 +27,26 @@ namespace PlatformCore
             this.ServiceName = serviceName;
         }
 
+
         #region IWorker Members
 
+
         public void ReceiveMapJob(string filePath, int nSplits, byte[] mapAssemblyCode, string mapClassName) {
-            //TODO
-            Thread.Sleep(10 * 1000);
+            new Thread(new ThreadStart(delegate
+            {
+                tracker = new JobTracker(this, JobTracker.JobTrackerStatus.ACTIVE);
+                tracker.start();
+            })).Start();
         }
 
         public bool ExecuteMapJob(IJobTask task) {
             
+            new Thread(new ThreadStart(delegate
+            {
+                tracker = new JobTracker(this, JobTracker.JobTrackerStatus.PASSIVE);
+                tracker.start();
+            })).Start();
+
             IClientSplitProviderService splitProvider = (IClientSplitProviderService)Activator.GetObject(
               typeof(IClientSplitProviderService),
               task.SplitProviderURL);
@@ -85,6 +96,11 @@ namespace PlatformCore
                 return;
             RemotingHelper.CreateService<Worker>(HostPort, ServiceName);
             IsInitialized = true;
+        }
+
+        internal new List<IWorker> getActiveWorkers()
+        {
+            throw new NotImplementedException();
         }
     }
 }

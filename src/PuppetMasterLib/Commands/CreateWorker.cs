@@ -8,6 +8,7 @@ using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
+using System.String;
 using System.Threading.Tasks;
 
 namespace PuppetMasterLib.Commands
@@ -33,16 +34,6 @@ namespace PuppetMasterLib.Commands
             /* asks him to create a worker with the given WorkerId
              * and expose its service at ServiceURL */
             pMaster.CreateWorker(WorkerId, ServiceURL, EntryURL);
-
-            /*if EntryURL
-             *      notify existing workers
-             *      -----
-             *      that it has started by calling
-             *      the worker listening at EntryURL
-             *      ----
-             *      wait.. what?!*/
-
-            //TODO: Implement me.
         }
 
         public override string ToString() {
