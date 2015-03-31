@@ -1,42 +1,38 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ClientServices;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClientServices.Tests
 {
     [TestClass]
     public class ClientSplitProviderServiceTest
     {
-        string entryURL = "TCP://LOCALHOST:9009/WORKERTEST";
-        string filePath = @".\job.txt";
-        int splits = 2;
-        static ClientService client = new ClientService();
+        private string entryURL = "TCP://LOCALHOST:9009/WORKERTEST";
+        private string filePath = @".\job.txt";
+        private int splits = 2;
+        private static ClientService client = new ClientService();
 
         [TestMethod]
         public void TestSplitAndSave() {
-                    
-                     
-            try
-            {
+
+            try {
                 // arrange
 
                 client.Init(entryURL);
- 
+
                 // act
 
                 ClientSplitProviderService cspSvc = (ClientSplitProviderService)Activator.GetObject(
                 typeof(ClientSplitProviderService),
-                client.GetSplitProviderServiceURL());
+                client.GetSplitProviderServiceUrl());
 
                 cspSvc.SplitAndSave(filePath, splits);
-                
-            }
-            catch (Exception e)
-            {
-                Assert.Fail("Something went wrong: "+ e);
+
+            } catch (Exception e) {
+                Assert.Fail("Something went wrong: " + e);
             }
 
-            // assert 
+            // assert
             Assert.IsTrue(true);
         }
 
@@ -44,8 +40,7 @@ namespace ClientServices.Tests
         public void TestGetFileSplit() {
             string split = null;
 
-            try
-            {
+            try {
                 // arrange
 
                 client.Init(entryURL);
@@ -54,18 +49,15 @@ namespace ClientServices.Tests
 
                 ClientSplitProviderService cspSvc = (ClientSplitProviderService)Activator.GetObject(
                 typeof(ClientSplitProviderService),
-                client.GetSplitProviderServiceURL());
+                client.GetSplitProviderServiceUrl());
 
                 split = cspSvc.GetFileSplit(filePath, 1);
 
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 Assert.Fail("Something went wrong: " + e);
             }
-            
 
-            // assert 
+            // assert
             Assert.IsTrue(split.Length > 0);
         }
     }

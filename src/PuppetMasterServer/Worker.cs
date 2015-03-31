@@ -18,28 +18,23 @@ namespace PlatformCore
         public int WorkerId { get; set; }
         public Uri ServiceUrl { get; set; }
 
-        public Worker() {
-        }
-
         public Worker(int workerId, Uri serviceUrl) {
             WorkerId = workerId;
             ServiceUrl = serviceUrl;
         }
 
-        #region IWorker Members
-
         public void ReceiveMapJob(string filePath, int nSplits, byte[] mapAssemblyCode, string mapClassName) {
+
             new Thread(new ThreadStart(delegate {
                 tracker = new JobTracker(this, JobTracker.JobTrackerStatus.ACTIVE);
-                tracker.start();
+                tracker.Start();
             })).Start();
         }
 
         public bool ExecuteMapJob(IJobTask task) {
-
             new Thread(new ThreadStart(delegate {
                 tracker = new JobTracker(this, JobTracker.JobTrackerStatus.PASSIVE);
-                tracker.start();
+                tracker.Start();
             })).Start();
 
             IClientSplitProviderService splitProvider = (IClientSplitProviderService)Activator.GetObject(
@@ -73,8 +68,6 @@ namespace PlatformCore
             }
             return false;
         }
-
-        #endregion IWorker Members
 
         internal static Worker Run(int workerId, Uri serviceUrl) {
             var wrk = new Worker(workerId, serviceUrl);

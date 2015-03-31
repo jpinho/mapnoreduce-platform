@@ -58,8 +58,8 @@ namespace ClientServices
             RemotingServices.Marshal(corSvc, CLIENT_OUTPUTRECV_SVCNAME, typeof(ClientOutputReceiverService));
             RemotingServices.Marshal(cspSvc, CLIENT_SPLITPROV_SVCNAME, typeof(ClientSplitProviderService));
 
-            Debug.WriteLine("Client Output Receiver Service, available at {0}.", corSvc.ServiceURL);
-            Debug.WriteLine("Client Split Provider Service, available at {0}.", cspSvc.ServiceURL);
+            Trace.WriteLine("Client Output Receiver Service, available at {0}.", corSvc.ServiceURL);
+            Trace.WriteLine("Client Split Provider Service, available at {0}.", cspSvc.ServiceURL);
         }
 
 

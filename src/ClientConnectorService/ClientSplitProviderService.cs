@@ -52,7 +52,7 @@ namespace ClientServices
                 lstSplits.Add(String.Join("\n", splitContent));
 
             foreach (string split in lstSplits)
-                Debug.WriteLine(split);
+                Trace.WriteLine(split);
 
             // saves the splits of the file on the store
             splitsStore.Add(filePath, lstSplits);

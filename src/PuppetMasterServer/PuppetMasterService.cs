@@ -1,13 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.Remoting;
-using System.Runtime.Remoting.Channels;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using PlatformCore.Exceptions;
 using SharedTypes;
 
 namespace PlatformCore
@@ -21,7 +14,7 @@ namespace PlatformCore
             var worker = Worker.Run(workerId, new Uri(serviceUrl));
             workers.Add(workerId, worker);
 
-            Debug.WriteLine(string.Format("New worker created: id '{0}', url '{1}'."
+            Trace.WriteLine(string.Format("New worker created: id '{0}', url '{1}'."
                 , workerId, worker.ServiceUrl));
 
             if (!string.IsNullOrWhiteSpace(entryUrl))
@@ -33,7 +26,7 @@ namespace PlatformCore
         }
 
         private void NotifyWorkerCreation(Worker worker) {
-            Debug.WriteLine("Sends notification to worker at ENTRY_URL informing worker creation.");
+            Trace.WriteLine("Sends notification to worker at ENTRY_URL informing worker creation.");
             //TODO: Contact worker at ENTRY_URL and announce new worker available.
         }
 
@@ -43,6 +36,7 @@ namespace PlatformCore
         public static void Run() {
             PuppetMasterService service = new PuppetMasterService();
             RemotingHelper.CreateService(service, ServiceUrl);
+            Trace.WriteLine("Puppet Master Service listening at '" + ServiceUrl + "'");
         }
     }
 }
