@@ -3,28 +3,121 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Remoting.Channels;
-using System.Text;
+using System.Runtime.Remoting;
 using System.Threading;
-using System.Threading.Tasks;
 using SharedTypes;
 
 namespace PlatformCore
 {
     public class Worker : MarshalByRefObject, IWorker
     {
-        private JobTracker tracker = null;
+        /// <summary>
+        /// The job splits priority queue.
+        /// </summary>
+        private readonly Queue<int> splitsQueue = new Queue<int>();
 
+        /// <summary>
+        /// The job tracker used to coordinate a job or to report progress about it's own job
+        /// execution. Whether this job tracker performes in one way or the other depends on its
+        /// mode property <see cref="JobTracker.JobTrackerStatus"/>.
+        /// </summary>
+        private JobTracker tracker;
+
+        /// <summary>
+        /// List of all workers known by this worker, that are online.
+        /// </summary>
+        private Dictionary<int /*worker id*/, IWorker> onlineWorkers = new Dictionary<int, IWorker>();
+
+        /// <summary>
+        /// List of workers that are processing Job Tasks.
+        /// </summary>
+        private Dictionary<int /*worker id*/, JobTask> busyWorkers = new Dictionary<int, JobTask>();
+
+        /// <summary>
+        /// List of workers that are not responding anymore.
+        /// </summary>
+        private List<IWorker> offlineWorkers = new List<IWorker>();
+
+        public delegate bool ExecuteMapJobDelegate(JobTask task);
+
+        /// <summary>
+        /// This worker id.
+        /// </summary>
         public int WorkerId { get; set; }
+
+        /// <summary>
+        /// The service URL used to reach this work remotely.
+        /// </summary>
         public Uri ServiceUrl { get; set; }
 
-        public Worker(int workerId, Uri serviceUrl) {
+        public Worker(int workerId, Uri serviceUrl, Dictionary<int, IWorker> availableWorkers) {
             WorkerId = workerId;
             ServiceUrl = serviceUrl;
+            this.onlineWorkers = availableWorkers;
         }
 
+        /// <summary>
+        /// Receives a Map job and distributes the processing of their contents accross multiple
+        /// workers. Each worker processes a split of the given filePath (used as file ID), calling
+        /// the Map method of the received class name of the assembly code in <paramref name="mapAssemblyCode"/>.
+        /// </summary>
+        /// <param name="filePath">The ID of the file</param>
+        /// <param name="nSplits">The number of splits to process.</param>
+        /// <param name="mapAssemblyCode">The byte code of the assembly file.</param>
+        /// <param name="mapClassName">The name of the class implementing <see cref="IMap"/> interface.</param>
         public void ReceiveMapJob(string filePath, int nSplits, byte[] mapAssemblyCode, string mapClassName) {
+            // Adds splits to priority queue.
+            for (var i = 0; i < nSplits; splitsQueue.Enqueue(i++))
+                ;
 
+            // Selects from all online workers those that are not busy.
+            var availableWorkers = new Queue<IWorker>((
+                    from onlineWorker in onlineWorkers
+                    where !busyWorkers.ContainsKey(onlineWorker.Key /*worker id*/)
+                    select onlineWorker.Value
+                ).ToList());
+
+            // Delivers as many splits as it cans, considering the number of available workers.
+            for (var i = 0; i < Math.Min(availableWorkers.Count, splitsQueue.Count); i++) {
+                var worker = availableWorkers.Dequeue();
+                var split = splitsQueue.Peek();
+
+                try {
+                    var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(
+                        worker.ServiceUrl.OriginalString);
+
+                    if (remoteWorker == null) {
+                        offlineWorkers.Add(worker);
+                        Trace.WriteLine("Could not locate worker at '" + worker.ServiceUrl + "'.");
+                        continue;
+                    }
+
+                    // The callback called after the execution of the async method call.
+                    var callback = new AsyncCallback((result) => {
+                        Trace.WriteLine(string.Format("Worker '{0}' finished processing split number '{1}'."
+                            , remoteWorker.ServiceUrl, split));
+                    });
+
+                    // Async call to ExecuteMapJob.
+                    var fnExecuteMapJob = new Worker.ExecuteMapJobDelegate(remoteWorker.ExecuteMapJob);
+                    fnExecuteMapJob.BeginInvoke((new JobTask() {
+                        FileName = filePath,
+                        MapClassName = mapClassName,
+                        MapFunctionAssembly = mapAssemblyCode,
+                        OutputReceiverURL = "??",
+                        SplitProviderURL = "??",
+                        SplitNumber = split
+                    }), callback, null);
+
+                    // Removes the peeked split from the queue.
+                    splitsQueue.Dequeue();
+                } catch (RemotingException ex) {
+                    Trace.WriteLine(ex.GetType().FullName + " - " + ex.Message
+                        + " -->> " + ex.StackTrace);
+                }
+            }
+
+            // Starts the Job Tracker thread, to execute apart from the worker thread.
             new Thread(new ThreadStart(delegate {
                 tracker = new JobTracker(this);
                 tracker.Start(JobTracker.JobTrackerStatus.ACTIVE);
@@ -37,47 +130,41 @@ namespace PlatformCore
                 tracker.Start(JobTracker.JobTrackerStatus.PASSIVE);
             })).Start();
 
-            IClientSplitProviderService splitProvider = (IClientSplitProviderService)Activator.GetObject(
-              typeof(IClientSplitProviderService),
-              task.SplitProviderURL);
+            var splitProvider = (IClientSplitProviderService)Activator.GetObject(
+                typeof(IClientSplitProviderService),
+                task.SplitProviderURL);
 
-            string data = splitProvider.GetFileSplit(task.FileName, int.Parse(task.SplitNumber));
+            var data = splitProvider.GetFileSplit(task.FileName, task.SplitNumber);
+            var assembly = Assembly.Load(task.MapFunctionAssembly);
 
-            Assembly assembly = Assembly.Load(task.MapFunctionAssembly);
+            foreach (var type in assembly.GetTypes()) {
+                if (!type.IsClass || !type.FullName.EndsWith("." + task.MapClassName))
+                    continue;
 
-            foreach (Type type in assembly.GetTypes()) {
-                if (type.IsClass == true) {
-                    if (type.FullName.EndsWith("." + task.MapClassName)) {
-                        object mapperClassObj = Activator.CreateInstance(type);
+                var mapperClassObj = Activator.CreateInstance(type);
+                object[] args = { data };
 
-                        object[] args = new object[] { data };
-                        object resultObject = type.InvokeMember("Map",
-                          BindingFlags.Default | BindingFlags.InvokeMethod,
-                               null,
-                               mapperClassObj,
-                               args);
-                        IList<KeyValuePair<string, string>> result = (IList<KeyValuePair<string, string>>)resultObject;
+                var result = (IList<KeyValuePair<string, string>>)type.InvokeMember("Map",
+                    BindingFlags.Default | BindingFlags.InvokeMethod, null, mapperClassObj, args);
 
-                        Console.WriteLine("Map call result was: ");
-                        foreach (KeyValuePair<string, string> p in result) {
-                            Console.WriteLine("key: " + p.Key + ", value: " + p.Value);
-                        }
-                        return true;
-                    }
-                }
+                Trace.WriteLine("Map call result was: ");
+                foreach (var p in result)
+                    Trace.WriteLine("key: " + p.Key + ", value: " + p.Value);
+
+                return true;
             }
             return false;
         }
 
-        internal static Worker Run(int workerId, Uri serviceUrl) {
-            var wrk = new Worker(workerId, serviceUrl);
-            RemotingHelper.CreateService(wrk, serviceUrl);
-            return wrk;
+        internal Dictionary<int, IWorker> GetActiveWorkers() {
+            //TODO: Implement this
+            return null;
         }
 
-        internal Dictionary<int, IWorker> GetActiveWorkers()
-        {
-            throw new NotImplementedException();
+        internal static Worker Run(int workerId, Uri serviceUrl, Dictionary<int, IWorker> workers) {
+            var wrk = new Worker(workerId, serviceUrl, workers);
+            RemotingHelper.CreateService(wrk, serviceUrl);
+            return wrk;
         }
     }
 }
