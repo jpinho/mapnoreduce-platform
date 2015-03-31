@@ -54,7 +54,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PuppetMasterServer\PlatformCore.csproj">
+    <ProjectReference Include="..\PlatformCore\PlatformCore.csproj">
       <Project>{73e63fcb-677c-46da-bfb8-f0c813b6f116}</Project>
       <Name>PlatformCore</Name>
     </ProjectReference>
