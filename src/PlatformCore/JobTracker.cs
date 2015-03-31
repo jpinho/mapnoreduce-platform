@@ -5,7 +5,7 @@ using SharedTypes;
 
 namespace PlatformCore
 {
-    internal class JobTracker : MarshalByRefObject, IJobTracker
+    public class JobTracker : MarshalByRefObject, IJobTracker
     {
         private Worker worker;
 
