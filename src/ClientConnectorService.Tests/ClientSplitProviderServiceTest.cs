@@ -8,7 +8,7 @@ namespace ClientServices.Tests
     public class ClientSplitProviderServiceTest
     {
         private string entryURL = "TCP://LOCALHOST:9009/WORKERTEST";
-        private string filePath = @".\job.txt";
+        private string filePath = @"..\..\job.txt";
         private int splits = 2;
         private static ClientService client = new ClientService();
 
