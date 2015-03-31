@@ -26,15 +26,15 @@ namespace PlatformCore
         public void ReceiveMapJob(string filePath, int nSplits, byte[] mapAssemblyCode, string mapClassName) {
 
             new Thread(new ThreadStart(delegate {
-                tracker = new JobTracker(this, JobTracker.JobTrackerStatus.ACTIVE);
-                tracker.Start();
+                tracker = new JobTracker(this);
+                tracker.Start(JobTracker.JobTrackerStatus.ACTIVE);
             })).Start();
         }
 
         public bool ExecuteMapJob(IJobTask task) {
             new Thread(new ThreadStart(delegate {
-                tracker = new JobTracker(this, JobTracker.JobTrackerStatus.PASSIVE);
-                tracker.Start();
+                tracker = new JobTracker(this);
+                tracker.Start(JobTracker.JobTrackerStatus.PASSIVE);
             })).Start();
 
             IClientSplitProviderService splitProvider = (IClientSplitProviderService)Activator.GetObject(
@@ -75,7 +75,8 @@ namespace PlatformCore
             return wrk;
         }
 
-        internal List<IWorker> GetActiveWorkers() {
+        internal Dictionary<int, IWorker> GetActiveWorkers()
+        {
             throw new NotImplementedException();
         }
     }

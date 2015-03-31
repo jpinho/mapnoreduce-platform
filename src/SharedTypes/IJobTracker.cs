@@ -8,8 +8,7 @@ namespace SharedTypes
 {
     public interface IJobTracker
     {
-        void Alive(String wid);
-        void Complete(String wid);
-        void Beat();
+        void Alive(int wid);
+        void Complete(int wid);
     }
 }

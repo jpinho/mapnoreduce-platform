@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SharedTypes;
+using System.Runtime.Remoting;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting.Channels.Tcp;
+using System.Runtime.Serialization.Formatters;
+using System.Collections;
 
 namespace PlatformCore
 {
@@ -12,29 +17,33 @@ namespace PlatformCore
 
         public enum JobTrackerStatus { ACTIVE, PASSIVE };
         private JobTrackerStatus mode = JobTrackerStatus.PASSIVE;
-        private List<IWorker> activeWorkers = new List<IWorker>();
+        private Dictionary<int, IWorker> activeWorkers = new Dictionary<int, IWorker>();
         private DateTime lastHeartBeat = DateTime.UtcNow.Date;
 
-        public JobTracker(Worker worker, JobTrackerStatus mode) {
-            this.activeWorkers = worker.GetActiveWorkers();
+        public JobTracker(Worker worker)
+        {
             this.worker = worker;
-            this.mode = mode;
         }
 
-        internal void Start() {
-            if (Enum.Equals(mode, JobTrackerStatus.ACTIVE)) {
+        public void Start(JobTrackerStatus trackerMode)
+        {
+            // Register Services (alive, complete)
+            // Do Work
+            if (Enum.Equals(trackerMode, JobTrackerStatus.ACTIVE))
+            {
+                RemotingServices.Marshal(this, "JobTracker", typeof(IJobTracker));
             }
         }
 
-        public void Alive(string wid) {
-
+        public void Alive(int wid)
+        {
+            /*TODO fault tolerant algorithm*/
         }
 
-        public void Complete(string wid) {
-
-        }
-
-        public void Beat() {
+        public void Complete(int wid)
+        {
+            //Remove worker from active list
+            activeWorkers.Remove(wid);
         }
     }
 }
