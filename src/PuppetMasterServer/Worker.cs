@@ -14,7 +14,7 @@ namespace PlatformCore
         /// <summary>
         /// The job splits priority queue.
         /// </summary>
-        private readonly Queue<int> splitsQueue = new Queue<int>();
+        private Queue<int> splitsQueue;
 
         /// <summary>
         /// The job tracker used to coordinate a job or to report progress about it's own job
@@ -61,14 +61,10 @@ namespace PlatformCore
         /// workers. Each worker processes a split of the given filePath (used as file ID), calling
         /// the Map method of the received class name of the assembly code in <paramref name="mapAssemblyCode"/>.
         /// </summary>
-        /// <param name="filePath">The ID of the file</param>
-        /// <param name="nSplits">The number of splits to process.</param>
-        /// <param name="mapAssemblyCode">The byte code of the assembly file.</param>
-        /// <param name="mapClassName">The name of the class implementing <see cref="IMap"/> interface.</param>
-        public void ReceiveMapJob(string filePath, int nSplits, byte[] mapAssemblyCode, string mapClassName) {
-            // Adds splits to priority queue.
-            for (var i = 0; i < nSplits; splitsQueue.Enqueue(i++))
-                ;
+        /// <param name="job">The job to be processed.</param>
+        public void ReceiveMapJob(IJobTask job) {
+            // Converts splits to priority queue.
+            splitsQueue = new Queue<int>(job.FileSplits);
 
             // Selects from all online workers those that are not busy.
             var availableWorkers = new Queue<IWorker>((
@@ -100,17 +96,15 @@ namespace PlatformCore
 
                     // Async call to ExecuteMapJob.
                     var fnExecuteMapJob = new Worker.ExecuteMapJobDelegate(remoteWorker.ExecuteMapJob);
-                    fnExecuteMapJob.BeginInvoke((new JobTask() {
-                        FileName = filePath,
-                        MapClassName = mapClassName,
-                        MapFunctionAssembly = mapAssemblyCode,
-                        OutputReceiverURL = "??",
-                        SplitProviderURL = "??",
-                        SplitNumber = split
-                    }), callback, null);
+                    var newTask = (JobTask)job.Clone();
+                    newTask.SplitNumber = split;
+                    fnExecuteMapJob.BeginInvoke(newTask, callback, null);
+                    Trace.WriteLine(string.Format("Job split {0} sent to worker at '{1}'."
+                        , newTask.SplitNumber, worker.ServiceUrl));
 
                     // Removes the peeked split from the queue.
                     splitsQueue.Dequeue();
+                    Trace.WriteLine("Split " + newTask.SplitNumber + " removed from splits queue.");
                 } catch (RemotingException ex) {
                     Trace.WriteLine(ex.GetType().FullName + " - " + ex.Message
                         + " -->> " + ex.StackTrace);
@@ -132,7 +126,7 @@ namespace PlatformCore
 
             var splitProvider = (IClientSplitProviderService)Activator.GetObject(
                 typeof(IClientSplitProviderService),
-                task.SplitProviderURL);
+                task.SplitProviderUrl);
 
             var data = splitProvider.GetFileSplit(task.FileName, task.SplitNumber);
             var assembly = Assembly.Load(task.MapFunctionAssembly);

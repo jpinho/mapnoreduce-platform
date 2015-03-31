@@ -1,12 +1,48 @@
-﻿namespace SharedTypes
+﻿using System;
+using System.Collections.Generic;
+
+namespace SharedTypes
 {
-    public interface IJobTask
+    /// <summary>
+    /// This DTO represents the information required by a <see cref="Worker"/> to process a job
+    /// split or to distribute it to multiple workers.
+    /// </summary>
+    public interface IJobTask : ICloneable
     {
+        /// <summary>
+        /// The name of the file being processed.
+        /// </summary>
         string FileName { get; set; }
-        string MapClassName { get; set; }
-        byte[] MapFunctionAssembly { get; set; }
-        string OutputReceiverURL { get; set; }
+
+        /// <summary>
+        /// The individual splits to be processed in this job.
+        /// </summary>
+        List<int> FileSplits { get; set; }
+
+        /// <summary>
+        /// The number of the split being processed in this job task. When set to '-1' it means that
+        /// the job split of this task has not been defined.
+        /// </summary>
         int SplitNumber { get; set; }
-        string SplitProviderURL { get; set; }
+
+        /// <summary>
+        /// The Split Provider URL from where split data can be obtained.
+        /// </summary>
+        string SplitProviderUrl { get; set; }
+
+        /// <summary>
+        /// The Output Receiver URL to where results should be sent.
+        /// </summary>
+        string OutputReceiverUrl { get; set; }
+
+        /// <summary>
+        /// The assembly byte code containing the Map Class.
+        /// </summary>
+        byte[] MapFunctionAssembly { get; set; }
+
+        /// <summary>
+        /// The name of the Map Class in the <see cref="MapFunctionAssembly"/>.
+        /// </summary>
+        string MapClassName { get; set; }
     }
 }

@@ -8,6 +8,6 @@ namespace SharedTypes
         int WorkerId { get; set; }
 
         bool ExecuteMapJob(IJobTask task);
-        void ReceiveMapJob(string filePath, int nSplits, byte[] mapAssemblyCode, string mapClassName);
+        void ReceiveMapJob(IJobTask job);
     }
 }
