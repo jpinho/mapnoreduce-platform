@@ -1,5 +1,5 @@
 ﻿using System;
-using ClientServices;
+using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClientServices.Tests
@@ -8,7 +8,7 @@ namespace ClientServices.Tests
     public class ClientSplitProviderServiceTest
     {
         private string entryURL = "TCP://LOCALHOST:9009/WORKERTEST";
-        private string filePath = @"..\..\job.txt";
+        private string filePath = Path.Combine(Environment.CurrentDirectory, "Resources\\job.txt");
         private int splits = 2;
         private static ClientService client = new ClientService();
 
@@ -17,11 +17,9 @@ namespace ClientServices.Tests
 
             try {
                 // arrange
-
                 client.Init(entryURL);
 
                 // act
-
                 ClientSplitProviderService cspSvc = (ClientSplitProviderService)Activator.GetObject(
                 typeof(ClientSplitProviderService),
                 client.GetSplitProviderServiceUrl());
@@ -42,17 +40,14 @@ namespace ClientServices.Tests
 
             try {
                 // arrange
-
                 client.Init(entryURL);
 
                 // act
-
                 ClientSplitProviderService cspSvc = (ClientSplitProviderService)Activator.GetObject(
-                typeof(ClientSplitProviderService),
-                client.GetSplitProviderServiceUrl());
+                    typeof(ClientSplitProviderService),
+                    client.GetSplitProviderServiceUrl());
 
                 split = cspSvc.GetFileSplit(filePath, 1);
-
             } catch (Exception e) {
                 Assert.Fail("Something went wrong: " + e);
             }
