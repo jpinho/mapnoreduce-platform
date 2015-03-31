@@ -11,7 +11,7 @@ namespace PlatformCore
         public static readonly Uri ServiceUrl = new Uri("tcp://localhost:9008/MNRP-PuppetMasterService");
 
         public void CreateWorker(int workerId, string serviceUrl, string entryUrl) {
-            var worker = Worker.Run(workerId, new Uri(serviceUrl));
+            var worker = Worker.Run(workerId, new Uri(serviceUrl), workers);
             workers.Add(workerId, worker);
 
             Trace.WriteLine(string.Format("New worker created: id '{0}', url '{1}'."
