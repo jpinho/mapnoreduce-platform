@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SharedTypes
+﻿namespace SharedTypes
 {
     public interface IJobTask
     {
@@ -8,7 +6,7 @@ namespace SharedTypes
         string MapClassName { get; set; }
         byte[] MapFunctionAssembly { get; set; }
         string OutputReceiverURL { get; set; }
-        string SplitNumber { get; set; }
+        int SplitNumber { get; set; }
         string SplitProviderURL { get; set; }
     }
 }
