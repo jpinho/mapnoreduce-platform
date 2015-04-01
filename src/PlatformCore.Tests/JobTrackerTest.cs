@@ -12,7 +12,7 @@ namespace PlatformCore.Tests
         PuppetMasterService puppetMaster = new PuppetMasterService();
         String remoteServiceUrl = "tcp://localhost:9000/worker";
         [TestMethod]
-        public void TestMethod1()
+        public void TestJobTracker()
         {
             puppetMaster.CreateWorker(1, remoteServiceUrl,null);
             var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(

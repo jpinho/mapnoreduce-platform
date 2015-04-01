@@ -9,6 +9,8 @@ namespace SharedTypes
     {
         void CreateWorker(int workerId, string serviceUrl, string entryURL);
 
+        void GetStatus();
+
         Dictionary<int, IWorker> GetWorkers();
     }
 }

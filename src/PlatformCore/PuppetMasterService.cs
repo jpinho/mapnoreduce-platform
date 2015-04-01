@@ -21,6 +21,12 @@ namespace PlatformCore
                 NotifyWorkerCreation(worker);
         }
 
+        public void GetStatus() {
+            foreach (IWorker worker in workers.Values){
+                worker.GetStatus();
+            }
+                
+        }
         public Dictionary<int, IWorker> GetWorkers() {
             return workers;
         }

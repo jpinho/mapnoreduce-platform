@@ -56,6 +56,10 @@ namespace PlatformCore
             this.onlineWorkers = availableWorkers;
         }
 
+        public void GetStatus() {
+            Debug.WriteLine("I'm fine, thanks.");
+        }
+
         /// <summary>
         /// Receives a Map job and distributes the processing of their contents accross multiple
         /// workers. Each worker processes a split of the given filePath (used as file ID), calling

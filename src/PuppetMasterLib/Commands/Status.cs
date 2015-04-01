@@ -11,7 +11,16 @@ namespace PuppetMasterLib.Commands
         public const string NAME = "status";
 
         public void Execute() {
-            //TODO: Implement me.
+            /*contact every puppetMasters?*/
+            
+            /* contact puppetMaster at PuppetMasterURL */
+            IPuppetMasterService pMaster = (IPuppetMasterService)Activator.GetObject(
+                typeof(IPuppetMasterService),
+                "tcp://localhost:9008/MNRP-PuppetMasterService");
+            //TODO fix hardcoded puppetmasterurl
+            
+            /* asks him for status*/
+            pMaster.GetStatus();
         }
 
         public override string ToString() {
