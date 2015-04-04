@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using SharedTypes;
+using System.Threading;
 
 namespace PlatformCore
 {
@@ -27,8 +28,39 @@ namespace PlatformCore
             }
                 
         }
+
         public Dictionary<int, IWorker> GetWorkers() {
             return workers;
+        }
+
+        public void Wait(int seconds)
+        {
+            Thread.Sleep(seconds * 1000);
+        }
+
+        public void SlowWorker(string WorkerId, int seconds)
+        {
+            //TODO implement SlowWorker
+        }
+
+        public void FreezeWorker(string WorkerId)
+        {
+            //TODO implement FreezeWorker
+        }
+
+        public void UnfreezeWorker(string WorkerId)
+        {
+            //TODO implement UnfreezeWorker
+        }
+
+        public void FreezeCommunication(string WorkerId)
+        {
+            //TODO implement FreezeCommunication
+        }
+
+        public void UnfreezeCommunication(string WorkerId)
+        {
+            //TODO implement UnfreezeCommunication
         }
 
         private void NotifyWorkerCreation(Worker worker) {
