@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exception\InvalidWorkerServiceUrlException.cs" />
+    <Compile Include="Exception\InvalidWorkerIdException.cs" />
     <Compile Include="JobTracker.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

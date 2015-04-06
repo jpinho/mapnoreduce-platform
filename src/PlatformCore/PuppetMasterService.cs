@@ -38,27 +38,37 @@ namespace PlatformCore
             Thread.Sleep(seconds * 1000);
         }
 
-        public void SlowWorker(string WorkerId, int seconds)
+        public void SlowWorker(int WorkerId, int seconds)
         {
-            //TODO implement SlowWorker
+            IWorker worker;
+
+            try
+            {
+                worker = workers[WorkerId];
+            }
+            catch (Exception e) {
+                throw new InvalidWorkerIdException(WorkerId, e);
+            }
+
+            worker.Slow(seconds);
         }
 
-        public void FreezeWorker(string WorkerId)
+        public void FreezeWorker(int WorkerId)
         {
             //TODO implement FreezeWorker
         }
 
-        public void UnfreezeWorker(string WorkerId)
+        public void UnfreezeWorker(int WorkerId)
         {
             //TODO implement UnfreezeWorker
         }
 
-        public void FreezeCommunication(string WorkerId)
+        public void FreezeCommunication(int WorkerId)
         {
             //TODO implement FreezeCommunication
         }
 
-        public void UnfreezeCommunication(string WorkerId)
+        public void UnfreezeCommunication(int WorkerId)
         {
             //TODO implement UnfreezeCommunication
         }

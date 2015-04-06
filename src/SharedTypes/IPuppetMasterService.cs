@@ -13,15 +13,15 @@ namespace SharedTypes
 
         void Wait(int seconds);
 
-        void SlowWorker(string WorkerId, int seconds);
+        void SlowWorker(int WorkerId, int seconds);
 
-        void FreezeWorker(string WorkerId);
+        void FreezeWorker(int WorkerId);
 
-        void UnfreezeWorker(string WorkerId);
+        void UnfreezeWorker(int WorkerId);
 
-        void FreezeCommunication(string WorkerId);
+        void FreezeCommunication(int WorkerId);
 
-        void UnfreezeCommunication(string WorkerId);
+        void UnfreezeCommunication(int WorkerId);
 
         Dictionary<int, IWorker> GetWorkers();
     }

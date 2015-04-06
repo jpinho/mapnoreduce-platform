@@ -164,5 +164,11 @@ namespace PlatformCore
             RemotingHelper.CreateService(wrk, serviceUrl);
             return wrk;
         }
+
+
+        public void Slow(int secs)
+        {
+            Thread.Sleep(secs * 1000);
+        }
     }
 }
