@@ -50,10 +50,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="JobTrackerTest.cs" />
+    <Compile Include="WorkerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ClientConnectorService\ClientServices.csproj">
+      <Project>{977ac474-eba7-41f9-89c2-10fe1e81d202}</Project>
+      <Name>ClientServices</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PlatformCore\PlatformCore.csproj">
       <Project>{73e63fcb-677c-46da-bfb8-f0c813b6f116}</Project>
       <Name>PlatformCore</Name>
@@ -62,6 +66,11 @@
       <Project>{5e7f4752-7d18-4da6-a243-eb5f7f631c7d}</Project>
       <Name>SharedTypes</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\job.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
