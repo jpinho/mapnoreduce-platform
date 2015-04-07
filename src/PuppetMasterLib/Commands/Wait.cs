@@ -12,7 +12,16 @@ namespace PuppetMasterLib.Commands
         public int Secs { get; set; }
 
         public void Execute() {
-            //TODO: Implement me.
+            /*contact every puppetMasters?*/
+
+            /* contact puppetMaster at PuppetMasterURL */
+            IPuppetMasterService pMaster = (IPuppetMasterService)Activator.GetObject(
+                typeof(IPuppetMasterService),
+                "tcp://localhost:9008/MNRP-PuppetMasterService");
+            //TODO fix hardcoded puppetmasterurl
+
+            /* asks him to wait some seconds*/
+            pMaster.Wait(Secs);
         }
 
         public override string ToString() {

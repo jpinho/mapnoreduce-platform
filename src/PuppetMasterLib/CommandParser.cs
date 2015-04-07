@@ -91,8 +91,17 @@ namespace PuppetMasterLib
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
+                        try
+                        {
+                            secs = int.Parse(keyWords[2]);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[2], "Integer"), e);
+                        }
                         parsedCommands.Add(new Commands.SlowWorker() {
-                            WorkerId = workerId
+                            WorkerId = workerId,
+                            Secs = secs
                         });
                         break;
 

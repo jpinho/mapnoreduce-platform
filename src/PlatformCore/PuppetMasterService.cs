@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using SharedTypes;
+using System.Threading;
 
 namespace PlatformCore
 {
@@ -21,8 +22,55 @@ namespace PlatformCore
                 NotifyWorkerCreation(worker);
         }
 
+        public void GetStatus() {
+            foreach (IWorker worker in workers.Values){
+                worker.GetStatus();
+            }
+                
+        }
+
         public Dictionary<int, IWorker> GetWorkers() {
             return workers;
+        }
+
+        public void Wait(int seconds)
+        {
+            Thread.Sleep(seconds * 1000);
+        }
+
+        public void SlowWorker(int WorkerId, int seconds)
+        {
+            IWorker worker;
+
+            try
+            {
+                worker = workers[WorkerId];
+            }
+            catch (Exception e) {
+                throw new InvalidWorkerIdException(WorkerId, e);
+            }
+
+            worker.Slow(seconds);
+        }
+
+        public void FreezeWorker(int WorkerId)
+        {
+            //TODO implement FreezeWorker
+        }
+
+        public void UnfreezeWorker(int WorkerId)
+        {
+            //TODO implement UnfreezeWorker
+        }
+
+        public void FreezeCommunication(int WorkerId)
+        {
+            //TODO implement FreezeCommunication
+        }
+
+        public void UnfreezeCommunication(int WorkerId)
+        {
+            //TODO implement UnfreezeCommunication
         }
 
         private void NotifyWorkerCreation(Worker worker) {
