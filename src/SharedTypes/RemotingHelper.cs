@@ -20,15 +20,15 @@ namespace SharedTypes
                 IDictionary props = new Hashtable();
                 props["port"] = serviceUrl.Port;
                 props["typeFilterLevel"] = TypeFilterLevel.Full;
-                //props["name"] = serviceUrl.AbsolutePath;
-                props["name"] = "MNRP-PuppetMasterService";
+                props["name"] = serviceUrl.AbsolutePath.TrimStart('/');
+                
 
                 TcpChannel channel = new TcpChannel(props, null, provider);
                 ChannelServices.RegisterChannel(channel, true);
             }
 
             RemotingConfiguration.RegisterWellKnownServiceType(
-                remoteObject.GetType(), "MNRP-PuppetMasterService", //serviceUrl.AbsolutePath,
+                remoteObject.GetType(), serviceUrl.AbsolutePath.TrimStart('/'),
                 WellKnownObjectMode.Singleton);
         }
 
