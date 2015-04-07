@@ -74,6 +74,8 @@
     <Content Include="Resources\job.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\SharedTypes.dll" />
+    <Content Include="Resources\UserMappersLib.dll" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

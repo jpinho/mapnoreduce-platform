@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using ClientServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharedTypes;
@@ -22,9 +23,13 @@ namespace PlatformCore.Tests
 
             // Fetchs the object from 'server'.
             var remoteWorker1 = RemotingHelper.GetRemoteObject<IWorker>(worker1ServiceUrl);
-            //clientService.Submit();
+            var jobFilePath = Path.Combine(Environment.CurrentDirectory, "Resources", "job.txt");
+            var jobOutputPath = string.Concat(jobFilePath, "." + DateTime.Now.ToString("ddMMyyHHmmssfff") + ".out");
+            var asmPath = Path.Combine(Environment.CurrentDirectory, "Resources", "UserMappersLib.dll");
 
-            //TODO: finish result verification.
+            clientService.Submit(jobFilePath, 5, jobOutputPath, "MonkeyMapper", asmPath);
+
+            //TODO: finish result verification (read results from the output folder)!
         }
 
         [TestMethod]
