@@ -18,6 +18,7 @@ namespace PlatformCore
         public void CreateWorker(int workerId, string serviceUrl, string entryUrl) {
             var worker = Worker.Run(workerId, new Uri(serviceUrl), workers);
             workers.Add(workerId, worker);
+            worker.UpdateAvailableWorkers(workers);
 
             Trace.WriteLine(string.Format("New worker created: id '{0}', url '{1}'."
                 , workerId, worker.ServiceUrl));

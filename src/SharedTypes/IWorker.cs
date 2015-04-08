@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Collections.Generic;
 namespace SharedTypes
 {
     public interface IWorker
@@ -13,5 +13,6 @@ namespace SharedTypes
         void Slow(int secs);
         void Freeze();
         void UnFreeze();
+        void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers);
     }
 }

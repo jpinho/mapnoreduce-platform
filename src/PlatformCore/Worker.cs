@@ -63,6 +63,10 @@ namespace PlatformCore
             this.onlineWorkers = availableWorkers;
         }
 
+        public void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers)
+        {
+            this.onlineWorkers = availableWorkers;
+        }
         public void GetStatus() {
             Debug.WriteLine("I'm fine, thanks.");
         }
@@ -118,6 +122,7 @@ namespace PlatformCore
 
                     // Async call to ExecuteMapJob.
                     AsyncExecuteMapJob(worker, split, remoteWorker, callback, job);
+
                 } catch (RemotingException ex) {
                     Trace.WriteLine(ex.GetType().FullName + " - " + ex.Message
                         + " -->> " + ex.StackTrace);
