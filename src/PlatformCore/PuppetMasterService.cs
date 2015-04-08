@@ -53,12 +53,36 @@ namespace PlatformCore
             worker.Slow(seconds);
         }
 
-        public void FreezeWorker(int WorkerId) {
-            //TODO implement FreezeWorker
+        public void FreezeWorker(int WorkerId)
+        {
+            IWorker worker;
+
+            try
+            {
+                worker = workers[WorkerId];
+            }
+            catch (Exception e)
+            {
+                throw new InvalidWorkerIdException(WorkerId, e);
+            }
+
+            worker.Freeze();
         }
 
-        public void UnfreezeWorker(int WorkerId) {
-            //TODO implement UnfreezeWorker
+        public void UnfreezeWorker(int WorkerId)
+        {
+            IWorker worker;
+
+            try
+            {
+                worker = workers[WorkerId];
+            }
+            catch (Exception e)
+            {
+                throw new InvalidWorkerIdException(WorkerId, e);
+            }
+
+            worker.UnFreeze();
         }
 
         public void FreezeCommunication(int WorkerId) {

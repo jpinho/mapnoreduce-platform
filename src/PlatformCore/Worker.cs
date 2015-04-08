@@ -11,6 +11,9 @@ namespace PlatformCore
 {
     public class Worker : MarshalByRefObject, IWorker
     {
+
+        private AutoResetEvent freezeHandle = new AutoResetEvent(false);
+        
         /// <summary>
         /// The job splits priority queue.
         /// </summary>
@@ -122,14 +125,15 @@ namespace PlatformCore
             }
         }
 
-        private void AsyncExecuteMapJob(IWorker worker, int split, IWorker remoteWorker, AsyncCallback callback, IJobTask job) {
+        private void AsyncExecuteMapJob(IWorker worker, int split, IWorker remoteWorker, AsyncCallback callback, IJobTask job)
+        {
             var fnExecuteMapJob = new Worker.ExecuteMapJobDelegate(remoteWorker.ExecuteMapJob);
             var newTask = (JobTask)job.Clone();
             newTask.SplitNumber = split;
             fnExecuteMapJob.BeginInvoke(newTask, callback, null);
             Trace.WriteLine(string.Format("Job split {0} sent to worker at '{1}'."
                 , newTask.SplitNumber, worker.ServiceUrl));
-
+ 
             // Removes the peeked split from the queue.
             splitsQueue.Dequeue();
             Trace.WriteLine("Split " + newTask.SplitNumber + " removed from splits queue.");
@@ -180,6 +184,16 @@ namespace PlatformCore
 
         public void Slow(int secs) {
             Thread.Sleep(secs * 1000);
+        }
+
+        public void Freeze()
+        {
+            freezeHandle.WaitOne();
+        }
+
+        public void UnFreeze()
+        {
+            freezeHandle.Set();
         }
     }
 }
