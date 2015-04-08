@@ -14,6 +14,10 @@ namespace PlatformCore
         private Dictionary<int, IWorker> activeWorkers = new Dictionary<int, IWorker>();
         private DateTime lastHeartBeat = DateTime.UtcNow.Date;
 
+        public JobTracker() {
+            // Required for .NET Remoting Proxy Classes.
+        }
+
         public JobTracker(Worker worker) {
             this.worker = worker;
         }

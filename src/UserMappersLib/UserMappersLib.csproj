@@ -39,14 +39,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IMap.cs" />
     <Compile Include="MonkeyMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SharedTypes\SharedTypes.csproj">
-      <Project>{5e7f4752-7d18-4da6-a243-eb5f7f631c7d}</Project>
-      <Name>SharedTypes</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

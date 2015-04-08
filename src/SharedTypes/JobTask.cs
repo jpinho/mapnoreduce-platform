@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace PlatformCore
 {
+    [Serializable]
     public class JobTask : SharedTypes.IJobTask
     {
         public string FileName { get; set; }
@@ -11,6 +13,9 @@ namespace PlatformCore
         public string OutputReceiverUrl { get; set; }
         public byte[] MapFunctionAssembly { get; set; }
         public string MapClassName { get; set; }
+
+        public JobTask() {
+        }
 
         public object Clone() {
             JobTask newTask = (JobTask)this.MemberwiseClone();

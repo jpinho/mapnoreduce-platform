@@ -50,6 +50,10 @@ namespace PlatformCore
         /// </summary>
         public Uri ServiceUrl { get; set; }
 
+        public Worker() {
+            // Required for .NET Remoting Proxy Classes.
+        }
+
         public Worker(int workerId, Uri serviceUrl, Dictionary<int, IWorker> availableWorkers) {
             WorkerId = workerId;
             ServiceUrl = serviceUrl;
@@ -69,14 +73,17 @@ namespace PlatformCore
         public void ReceiveMapJob(IJobTask job) {
             // Converts splits to priority queue.
             splitsQueue = new Queue<int>(job.FileSplits);
+
             // Selects from all online workers those that are not busy.
             var availableWorkers = new Queue<IWorker>((
                     from onlineWorker in onlineWorkers
                     where !busyWorkers.ContainsKey(onlineWorker.Key /*worker id*/)
                     select onlineWorker.Value
                 ).ToList());
+
             //splits jobs
-            splitsDelivery(availableWorkers, job);
+            SplitsDelivery(availableWorkers, job);
+
             // Starts the Job Tracker thread, to execute apart from the worker thread.
             new Thread(new ThreadStart(delegate {
                 tracker = new JobTracker(this);
@@ -84,46 +91,38 @@ namespace PlatformCore
             })).Start();
         }
 
-        private void splitsDelivery(Queue<IWorker> availableWorkers, IJobTask job)
-        {
+        private void SplitsDelivery(Queue<IWorker> availableWorkers, IJobTask job) {
             // Delivers as many splits as it cans, considering the number of available workers.
-            for (var i = 0; i < Math.Min(availableWorkers.Count, splitsQueue.Count); i++)
-            {
+            for (var i = 0; i < Math.Min(availableWorkers.Count, splitsQueue.Count); i++) {
                 var worker = availableWorkers.Dequeue();
                 var split = splitsQueue.Peek();
 
-                try
-                {
+                try {
                     var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(
                         worker.ServiceUrl.OriginalString);
 
-                    if (remoteWorker == null)
-                    {
+                    if (remoteWorker == null) {
                         offlineWorkers.Add(worker);
                         Trace.WriteLine("Could not locate worker at '" + worker.ServiceUrl + "'.");
                         continue;
                     }
 
                     // The callback called after the execution of the async method call.
-                    var callback = new AsyncCallback((result) =>
-                    {
+                    var callback = new AsyncCallback((result) => {
                         Trace.WriteLine(string.Format("Worker '{0}' finished processing split number '{1}'."
                             , remoteWorker.ServiceUrl, split));
                     });
 
                     // Async call to ExecuteMapJob.
-                    asyncExecuteMapJob(worker, split, remoteWorker, callback, job);
-                }
-                catch (RemotingException ex)
-                {
+                    AsyncExecuteMapJob(worker, split, remoteWorker, callback, job);
+                } catch (RemotingException ex) {
                     Trace.WriteLine(ex.GetType().FullName + " - " + ex.Message
                         + " -->> " + ex.StackTrace);
                 }
-            }            
+            }
         }
 
-        private void asyncExecuteMapJob(IWorker worker, int split, IWorker remoteWorker, AsyncCallback callback, IJobTask job)
-        {
+        private void AsyncExecuteMapJob(IWorker worker, int split, IWorker remoteWorker, AsyncCallback callback, IJobTask job) {
             var fnExecuteMapJob = new Worker.ExecuteMapJobDelegate(remoteWorker.ExecuteMapJob);
             var newTask = (JobTask)job.Clone();
             newTask.SplitNumber = split;
@@ -179,9 +178,7 @@ namespace PlatformCore
             return wrk;
         }
 
-
-        public void Slow(int secs)
-        {
+        public void Slow(int secs) {
             Thread.Sleep(secs * 1000);
         }
     }

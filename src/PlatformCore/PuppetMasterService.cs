@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using SharedTypes;
 using System.Threading;
+using SharedTypes;
 
 namespace PlatformCore
 {
@@ -10,6 +10,10 @@ namespace PlatformCore
     {
         private readonly Dictionary<int, IWorker> workers = new Dictionary<int, IWorker>();
         public static readonly Uri ServiceUrl = new Uri("tcp://localhost:9008/MNRP-PuppetMasterService");
+
+        public PuppetMasterService() {
+            // Required for .NET Remoting Proxy Classes.
+        }
 
         public void CreateWorker(int workerId, string serviceUrl, string entryUrl) {
             var worker = Worker.Run(workerId, new Uri(serviceUrl), workers);
@@ -23,53 +27,45 @@ namespace PlatformCore
         }
 
         public void GetStatus() {
-            foreach (IWorker worker in workers.Values){
+            foreach (IWorker worker in workers.Values) {
                 worker.GetStatus();
             }
-                
+
         }
 
         public Dictionary<int, IWorker> GetWorkers() {
             return workers;
         }
 
-        public void Wait(int seconds)
-        {
+        public void Wait(int seconds) {
             Thread.Sleep(seconds * 1000);
         }
 
-        public void SlowWorker(int WorkerId, int seconds)
-        {
+        public void SlowWorker(int WorkerId, int seconds) {
             IWorker worker;
 
-            try
-            {
+            try {
                 worker = workers[WorkerId];
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new InvalidWorkerIdException(WorkerId, e);
             }
 
             worker.Slow(seconds);
         }
 
-        public void FreezeWorker(int WorkerId)
-        {
+        public void FreezeWorker(int WorkerId) {
             //TODO implement FreezeWorker
         }
 
-        public void UnfreezeWorker(int WorkerId)
-        {
+        public void UnfreezeWorker(int WorkerId) {
             //TODO implement UnfreezeWorker
         }
 
-        public void FreezeCommunication(int WorkerId)
-        {
+        public void FreezeCommunication(int WorkerId) {
             //TODO implement FreezeCommunication
         }
 
-        public void UnfreezeCommunication(int WorkerId)
-        {
+        public void UnfreezeCommunication(int WorkerId) {
             //TODO implement UnfreezeCommunication
         }
 
