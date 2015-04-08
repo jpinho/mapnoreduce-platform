@@ -10,9 +10,14 @@ namespace PuppetMasterLib.Commands
     {
         public const string NAME = "freezew";
         public int WorkerId { get; set; }
+        public string PuppetMasterUrl { get; set; } 
 
         public void Execute() {
-            //TODO: Implement me.
+            IPuppetMasterService pMaster = (IPuppetMasterService)Activator.GetObject(
+                typeof(IPuppetMasterService),
+                "tcp://localhost:9008/MNRP-PuppetMasterService");
+            //temp puppet master hardcoded
+            pMaster.FreezeWorker(WorkerId);
         }
 
         public override string ToString() {

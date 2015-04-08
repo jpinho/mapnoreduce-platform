@@ -11,5 +11,7 @@ namespace SharedTypes
         void ReceiveMapJob(IJobTask job);
         void GetStatus();
         void Slow(int secs);
+        void Freeze();
+        void UnFreeze();
     }
 }
