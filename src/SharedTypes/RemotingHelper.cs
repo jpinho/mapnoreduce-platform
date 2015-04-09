@@ -27,9 +27,10 @@ namespace SharedTypes
                 ChannelServices.RegisterChannel(channel, true);
             }
 
-            RemotingConfiguration.RegisterWellKnownServiceType(
-                remoteObject.GetType(), serviceUrl.AbsolutePath.TrimStart('/'),
-                WellKnownObjectMode.Singleton);
+            RemotingServices.Marshal(
+                (MarshalByRefObject)remoteObject
+                , serviceUrl.AbsolutePath.TrimStart('/')
+                , remoteObject.GetType());
         }
 
         public static T GetRemoteObject<T>(string serviceUrl) {

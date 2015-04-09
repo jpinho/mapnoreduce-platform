@@ -19,7 +19,7 @@ namespace ClientServices
         }
 
         public string GetFileSplit(string filePath, int splitNumber) {
-            return splitsStore[filePath][splitNumber - 1];
+            return splitsStore[filePath][splitNumber];
         }
 
         public void SplitAndSave(string filePath, int nSplits) {
