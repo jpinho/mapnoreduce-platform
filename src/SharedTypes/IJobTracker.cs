@@ -10,5 +10,7 @@ namespace SharedTypes
     {
         void Alive(int wid);
         void Complete(int wid);
+        void FreezeCommunication();
+        void UnfreezeCommunication();
     }
 }

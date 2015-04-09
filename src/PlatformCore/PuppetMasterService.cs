@@ -87,11 +87,33 @@ namespace PlatformCore
         }
 
         public void FreezeCommunication(int WorkerId) {
-            //TODO implement FreezeCommunication
+            IWorker worker;
+
+            try
+            {
+                worker = workers[WorkerId];
+            }
+            catch (Exception e)
+            {
+                throw new InvalidWorkerIdException(WorkerId, e);
+            }
+
+            worker.FreezeCommunication();
         }
 
         public void UnfreezeCommunication(int WorkerId) {
-            //TODO implement UnfreezeCommunication
+            IWorker worker;
+
+            try
+            {
+                worker = workers[WorkerId];
+            }
+            catch (Exception e)
+            {
+                throw new InvalidWorkerIdException(WorkerId, e);
+            }
+
+            worker.UnfreezeCommunication();
         }
 
         private void NotifyWorkerCreation(Worker worker) {

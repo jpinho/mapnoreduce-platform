@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Remoting;
+using System.Threading;
 using SharedTypes;
 
 namespace PlatformCore
 {
     public class JobTracker : MarshalByRefObject, IJobTracker
     {
+        private AutoResetEvent freezeHandle = new AutoResetEvent(false);
+
         private Worker worker;
 
         public enum JobTrackerStatus { ACTIVE, PASSIVE };
@@ -36,6 +39,17 @@ namespace PlatformCore
         public void Complete(int wid) {
             //Remove worker from active list
             activeWorkers.Remove(wid);
+        }
+
+
+        public void FreezeCommunication()
+        {
+            freezeHandle.WaitOne();
+        }
+
+        public void UnfreezeCommunication()
+        {
+            freezeHandle.Set();
         }
     }
 }

@@ -33,7 +33,7 @@ namespace PlatformCore.Tests
         }
 
         [TestMethod]
-        public void TestJobTracker() {
+        public void TestJobTrackerStart() {
             // creates the worker and gets remote reference to it.
             puppetMaster.CreateWorker(1, worker1ServiceUrl, null);
             var remoteWorker1 = RemotingHelper.GetRemoteObject<IWorker>(worker1ServiceUrl);

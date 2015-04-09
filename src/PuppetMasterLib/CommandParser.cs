@@ -127,24 +127,24 @@ namespace PuppetMasterLib
                         });
                         break;
 
-                    case Commands.FreezeJobTracker.NAME:
+                    case Commands.FreezeCommunication.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        parsedCommands.Add(new Commands.FreezeJobTracker() {
+                        parsedCommands.Add(new Commands.FreezeCommunication() {
                             WorkerId = workerId
                         });
                         break;
 
-                    case Commands.UnfreezeJobTracker.NAME:
+                    case Commands.UnfreezeCommunication.NAME:
                         try {
                             workerId = int.Parse(keyWords[1]);
                         } catch (Exception e) {
                             throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
                         }
-                        parsedCommands.Add(new Commands.UnfreezeJobTracker() {
+                        parsedCommands.Add(new Commands.UnfreezeCommunication() {
                             WorkerId = workerId
                         });
                         break;

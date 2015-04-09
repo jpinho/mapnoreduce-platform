@@ -13,6 +13,8 @@ namespace SharedTypes
         void Slow(int secs);
         void Freeze();
         void UnFreeze();
+        void FreezeCommunication();
+        void UnfreezeCommunication();
         void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers);
     }
 }

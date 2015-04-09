@@ -61,6 +61,7 @@ namespace PlatformCore
             WorkerId = workerId;
             ServiceUrl = serviceUrl;
             this.onlineWorkers = availableWorkers;
+            tracker = new JobTracker(this);
         }
 
         public void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers)
@@ -193,12 +194,25 @@ namespace PlatformCore
 
         public void Freeze()
         {
+            tracker.FreezeCommunication();
             freezeHandle.WaitOne();
         }
 
         public void UnFreeze()
         {
             freezeHandle.Set();
+            tracker.UnfreezeCommunication();
+        }
+
+
+        public void FreezeCommunication()
+        {
+            tracker.FreezeCommunication();
+        }
+
+        public void UnfreezeCommunication()
+        {
+            tracker.UnfreezeCommunication();
         }
     }
 }

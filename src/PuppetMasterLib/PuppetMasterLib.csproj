@@ -43,8 +43,8 @@
   <ItemGroup>
     <Compile Include="CommandParser.cs" />
     <Compile Include="Exceptions\CommandInvalidParameterException.cs" />
-    <Compile Include="Commands\UnfreezeJobTracker.cs" />
-    <Compile Include="Commands\FreezeJobTracker.cs" />
+    <Compile Include="Commands\UnfreezeCommunication.cs" />
+    <Compile Include="Commands\FreezeCommunication.cs" />
     <Compile Include="Commands\UnfreezeWorker.cs" />
     <Compile Include="Commands\FreezeWorker.cs" />
     <Compile Include="Commands\SubmitJob.cs" />
