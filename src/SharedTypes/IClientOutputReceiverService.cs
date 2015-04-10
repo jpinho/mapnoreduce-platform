@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace SharedTypes
+﻿namespace SharedTypes
 {
     public interface IClientOutputReceiverService
     {
-        void ReceiveMapOutputFragment(string filename, string result, int splitNumber);
+        void ReceiveMapOutputFragment(string filename, string[] result, int splitNumber);
     }
 }
