@@ -14,23 +14,25 @@ namespace SharedTypes
         }
 
         public static void CreateService(Object remoteObject, Uri serviceUrl, bool registerChannel) {
-            if (!registerChannel) {
-                BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
-
-                IDictionary props = new Hashtable();
-                props["port"] = serviceUrl.Port;
-                props["typeFilterLevel"] = TypeFilterLevel.Full;
-                props["name"] = serviceUrl.AbsolutePath.TrimStart('/');
-                
-
-                TcpChannel channel = new TcpChannel(props, null, provider);
-                ChannelServices.RegisterChannel(channel, true);
-            }
+            if (registerChannel)
+                RegisterChannel(serviceUrl);
 
             RemotingServices.Marshal(
                 (MarshalByRefObject)remoteObject
                 , serviceUrl.AbsolutePath.TrimStart('/')
                 , remoteObject.GetType());
+        }
+
+        public static void RegisterChannel(Uri serviceUrl) {
+            BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
+
+            IDictionary props = new Hashtable();
+            props["port"] = serviceUrl.Port;
+            props["typeFilterLevel"] = TypeFilterLevel.Full;
+            props["name"] = serviceUrl.AbsolutePath.TrimStart('/');
+
+            TcpChannel channel = new TcpChannel(props, null, provider);
+            ChannelServices.RegisterChannel(channel, true);
         }
 
         public static T GetRemoteObject<T>(string serviceUrl) {

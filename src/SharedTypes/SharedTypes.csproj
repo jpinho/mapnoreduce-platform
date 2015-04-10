@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums.cs" />
     <Compile Include="IJobTask.cs" />
     <Compile Include="IJobTracker.cs" />
     <Compile Include="JobTask.cs" />
