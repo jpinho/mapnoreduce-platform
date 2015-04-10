@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharedTypes;
 using System.Diagnostics;
+using System.IO;
+using SharedTypes;
 
 namespace ClientServices
 {
@@ -19,7 +16,7 @@ namespace ClientServices
         }
 
         public string GetFileSplit(string filePath, int splitNumber) {
-            return splitsStore[filePath][splitNumber];
+            return splitsStore[filePath][splitNumber - 1];
         }
 
         public void SplitAndSave(string filePath, int nSplits) {
@@ -31,21 +28,20 @@ namespace ClientServices
 
             // performs the attributions of lines to their splits
             List<string> splitContent = new List<string>();
-            for (int i = 0; i < lines.Length; i++ )
-                //foreach (string line in lines)
+            for (int i = 0; i < lines.Length; i++)
+            //foreach (string line in lines)
                 {
-                    // adds the line to the current split
-                    splitContent.Add(lines[i]);
-                               
-                    // split size reached
-                    if (splitContent.Count >= splitSize)
-                    {
-                        // saves the split
-                        lstSplits.Add(String.Join("\n", splitContent));
-                        // the next cycle is the new split
-                        splitContent = new List<string>();
-                    }
+                // adds the line to the current split
+                splitContent.Add(lines[i]);
+
+                // split size reached
+                if (splitContent.Count >= splitSize) {
+                    // saves the split
+                    lstSplits.Add(String.Join("\n", splitContent));
+                    // the next cycle is the new split
+                    splitContent = new List<string>();
                 }
+            }
 
             // adds last split (if incomplete)
             if (splitContent.Count >= 0)
