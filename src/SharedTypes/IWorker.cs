@@ -9,7 +9,7 @@ namespace SharedTypes
 
         bool ExecuteMapJob(IJobTask task);
         void ReceiveMapJob(IJobTask job);
-        void GetStatus();
+        WorkerStatus GetStatus();
         void Slow(int secs);
         void Freeze();
         void UnFreeze();
