@@ -38,7 +38,7 @@ namespace PlatformCore.Tests
             puppetMaster.CreateWorker(1, worker1ServiceUrl, null);
             var remoteWorker1 = RemotingHelper.GetRemoteObject<IWorker>(worker1ServiceUrl);
 
-            var tracker = new JobTracker((Worker)remoteWorker1);
+            var tracker = new JobTracker((Worker)remoteWorker1, new JobTask());
             tracker.Start(JobTracker.JobTrackerStatus.ACTIVE);
         }
     }
