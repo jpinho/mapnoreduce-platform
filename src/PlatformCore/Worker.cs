@@ -138,10 +138,12 @@ namespace PlatformCore
                     var outputReceiver = (IClientOutputReceiverService)Activator.GetObject(
                         typeof(IClientOutputReceiverService),
                         task.OutputReceiverUrl);
+
                     outputReceiver.ReceiveMapOutputFragment(
                         task.FileName
                         , (from r in result select r.Key + " " + r.Value).ToArray()
                         , task.SplitNumber);
+
                     return true;
                 }
                 return false;
