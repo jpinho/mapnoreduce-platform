@@ -10,13 +10,15 @@ namespace PlatformCore
 {
     public class Worker : MarshalByRefObject, IWorker
     {
+        private readonly object workerJobLock = new object();
+        private readonly object workerReceiveJobLock = new object();
 
         private readonly AutoResetEvent freezeHandle = new AutoResetEvent(false);
 
         /// <summary>
         /// The job trackers used to coordinate a job or to report progress about it's own job
         /// execution. Whether this job tracker performes in one way or the other depends on its
-        /// mode property <see cref="JobTracker.JobTrackerStatus"/>.
+        /// mode property <see cref="JobTrackerStatus"/>.
         /// </summary>
         private readonly List<JobTracker> trackers = new List<JobTracker>();
 
@@ -24,11 +26,6 @@ namespace PlatformCore
         /// List of all workers known by this worker, that are online.
         /// </summary>
         private Dictionary<int /*worker id*/, IWorker> onlineWorkers = new Dictionary<int, IWorker>();
-
-        /// <summary>
-        /// List of workers that are processing Job Tasks.
-        /// </summary>
-        private readonly Dictionary<int /*worker id*/, JobTask> busyWorkers = new Dictionary<int, JobTask>();
 
         /// <summary>
         /// List of workers that are not responding anymore.
@@ -50,31 +47,45 @@ namespace PlatformCore
             get { return offlineWorkers; }
         }
 
-        public Dictionary<int /*worker id*/, JobTask> BusyWorkers {
-            get { return busyWorkers; }
-        }
-
         /// <summary>
         /// The service URL used to reach this work remotely.
         /// </summary>
         public Uri ServiceUrl { get; set; }
 
+        public WorkerStatus Status { get; set; }
+
         public Worker() {
-            // Required for .NET Remoting Proxy Classes.
+            Status = WorkerStatus.Available;
         }
 
-        public Worker(int workerId, Uri serviceUrl, Dictionary<int, IWorker> availableWorkers) {
+        public Worker(int workerId, Uri serviceUrl, Dictionary<int, IWorker> availableWorkers)
+            : this() {
             WorkerId = workerId;
             ServiceUrl = serviceUrl;
-            this.onlineWorkers = availableWorkers;
+            onlineWorkers = availableWorkers;
+        }
+
+        /// <summary>
+        /// Overrides the default object leasing behavior such that the object is kept in memory as
+        /// long as the host application domain is running.
+        /// 
+        /// Solves this problem: "Note, however, that these Singleton remote objects do have a
+        /// default lifetime associated with them (see the Object Lifetime Management section
+        /// below) . This means that clients will not necessarily always receive a reference to the
+        /// same instance of the remotable class."
+        /// </summary>
+        /// <see cref="https://msdn.microsoft.com/en-us/library/ms973841.aspx"/>
+        public override Object InitializeLifetimeService() {
+            return null;
         }
 
         public void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers) {
             this.onlineWorkers = availableWorkers;
         }
 
-        public void GetStatus() {
-            Debug.WriteLine("I'm fine, thanks.");
+        public WorkerStatus GetStatus() {
+            Trace.WriteLine("I'm fine, my internal status is '" + Status.ToString() + "'.");
+            return Status;
         }
 
         /// <summary>
@@ -84,13 +95,16 @@ namespace PlatformCore
         /// </summary>
         /// <param name="job">The job to be processed.</param>
         public void ReceiveMapJob(IJobTask job) {
-            // Starts the Job Tracker thread, to execute apart from the worker thread.
-            var tracker = new JobTracker(this, job);
-            trackers.Add(tracker);
 
-            new Thread(new ThreadStart(delegate {
-                tracker.Start(JobTracker.JobTrackerStatus.ACTIVE);
-            })).Start();
+            lock (workerReceiveJobLock) {
+                // Starts the Job Tracker thread, to execute apart from the worker thread.
+                var tracker = new JobTracker(this, job);
+                trackers.Add(tracker);
+
+                new Thread(new ThreadStart(delegate {
+                    tracker.Start(JobTrackerStatus.Active);
+                })).Start();
+            }
         }
 
         public void AsyncExecuteMapJob(IJobTracker jobTracker, int split, IWorker remoteWorker, AsyncCallback callback, IJobTask job) {
@@ -106,49 +120,51 @@ namespace PlatformCore
         }
 
         public bool ExecuteMapJob(IJobTask task) {
-            var passiveTracker = new JobTracker(this, task);
-            var thrPassiveTracker = new Thread(new ThreadStart(delegate {
-                passiveTracker.Start(
-                    JobTracker.JobTrackerStatus.PASSIVE);
-            }));
-            thrPassiveTracker.Start();
+            lock (workerJobLock) {
+                var passiveTracker = new JobTracker(this, task);
+                var thrPassiveTracker = new Thread(new ThreadStart(delegate {
+                    passiveTracker.Start(
+                        JobTrackerStatus.Passive);
+                }));
+                thrPassiveTracker.Start();
 
-            try {
-                var splitProvider = (IClientSplitProviderService)Activator.GetObject(
-                    typeof(IClientSplitProviderService),
-                    task.SplitProviderUrl);
+                try {
+                    var splitProvider = (IClientSplitProviderService)Activator.GetObject(
+                        typeof(IClientSplitProviderService),
+                        task.SplitProviderUrl);
 
-                var data = splitProvider.GetFileSplit(task.FileName, task.SplitNumber);
-                var assembly = Assembly.Load(task.MapFunctionAssembly);
+                    var data = splitProvider.GetFileSplit(task.FileName, task.SplitNumber);
+                    var assembly = Assembly.Load(task.MapFunctionAssembly);
 
-                foreach (var type in assembly.GetTypes()) {
-                    if (!type.IsClass || !type.FullName.EndsWith("." + task.MapClassName))
-                        continue;
+                    foreach (var type in assembly.GetTypes()) {
+                        if (!type.IsClass || !type.FullName.EndsWith("." + task.MapClassName))
+                            continue;
 
-                    var mapperClassObj = Activator.CreateInstance(type);
-                    object[] args = { data };
+                        var mapperClassObj = Activator.CreateInstance(type);
+                        object[] args = { data };
 
-                    var result = (IList<KeyValuePair<string, string>>)type.InvokeMember("Map",
-                        BindingFlags.Default | BindingFlags.InvokeMethod, null, mapperClassObj, args);
+                        var result = (IList<KeyValuePair<string, string>>)type.InvokeMember("Map",
+                            BindingFlags.Default | BindingFlags.InvokeMethod, null, mapperClassObj, args);
 
-                    Trace.WriteLine("Map call result was: ");
-                    foreach (var p in result)
-                        Trace.WriteLine("key: " + p.Key + ", value: " + p.Value);
+                        Trace.WriteLine("Map call result was: ");
+                        foreach (var p in result)
+                            Trace.WriteLine("key: " + p.Key + ", value: " + p.Value);
 
-                    var outputReceiver = (IClientOutputReceiverService)Activator.GetObject(
-                        typeof(IClientOutputReceiverService),
-                        task.OutputReceiverUrl);
+                        var outputReceiver = (IClientOutputReceiverService)Activator.GetObject(
+                            typeof(IClientOutputReceiverService),
+                            task.OutputReceiverUrl);
 
-                    outputReceiver.ReceiveMapOutputFragment(
-                        task.FileName
-                        , (from r in result select r.Key + " " + r.Value).ToArray()
-                        , task.SplitNumber);
+                        outputReceiver.ReceiveMapOutputFragment(
+                            task.FileName
+                            , (from r in result select r.Key + " " + r.Value).ToArray()
+                            , task.SplitNumber);
 
-                    return true;
+                        return true;
+                    }
+                    return false;
+                } finally {
+                    thrPassiveTracker.Abort();
                 }
-                return false;
-            } finally {
-                thrPassiveTracker.Abort();
             }
         }
 

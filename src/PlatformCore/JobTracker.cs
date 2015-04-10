@@ -19,9 +19,7 @@ namespace PlatformCore
         /// The job splits priority queue.
         /// </summary>
         private Queue<int> splitsQueue;
-
-        public enum JobTrackerStatus { ACTIVE, PASSIVE };
-        private JobTrackerStatus mode = JobTrackerStatus.PASSIVE;
+        private JobTrackerStatus mode = JobTrackerStatus.Passive;
         private DateTime lastHeartBeat = DateTime.UtcNow.Date;
 
         public JobTracker() {
@@ -35,7 +33,7 @@ namespace PlatformCore
 
         public void Start(JobTrackerStatus trackerMode) {
             // Register Services (alive, complete) Do Work
-            if (Enum.Equals(trackerMode, JobTrackerStatus.ACTIVE)) {
+            if (Enum.Equals(trackerMode, JobTrackerStatus.Active)) {
                 RemotingServices.Marshal(this, "JobTracker", typeof(IJobTracker));
 
                 // Converts splits to priority queue.
@@ -45,7 +43,7 @@ namespace PlatformCore
                     // Selects from all online workers those that are not busy.
                     var availableWorkers = new Queue<IWorker>((
                             from onlineWorker in worker.OnlineWorkers
-                            where !worker.BusyWorkers.ContainsKey(onlineWorker.Key /*worker id*/)
+                            where onlineWorker.Value.GetStatus() == WorkerStatus.Available
                             select onlineWorker.Value
                         ).ToList());
 

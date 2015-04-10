@@ -118,7 +118,12 @@ namespace ClientServices
 
             // Saves the map job output to disk.
             var result = corSvc.GetMapResult(filePath);
-            using (var outFile = File.CreateText(Path.Combine(outputDir, filePath + ".out"))) {
+            var outFilePath = Path.Combine(outputDir, filePath + ".out");
+
+            if (File.Exists(outFilePath))
+                File.Delete(outFilePath);
+
+            using (var outFile = File.CreateText(outFilePath)) {
                 foreach (var splitResult in result)
                     outFile.WriteLine(String.Join("\n", splitResult));
             }
