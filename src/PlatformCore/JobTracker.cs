@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Remoting;
 using System.Threading;
 using SharedTypes;
+using EnvDTE;
 
 namespace PlatformCore
 {
@@ -48,7 +49,7 @@ namespace PlatformCore
                         ).ToList());
 
                     SplitsDelivery(availableWorkers, Task);
-                    Thread.Sleep(2000);
+                    System.Threading.Thread.Sleep(2000);
                 }
             }
         }
@@ -86,11 +87,17 @@ namespace PlatformCore
         }
 
         public void FreezeCommunication() {
-            freezeHandle.WaitOne();
+            //freezeHandle.WaitOne();
+            DTE dte = new DTE();
+            EnvDTE.Thread thread = dte.Debugger.CurrentThread;
+            thread.Freeze();
         }
 
         public void UnfreezeCommunication() {
-            freezeHandle.Set();
+            //freezeHandle.Set();
+            DTE dte = new DTE();
+            EnvDTE.Thread thread = dte.Debugger.CurrentThread;
+            thread.Thaw();
         }
     }
 }

@@ -19,13 +19,11 @@ namespace PlatformCore.Tests
             //the point was freezing only jobtracker component
             remoteWorker.FreezeCommunication();
 
-            //testing if worker is working -- it's not
+            //testing if worker is working -- yap its working
             remoteWorker.GetStatus();
-
-            //actually nothing works 
+            
+            //unfreezing jobtracker
             remoteWorker.UnfreezeCommunication();
-
-            //shit.
 
         }
     }
