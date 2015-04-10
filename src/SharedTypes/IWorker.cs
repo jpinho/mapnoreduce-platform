@@ -16,5 +16,6 @@ namespace SharedTypes
         void FreezeCommunication();
         void UnfreezeCommunication();
         void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers);
+        void AsyncExecuteMapJob(IJobTracker jobTracker, int split, IWorker remoteWorker, AsyncCallback callback, IJobTask job);
     }
 }
