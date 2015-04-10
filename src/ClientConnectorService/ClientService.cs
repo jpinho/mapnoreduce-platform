@@ -19,6 +19,7 @@ namespace ClientServices
         public const string CLIENT_OUTPUTRECV_SVCNAME = "MNRP-ClientORS";
         public const string CLIENT_SPLITPROV_SVCNAME = "MNRP-ClientSPS";
         private const int RESULT_WAIT_TIMEOUT = 5000;
+        private const int RESULT_WAIT_LIMIT = 6;
 
         private ClientOutputReceiverService corSvc;
         private ClientSplitProviderService cspSvc;
@@ -101,20 +102,25 @@ namespace ClientServices
             };
 
             // Creates a list of splits.
-            for (var i = 0; i < nSplits; job.FileSplits.Add(i++))
+            for (var i = 0; i < nSplits; job.FileSplits.Add(++i))
                 ;
 
             // Calls the non blocking function to send the job to the master worker.
             masterWorker.ReceiveMapJob(job);
 
             // Blocks the current thread until the result is ready.
-            while (!corSvc.IsMapResultReady(filePath, nSplits))
+            var waitCount = 0;
+            while (!corSvc.IsMapResultReady(filePath, nSplits)) {
+                if (waitCount++ >= RESULT_WAIT_LIMIT)
+                    throw new TimeoutException("ClientOutputResult service 'IsMapResultReady' wait timed out!");
                 Thread.Sleep(RESULT_WAIT_TIMEOUT);
+            }
 
             // Saves the map job output to disk.
-            var result = corSvc.GetMapResult();
+            var result = corSvc.GetMapResult(filePath);
             using (var outFile = File.CreateText(Path.Combine(outputDir, filePath + ".out"))) {
-                outFile.Write(String.Join("\n", result));
+                foreach (var splitResult in result)
+                    outFile.WriteLine(String.Join("\n", splitResult));
             }
         }
     }
