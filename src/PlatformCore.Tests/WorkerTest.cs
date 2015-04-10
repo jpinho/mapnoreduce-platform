@@ -10,7 +10,11 @@ namespace PlatformCore.Tests
     public class WorkerTest
     {
         private PuppetMasterService puppetMaster = new PuppetMasterService();
-        private String worker1ServiceUrl = "tcp://localhost:9000/worker";
+        private String worker1ServiceUrl = "tcp://localhost:9000/worker1";
+        private String worker2ServiceUrl = "tcp://localhost:9001/worker2";
+        private String worker3ServiceUrl = "tcp://localhost:9002/worker3";
+        private String worker4ServiceUrl = "tcp://localhost:9003/worker4";
+        private String worker5ServiceUrl = "tcp://localhost:9004/worker5";
 
         [TestMethod]
         public void TestWorker() {
@@ -20,6 +24,10 @@ namespace PlatformCore.Tests
 
             // Creates a worker at the given URL.
             puppetMaster.CreateWorker(1, worker1ServiceUrl, null);
+            puppetMaster.CreateWorker(2, worker2ServiceUrl, null);
+            puppetMaster.CreateWorker(3, worker3ServiceUrl, null);
+            puppetMaster.CreateWorker(4, worker4ServiceUrl, null);
+            puppetMaster.CreateWorker(5, worker5ServiceUrl, null);
 
             // Fetchs the object from 'server'.
             var remoteWorker1 = RemotingHelper.GetRemoteObject<IWorker>(worker1ServiceUrl);
@@ -39,7 +47,7 @@ namespace PlatformCore.Tests
             var remoteWorker1 = RemotingHelper.GetRemoteObject<IWorker>(worker1ServiceUrl);
 
             var tracker = new JobTracker((Worker)remoteWorker1, new JobTask());
-            tracker.Start(JobTracker.JobTrackerStatus.ACTIVE);
+            tracker.Start(JobTrackerStatus.Active);
         }
     }
 }
