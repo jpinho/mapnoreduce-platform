@@ -12,25 +12,20 @@ namespace PlatformCore
 	{
 		private readonly object workerJobLock = new object();
 		private readonly object workerReceiveJobLock = new object();
-
 		private readonly AutoResetEvent freezeHandle = new AutoResetEvent(false);
 
 		/// <summary>
-		/// The job trackers used to coordinate a job or to report progress about it's own job
-		/// execution. Whether this job tracker performes in one way or the other depends on its
-		/// mode property <see cref="JobTrackerStatus"/>.
+		/// The job activeTracker used to coordinate a job or to report progress about it's own job
+		/// execution. Whether this job activeTracker performes in one way or the other depends on
+		/// its mode property <see cref="JobTrackerStatus"/>.
 		/// </summary>
-		private readonly List<JobTracker> trackers = new List<JobTracker>();
+		private readonly JobTracker activeTracker;
 
-		/// <summary>
-		/// List of all workers known by this worker, that are online.
-		/// </summary>
-		private Dictionary<int /*worker id*/, IWorker> onlineWorkers = new Dictionary<int, IWorker>();
+		private readonly Thread thrActiveTracker;
 
-		/// <summary>
-		/// List of workers that are not responding anymore.
-		/// </summary>
-		private readonly List<IWorker> offlineWorkers = new List<IWorker>();
+		private readonly JobTracker passiveTracker;
+
+		private readonly Thread thrPassiveTracker;
 
 		public delegate bool ExecuteMapJobDelegate(JobTask task);
 
@@ -39,13 +34,15 @@ namespace PlatformCore
 		/// </summary>
 		public int WorkerId { get; set; }
 
-		public Dictionary<int /*worker id*/, IWorker> OnlineWorkers {
-			get { return onlineWorkers; }
-		}
+		/// <summary>
+		/// List of all workers known by this worker, that are online.
+		/// </summary>
+		public Dictionary<int /*worker id*/, IWorker> OnlineWorkers { get; private set; }
 
-		public List<IWorker> OfflineWorkers {
-			get { return offlineWorkers; }
-		}
+		/// <summary>
+		/// List of workers that are not responding anymore.
+		/// </summary>
+		public List<IWorker> OfflineWorkers { get; private set; }
 
 		/// <summary>
 		/// The service URL used to reach this work remotely.
@@ -56,23 +53,28 @@ namespace PlatformCore
 
 		public Worker() {
 			Status = WorkerStatus.Available;
+			activeTracker = new JobTracker(this, JobTrackerMode.Active);
+			passiveTracker = new JobTracker(this, JobTrackerMode.Passive);
+
+			thrActiveTracker = new Thread(() => {
+				activeTracker.Start();
+			});
+
+			thrPassiveTracker = new Thread(() => {
+				passiveTracker.Start();
+			});
 		}
 
 		public Worker(int workerId, Uri serviceUrl, Dictionary<int, IWorker> availableWorkers)
 			: this() {
 			WorkerId = workerId;
 			ServiceUrl = serviceUrl;
-			onlineWorkers = availableWorkers;
+			OnlineWorkers = availableWorkers;
 		}
 
 		/// <summary>
 		/// Overrides the default object leasing behavior such that the object is kept in memory as
 		/// long as the host application domain is running.
-		/// 
-		/// Solves this problem: "Note, however, that these Singleton remote objects do have a
-		/// default lifetime associated with them (see the Object Lifetime Management section
-		/// below) . This means that clients will not necessarily always receive a reference to the
-		/// same instance of the remotable class."
 		/// </summary>
 		/// <see><cref>https://msdn.microsoft.com/en-us/library/ms973841.aspx</cref></see>
 		public override Object InitializeLifetimeService() {
@@ -80,11 +82,11 @@ namespace PlatformCore
 		}
 
 		public void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers) {
-			onlineWorkers = availableWorkers;
+			OnlineWorkers = availableWorkers;
 		}
 
 		public WorkerStatus GetStatus() {
-			Trace.WriteLine("I'm fine, my internal status is '" + Status.ToString() + "'.");
+			Trace.WriteLine("Worker [ID: " + WorkerId + "] - Status: '" + Status.ToString() + "'.");
 			return Status;
 		}
 
@@ -93,40 +95,19 @@ namespace PlatformCore
 		/// workers. Each worker processes a split of the given filePath (used as file ID), calling
 		/// the Map method of the received class name of the assembly code.
 		/// </summary>
-		/// <param name="job">The job to be processed.</param>
-		public void ReceiveMapJob(IJobTask job) {
-
+		/// <param name="task">The job to be processed.</param>
+		public void ReceiveMapJob(IJobTask task) {
 			lock (workerReceiveJobLock) {
-				// Starts the Job Tracker thread, to execute apart from the worker thread.
-				var tracker = new JobTracker(this, job);
-				trackers.Add(tracker);
-
-				new Thread(new ThreadStart(delegate {
-					tracker.Start(JobTrackerStatus.Active);
-				})).Start();
+				Trace.WriteLine("New map job received by worker [ID: " + WorkerId + "].\n"
+					+ "Master Job Tracker Uri: '" + activeTracker.ServiceUri + "'");
+				task.JobTrackerUri = activeTracker.ServiceUri;
+				activeTracker.ScheduleJob(task);
 			}
-		}
-
-		public void AsyncExecuteMapJob(IJobTracker jobTracker, int split, IWorker remoteWorker, AsyncCallback callback, IJobTask job) {
-			var fnExecuteMapJob = new ExecuteMapJobDelegate(remoteWorker.ExecuteMapJob);
-			var newTask = (JobTask)job.Clone();
-			newTask.SplitNumber = split;
-			fnExecuteMapJob.BeginInvoke(newTask, callback, null);
-
-			Trace.WriteLine(string.Format("Job split {0} sent to worker at '{1}'."
-				, newTask.SplitNumber, remoteWorker.ServiceUrl));
-
-			Trace.WriteLine("Split " + newTask.SplitNumber + " removed from splits queue.");
 		}
 
 		public bool ExecuteMapJob(IJobTask task) {
 			lock (workerJobLock) {
-				var passiveTracker = new JobTracker(this, task);
-				var thrPassiveTracker = new Thread(new ThreadStart(delegate {
-					passiveTracker.Start(
-						JobTrackerStatus.Passive);
-				}));
-				thrPassiveTracker.Start();
+				passiveTracker.ScheduleJob(task);
 
 				try {
 					var splitProvider = (IClientSplitProviderService)Activator.GetObject(
@@ -136,8 +117,7 @@ namespace PlatformCore
 					var data = splitProvider.GetFileSplit(task.FileName, task.SplitNumber);
 					var assembly = Assembly.Load(task.MapFunctionAssembly);
 
-					// WORK DELAY SIMULATION
-					Thread.Sleep(10 * 1000);
+					Thread.Sleep(/*work delay simulation*/ 10 * 1000);
 
 					foreach (var type in assembly.GetTypes()) {
 						if (!type.IsClass || !type.FullName.EndsWith("." + task.MapClassName))
@@ -171,9 +151,13 @@ namespace PlatformCore
 			}
 		}
 
-		internal Dictionary<int, IWorker> GetActiveWorkers() {
-			//TODO: Implement this
-			return null;
+		public void AsyncExecuteMapJob(IJobTracker jobTracker, int split, IWorker remoteWorker, AsyncCallback callback, IJobTask job) {
+			var fnExecuteMapJob = new ExecuteMapJobDelegate(remoteWorker.ExecuteMapJob);
+			var newTask = (JobTask)job.Clone();
+			newTask.SplitNumber = split;
+
+			Trace.WriteLine("Begin invoke job on worker [ID: " + WorkerId + "].");
+			fnExecuteMapJob.BeginInvoke(newTask, callback, null);
 		}
 
 		internal static Worker Run(int workerId, Uri serviceUrl, Dictionary<int, IWorker> workers) {
@@ -187,25 +171,21 @@ namespace PlatformCore
 		}
 
 		public void Freeze() {
-			foreach (var tracker in trackers)
-				tracker.FreezeCommunication();
+			activeTracker.FreezeCommunication();
 			freezeHandle.WaitOne();
 		}
 
 		public void UnFreeze() {
 			freezeHandle.Set();
-			foreach (var tracker in trackers)
-				tracker.UnfreezeCommunication();
+			activeTracker.UnfreezeCommunication();
 		}
 
 		public void FreezeCommunication() {
-			foreach (var tracker in trackers)
-				tracker.FreezeCommunication();
+			activeTracker.FreezeCommunication();
 		}
 
 		public void UnfreezeCommunication() {
-			foreach (var tracker in trackers)
-				tracker.UnfreezeCommunication();
+			activeTracker.UnfreezeCommunication();
 		}
 	}
 }

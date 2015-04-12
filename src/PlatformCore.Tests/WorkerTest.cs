@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using ClientServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -43,19 +42,7 @@ namespace PlatformCore.Tests
 
 		[TestMethod]
 		public void TestJobTrackerStart() {
-			// creates the worker and gets remote reference to it.
-			puppetMaster.CreateWorker(1, worker1ServiceUrl, null);
-			var remoteWorker1 = RemotingHelper.GetRemoteObject<IWorker>(
-				"tcp://localhost:21004/worker" + Guid.NewGuid().ToString("D"));
-
-			var tracker = new JobTracker((Worker)remoteWorker1, new JobTask() {
-				FileSplits = new List<int> { 1, 2, 3, 4, 5 },
-				FileName = "job.txt",
-				MapClassName = "MonkeyMapper"
-			});
-
 			//TODO: Implement me.
-			//tracker.Start(JobTrackerStatus.Active);
 		}
 	}
 }
