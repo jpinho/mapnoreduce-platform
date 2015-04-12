@@ -1,30 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using SharedTypes;
 
 namespace PuppetMasterLib.Commands
 {
-    public class Status : ICommand
-    {
-        public const string NAME = "status";
+	public class Status : ICommand
+	{
+		public const string NAME = "status";
+		public Uri ServiceUri { get; set; }
 
-        public void Execute() {
-            /*contact every puppetMasters?*/
-            
-            /* contact puppetMaster at PuppetMasterURL */
-            IPuppetMasterService pMaster = (IPuppetMasterService)Activator.GetObject(
-                typeof(IPuppetMasterService),
-                "tcp://localhost:9008/MNRP-PuppetMasterService");
-            //TODO fix hardcoded puppetmasterurl
-            
-            /* asks him for status*/
-            pMaster.GetStatus();
-        }
+		public void Execute() {
+			if (ServiceUri == null)
+				ServiceUri = Globals.LocalPuppetMasterUri;
+			var pMaster = (IPuppetMasterService)Activator.GetObject(
+				typeof(IPuppetMasterService),
+				ServiceUri.ToString());
+			pMaster.GetStatus();
+		}
 
-        public override string ToString() {
-            return NAME;
-        }
-    }
+		public override string ToString() {
+			return NAME;
+		}
+	}
 }

@@ -61,7 +61,7 @@ namespace PuppetMasterUI
 				Thread.Sleep(/*medium*/ 500);
 
 			try {
-				commands = CommandParser.Run(script);
+				commands = CommandParser.Run(script, puppetMasterService);
 			} catch (Exception ex) {
 				operationStatus.Invoke(new MethodInvoker(() => {
 					MessageBox.Show("Error while processing script - " + ex.Message + " -->> " + ex.StackTrace);
@@ -111,7 +111,7 @@ namespace PuppetMasterUI
 								() => operationStatus.ReportProgress("Executing '" + operation + "' command...", true)));
 
 						cmd.Execute();
-						Thread.Sleep(1000);
+						Thread.Sleep(/*fast*/ 200);
 
 						operationStatus.Invoke(
 							new MethodInvoker(

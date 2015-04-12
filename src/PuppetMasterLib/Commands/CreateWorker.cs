@@ -1,34 +1,29 @@
 ﻿using System;
-using System.Diagnostics;
 using SharedTypes;
 
 namespace PuppetMasterLib.Commands
 {
-    public class CreateWorker : ICommand
-    {
-        public const string NAME = "worker";
+	public class CreateWorker : ICommand
+	{
+		public const string NAME = "worker";
 
-        public int WorkerId { get; set; }
+		public int WorkerId { get; set; }
 
-        public string PuppetMasterURL { get; set; }
+		public string PuppetMasterUrl { get; set; }
 
-        public string ServiceURL { get; set; }
+		public string ServiceUrl { get; set; }
 
-        public string EntryURL { get; set; }
+		public string EntryUrl { get; set; }
 
-        public void Execute() {
-            /* contact puppetMaster at PuppetMasterURL */
-            IPuppetMasterService pMaster = (IPuppetMasterService)Activator.GetObject(
-                typeof(IPuppetMasterService),
-                PuppetMasterURL);
+		public void Execute() {
+			var pMaster = (IPuppetMasterService)Activator.GetObject(
+				typeof(IPuppetMasterService),
+				PuppetMasterUrl);
+			pMaster.CreateWorker(WorkerId, ServiceUrl, EntryUrl);
+		}
 
-            /* asks him to create a worker with the given WorkerId
-             * and expose its service at ServiceURL */
-            pMaster.CreateWorker(WorkerId, ServiceURL, EntryURL);
-        }
-
-        public override string ToString() {
-            return NAME;
-        }
-    }
+		public override string ToString() {
+			return NAME;
+		}
+	}
 }

@@ -16,6 +16,10 @@ namespace PlatformCore
 			// Required for .NET Remoting Proxy Classes.
 		}
 
+		public Uri GetServiceUri() {
+			return ServiceUrl;
+		}
+
 		public void CreateWorker(int workerId, string serviceUrl, string entryUrl) {
 			lock (globalLock) {
 				var serviceUri = new Uri(serviceUrl);
@@ -33,7 +37,7 @@ namespace PlatformCore
 		}
 
 		public void GetStatus() {
-			foreach (IWorker worker in workers.Values) {
+			foreach (var worker in workers.Values) {
 				worker.GetStatus();
 			}
 		}
@@ -46,61 +50,61 @@ namespace PlatformCore
 			Thread.Sleep(seconds * 1000);
 		}
 
-		public void SlowWorker(int WorkerId, int seconds) {
+		public void SlowWorker(int workerId, int seconds) {
 			IWorker worker;
 
 			try {
-				worker = workers[WorkerId];
+				worker = workers[workerId];
 			} catch (Exception e) {
-				throw new InvalidWorkerIdException(WorkerId, e);
+				throw new InvalidWorkerIdException(workerId, e);
 			}
 
 			worker.Slow(seconds);
 		}
 
-		public void FreezeWorker(int WorkerId) {
+		public void FreezeWorker(int workerId) {
 			IWorker worker;
 
 			try {
-				worker = workers[WorkerId];
+				worker = workers[workerId];
 			} catch (Exception e) {
-				throw new InvalidWorkerIdException(WorkerId, e);
+				throw new InvalidWorkerIdException(workerId, e);
 			}
 
 			worker.Freeze();
 		}
 
-		public void UnfreezeWorker(int WorkerId) {
+		public void UnfreezeWorker(int workerId) {
 			IWorker worker;
 
 			try {
-				worker = workers[WorkerId];
+				worker = workers[workerId];
 			} catch (Exception e) {
-				throw new InvalidWorkerIdException(WorkerId, e);
+				throw new InvalidWorkerIdException(workerId, e);
 			}
 
 			worker.UnFreeze();
 		}
 
-		public void FreezeCommunication(int WorkerId) {
+		public void FreezeCommunication(int workerId) {
 			IWorker worker;
 
 			try {
-				worker = workers[WorkerId];
+				worker = workers[workerId];
 			} catch (Exception e) {
-				throw new InvalidWorkerIdException(WorkerId, e);
+				throw new InvalidWorkerIdException(workerId, e);
 			}
 
 			worker.FreezeCommunication();
 		}
 
-		public void UnfreezeCommunication(int WorkerId) {
+		public void UnfreezeCommunication(int workerId) {
 			IWorker worker;
 
 			try {
-				worker = workers[WorkerId];
+				worker = workers[workerId];
 			} catch (Exception e) {
-				throw new InvalidWorkerIdException(WorkerId, e);
+				throw new InvalidWorkerIdException(workerId, e);
 			}
 
 			worker.UnfreezeCommunication();

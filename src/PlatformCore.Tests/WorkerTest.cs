@@ -10,12 +10,12 @@ namespace PlatformCore.Tests
 	[TestClass]
 	public class WorkerTest
 	{
-		private PuppetMasterService puppetMaster = new PuppetMasterService();
-		private String worker1ServiceUrl = "tcp://localhost:20000/worker" + Guid.NewGuid().ToString("D");
-		private String worker2ServiceUrl = "tcp://localhost:20001/worker" + Guid.NewGuid().ToString("D");
-		private String worker3ServiceUrl = "tcp://localhost:20002/worker" + Guid.NewGuid().ToString("D");
-		private String worker4ServiceUrl = "tcp://localhost:20003/worker" + Guid.NewGuid().ToString("D");
-		private String worker5ServiceUrl = "tcp://localhost:20004/worker" + Guid.NewGuid().ToString("D");
+		private readonly PuppetMasterService puppetMaster = new PuppetMasterService();
+		private readonly String worker1ServiceUrl = "tcp://localhost:20000/worker" + Guid.NewGuid().ToString("D");
+		private readonly String worker2ServiceUrl = "tcp://localhost:20001/worker" + Guid.NewGuid().ToString("D");
+		private readonly String worker3ServiceUrl = "tcp://localhost:20002/worker" + Guid.NewGuid().ToString("D");
+		private readonly String worker4ServiceUrl = "tcp://localhost:20003/worker" + Guid.NewGuid().ToString("D");
+		private readonly String worker5ServiceUrl = "tcp://localhost:20004/worker" + Guid.NewGuid().ToString("D");
 
 		[TestMethod]
 		public void TestWorker() {
