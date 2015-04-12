@@ -53,6 +53,8 @@
 			this.tpNewScript = new System.Windows.Forms.TabPage();
 			this.txtScripts = new System.Windows.Forms.TextBox();
 			this.tpMonitoring = new System.Windows.Forms.TabPage();
+			this.cbMonitoring = new System.Windows.Forms.CheckBox();
+			this.cbLiveUpdate = new System.Windows.Forms.CheckBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.gvRemoteObjects = new System.Windows.Forms.DataGridView();
 			this.ObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -63,8 +65,6 @@
 			this.txtLogFile = new System.Windows.Forms.TextBox();
 			this.bwScriptWorker = new System.ComponentModel.BackgroundWorker();
 			this.tmrMonitoring = new System.Windows.Forms.Timer(this.components);
-			this.cbLiveUpdate = new System.Windows.Forms.CheckBox();
-			this.cbMonitoring = new System.Windows.Forms.CheckBox();
 			this.tsTopNavigation.SuspendLayout();
 			this.tcScriptContainer.SuspendLayout();
 			this.tpNewScript.SuspendLayout();
@@ -334,6 +334,31 @@
 			this.tpMonitoring.TabIndex = 1;
 			this.tpMonitoring.Text = "Monitoring";
 			// 
+			// cbMonitoring
+			// 
+			this.cbMonitoring.AutoSize = true;
+			this.cbMonitoring.Checked = true;
+			this.cbMonitoring.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.cbMonitoring.Location = new System.Drawing.Point(649, 8);
+			this.cbMonitoring.Name = "cbMonitoring";
+			this.cbMonitoring.Size = new System.Drawing.Size(117, 17);
+			this.cbMonitoring.TabIndex = 5;
+			this.cbMonitoring.Text = "Monitoring Enabled";
+			this.cbMonitoring.UseVisualStyleBackColor = true;
+			this.cbMonitoring.CheckedChanged += new System.EventHandler(this.cbMonitoring_CheckedChanged);
+			// 
+			// cbLiveUpdate
+			// 
+			this.cbLiveUpdate.AutoSize = true;
+			this.cbLiveUpdate.Checked = true;
+			this.cbLiveUpdate.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.cbLiveUpdate.Location = new System.Drawing.Point(772, 8);
+			this.cbLiveUpdate.Name = "cbLiveUpdate";
+			this.cbLiveUpdate.Size = new System.Drawing.Size(105, 17);
+			this.cbLiveUpdate.TabIndex = 4;
+			this.cbLiveUpdate.Text = "Log Live Update";
+			this.cbLiveUpdate.UseVisualStyleBackColor = true;
+			// 
 			// label1
 			// 
 			this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
@@ -434,31 +459,6 @@
 			this.tmrMonitoring.Enabled = true;
 			this.tmrMonitoring.Interval = 2000;
 			this.tmrMonitoring.Tick += new System.EventHandler(this.tmrMonitoring_Tick);
-			// 
-			// cbLiveUpdate
-			// 
-			this.cbLiveUpdate.AutoSize = true;
-			this.cbLiveUpdate.Checked = true;
-			this.cbLiveUpdate.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.cbLiveUpdate.Location = new System.Drawing.Point(772, 8);
-			this.cbLiveUpdate.Name = "cbLiveUpdate";
-			this.cbLiveUpdate.Size = new System.Drawing.Size(105, 17);
-			this.cbLiveUpdate.TabIndex = 4;
-			this.cbLiveUpdate.Text = "Log Live Update";
-			this.cbLiveUpdate.UseVisualStyleBackColor = true;
-			// 
-			// cbMonitoring
-			// 
-			this.cbMonitoring.AutoSize = true;
-			this.cbMonitoring.Checked = true;
-			this.cbMonitoring.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.cbMonitoring.Location = new System.Drawing.Point(649, 8);
-			this.cbMonitoring.Name = "cbMonitoring";
-			this.cbMonitoring.Size = new System.Drawing.Size(117, 17);
-			this.cbMonitoring.TabIndex = 5;
-			this.cbMonitoring.Text = "Monitoring Enabled";
-			this.cbMonitoring.UseVisualStyleBackColor = true;
-			this.cbMonitoring.CheckedChanged += new System.EventHandler(this.cbMonitoring_CheckedChanged);
 			// 
 			// ScriptRunner
 			// 

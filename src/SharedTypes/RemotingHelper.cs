@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
@@ -14,8 +15,13 @@ namespace SharedTypes
 		}
 
 		public static void CreateService(Object remoteObject, Uri serviceUrl, bool registerChannel) {
-			if (registerChannel)
-				RegisterChannel(serviceUrl);
+			if (registerChannel) {
+				try {
+					RegisterChannel(serviceUrl);
+				} catch (Exception ex) {
+					Trace.TraceError("RegisterChannel failed - " + ex.Message + " -->> " + ex.StackTrace);
+				}
+			}
 
 			RemotingServices.Marshal(
 				(MarshalByRefObject)remoteObject
