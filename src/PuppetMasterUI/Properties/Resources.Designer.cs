@@ -59,22 +59,5 @@ namespace PuppetMasterUI.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to     puppet master status: online
-        ///
-        ///    summary:
-        ///
-        ///    - master server url:
-        ///          {0}
-        ///
-        ///    - worker instances ({1}):
-        ///{2}.
-        /// </summary>
-        internal static string PuppetMasterServerStatusMessage {
-            get {
-                return ResourceManager.GetString("PuppetMasterServerStatusMessage", resourceCulture);
-            }
-        }
     }
 }
