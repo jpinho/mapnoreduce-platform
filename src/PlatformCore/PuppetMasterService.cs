@@ -10,7 +10,7 @@ namespace PlatformCore
 	{
 		private readonly object globalLock = new object();
 		private readonly Dictionary<int, IWorker> workers = new Dictionary<int, IWorker>();
-		public static readonly Uri ServiceUrl = new Uri("tcp://localhost:9008/MNRP-PuppetMasterService");
+		public static readonly Uri ServiceUrl = Globals.LocalPuppetMasterUri;
 
 		public PuppetMasterService() {
 			// Required for .NET Remoting Proxy Classes.
