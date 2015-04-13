@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SharedTypes
+﻿namespace SharedTypes
 {
-    public interface IJobTracker
-    {
-        void Alive(int wid);
-        void Complete(int wid);
-        void FreezeCommunication();
-        void UnfreezeCommunication();
-    }
+	public interface IJobTracker
+	{
+		void ScheduleJob(IJobTask job);
+		void Alive(int wid);
+		void FreezeCommunication();
+		void UnfreezeCommunication();
+	}
 }

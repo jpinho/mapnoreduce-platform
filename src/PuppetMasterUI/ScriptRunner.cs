@@ -18,7 +18,6 @@ namespace PuppetMasterUI
 
 		public ScriptRunner() {
 			InitializeComponent();
-			tcScriptContainer.TabPages.Remove(tpMonitoring);
 			newScriptTab = tpNewScript.Name;
 			ofdOpenFile.InitialDirectory = Path.Combine(Environment.CurrentDirectory, "Scripts");
 			sfdSaveFile.InitialDirectory = Path.Combine(Environment.CurrentDirectory, "Scripts");
@@ -41,7 +40,18 @@ namespace PuppetMasterUI
 				operationStatus,
 				((TextBox)tcScriptContainer.SelectedTab.Controls[0]).Text));
 
-			operationStatus.ShowDialog();
+			try {
+				operationStatus.ShowDialog();
+			} catch (Exception ex) {
+				var exShow = ex;
+
+				if (ex.InnerException != null)
+					exShow = ex.InnerException;
+
+				MessageBox.Show(exShow.GetType().FullName + " - " + exShow.Message
+					+ " -->> " + exShow.StackTrace);
+			}
+
 			tsRunScript.Enabled = true;
 			tsRunScriptStep.Enabled = true;
 		}
@@ -236,6 +246,12 @@ namespace PuppetMasterUI
 				tcScriptContainer.TabPages.Remove(tpMonitoring);
 				return;
 			}
+
+			if (tcScriptContainer.TabPages.Contains(tpMonitoring)) {
+				tcScriptContainer.SelectTab(tpMonitoring);
+				return;
+			}
+
 			tcScriptContainer.TabPages.Add(tpMonitoring);
 			tcScriptContainer.SelectTab(tpMonitoring);
 		}
@@ -246,8 +262,11 @@ namespace PuppetMasterUI
 					FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
 					using (var reader = new StreamReader(fs)) {
 						txtLogFile.Text = await reader.ReadToEndAsync();
-						txtLogFile.Select(txtLogFile.Text.Length - 1, 1);
-						txtLogFile.ScrollToCaret();
+
+						if (cbAutoScroll.Checked) {
+							txtLogFile.Select(txtLogFile.Text.Length - 1, 1);
+							txtLogFile.ScrollToCaret();
+						}
 					}
 				}
 			}
@@ -272,7 +291,7 @@ namespace PuppetMasterUI
 				gvRemoteObjects.Rows.Add(new object[] {
 					"Worker Service [ID: " + worker.Value.WorkerId + "]",
 					worker.Value.ServiceUrl,
-					worker.Value.GetStatus().ToString(),
+					RemotingHelper.GetRemoteObject<IWorker>(worker.Value.ServiceUrl).GetStatus().ToString(),
 					"N/A"
 				});
 			}
@@ -280,6 +299,10 @@ namespace PuppetMasterUI
 
 		private void cbMonitoring_CheckedChanged(object sender, EventArgs e) {
 			tmrMonitoring.Enabled = cbMonitoring.Checked;
+		}
+
+		private void tsDdbMonitoring_Click(object sender, EventArgs e) {
+
 		}
 	}
 }

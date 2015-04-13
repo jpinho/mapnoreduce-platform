@@ -8,29 +8,28 @@ using SharedTypes;
 
 namespace PlatformCore
 {
+	[Serializable]
 	public class Worker : MarshalByRefObject, IWorker
 	{
-		private readonly object workerJobLock = new object();
+		public const int NOTIFY_TIMEOUT = 1000 * 5;
+		private readonly object workerLock = new object();
 		private readonly object workerReceiveJobLock = new object();
-
 		private readonly AutoResetEvent freezeHandle = new AutoResetEvent(false);
 
 		/// <summary>
-		/// The job trackers used to coordinate a job or to report progress about it's own job
-		/// execution. Whether this job tracker performes in one way or the other depends on its
-		/// mode property <see cref="JobTrackerStatus"/>.
+		/// The job activeTracker used to coordinate a job or to report progress about it's own job
+		/// execution. Whether this job activeTracker performes in one way or the other depends on
+		/// its mode property <see cref="JobTrackerState"/>.
 		/// </summary>
-		private readonly List<JobTracker> trackers = new List<JobTracker>();
-
+		private JobTracker activeTracker;
+		private Thread thrActiveTracker;
+		private JobTracker passiveTracker;
+		private Thread thrPassiveTracker;
+		private bool trackersInitialized;
 		/// <summary>
-		/// List of all workers known by this worker, that are online.
+		/// List of all workers known by this worker.
 		/// </summary>
-		private Dictionary<int /*worker id*/, IWorker> onlineWorkers = new Dictionary<int, IWorker>();
-
-		/// <summary>
-		/// List of workers that are not responding anymore.
-		/// </summary>
-		private readonly List<IWorker> offlineWorkers = new List<IWorker>();
+		private Dictionary<int /*worker id*/, IWorker> workersList;
 
 		public delegate bool ExecuteMapJobDelegate(JobTask task);
 
@@ -38,14 +37,6 @@ namespace PlatformCore
 		/// This worker id.
 		/// </summary>
 		public int WorkerId { get; set; }
-
-		public Dictionary<int /*worker id*/, IWorker> OnlineWorkers {
-			get { return onlineWorkers; }
-		}
-
-		public List<IWorker> OfflineWorkers {
-			get { return offlineWorkers; }
-		}
 
 		/// <summary>
 		/// The service URL used to reach this work remotely.
@@ -62,17 +53,12 @@ namespace PlatformCore
 			: this() {
 			WorkerId = workerId;
 			ServiceUrl = serviceUrl;
-			onlineWorkers = availableWorkers;
+			workersList = availableWorkers;
 		}
 
 		/// <summary>
 		/// Overrides the default object leasing behavior such that the object is kept in memory as
 		/// long as the host application domain is running.
-		/// 
-		/// Solves this problem: "Note, however, that these Singleton remote objects do have a
-		/// default lifetime associated with them (see the Object Lifetime Management section
-		/// below) . This means that clients will not necessarily always receive a reference to the
-		/// same instance of the remotable class."
 		/// </summary>
 		/// <see><cref>https://msdn.microsoft.com/en-us/library/ms973841.aspx</cref></see>
 		public override Object InitializeLifetimeService() {
@@ -80,12 +66,28 @@ namespace PlatformCore
 		}
 
 		public void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers) {
-			onlineWorkers = availableWorkers;
+			lock (workerLock) {
+				workersList = availableWorkers;
+			}
+		}
+
+		public Dictionary<int, IWorker> GetWorkersList() {
+			lock (workerLock) {
+				return workersList;
+			}
 		}
 
 		public WorkerStatus GetStatus() {
-			Trace.WriteLine("I'm fine, my internal status is '" + Status.ToString() + "'.");
-			return Status;
+			lock (workerLock) {
+				//Trace.WriteLine("Worker [ID: " + WorkerId + "] - Status: '" + Status.ToString() + "'.");
+				return Status;
+			}
+		}
+
+		public void SetStatus(WorkerStatus status) {
+			lock (workerLock) {
+				Status = status;
+			}
 		}
 
 		/// <summary>
@@ -93,87 +95,112 @@ namespace PlatformCore
 		/// workers. Each worker processes a split of the given filePath (used as file ID), calling
 		/// the Map method of the received class name of the assembly code.
 		/// </summary>
-		/// <param name="job">The job to be processed.</param>
-		public void ReceiveMapJob(IJobTask job) {
-
+		/// <param name="task">The job to be processed.</param>
+		public void ReceiveMapJob(IJobTask task) {
 			lock (workerReceiveJobLock) {
-				// Starts the Job Tracker thread, to execute apart from the worker thread.
-				var tracker = new JobTracker(this, job);
-				trackers.Add(tracker);
+				if (!trackersInitialized)
+					InitTrackers();
 
-				new Thread(new ThreadStart(delegate {
-					tracker.Start(JobTrackerStatus.Active);
-				})).Start();
+				Trace.WriteLine("New map job received by worker [ID: " + WorkerId + "].\n"
+					+ "Master Job Tracker Uri: '" + activeTracker.ServiceUri + "'");
+				task.JobTrackerUri = activeTracker.ServiceUri;
+				activeTracker.ScheduleJob(task);
 			}
 		}
 
-		public void AsyncExecuteMapJob(IJobTracker jobTracker, int split, IWorker remoteWorker, AsyncCallback callback, IJobTask job) {
-			var fnExecuteMapJob = new ExecuteMapJobDelegate(remoteWorker.ExecuteMapJob);
-			var newTask = (JobTask)job.Clone();
-			newTask.SplitNumber = split;
-			fnExecuteMapJob.BeginInvoke(newTask, callback, null);
+		private void InitTrackers() {
+			trackersInitialized = true;
+			activeTracker = new JobTracker(this, JobTrackerMode.Active);
+			passiveTracker = new JobTracker(this, JobTrackerMode.Passive);
 
-			Trace.WriteLine(string.Format("Job split {0} sent to worker at '{1}'."
-				, newTask.SplitNumber, remoteWorker.ServiceUrl));
+			thrActiveTracker = new Thread(() => {
+				activeTracker.Start();
+			});
 
-			Trace.WriteLine("Split " + newTask.SplitNumber + " removed from splits queue.");
+			thrPassiveTracker = new Thread(() => {
+				passiveTracker.Start();
+			});
+
+			thrActiveTracker.Start();
+			thrPassiveTracker.Start();
 		}
 
 		public bool ExecuteMapJob(IJobTask task) {
-			lock (workerJobLock) {
-				var passiveTracker = new JobTracker(this, task);
-				var thrPassiveTracker = new Thread(new ThreadStart(delegate {
-					passiveTracker.Start(
-						JobTrackerStatus.Passive);
-				}));
-				thrPassiveTracker.Start();
+			lock (workerLock) {
+				if (!trackersInitialized)
+					InitTrackers();
+				passiveTracker.ScheduleJob(task);
+				Status = WorkerStatus.Busy;
+			}
 
-				try {
-					var splitProvider = (IClientSplitProviderService)Activator.GetObject(
-						typeof(IClientSplitProviderService),
-						task.SplitProviderUrl);
+			try {
+				var splitProvider = (IClientSplitProviderService)Activator.GetObject(
+					typeof(IClientSplitProviderService),
+					task.SplitProviderUrl);
 
-					var data = splitProvider.GetFileSplit(task.FileName, task.SplitNumber);
-					var assembly = Assembly.Load(task.MapFunctionAssembly);
+				var data = splitProvider.GetFileSplit(task.FileName, task.SplitNumber);
+				var assembly = Assembly.Load(task.MapFunctionAssembly);
 
-					// WORK DELAY SIMULATION
-					Thread.Sleep(10 * 1000);
+				//Thread.Sleep( /*work delay simulation*/ 30 * 1000);
 
-					foreach (var type in assembly.GetTypes()) {
-						if (!type.IsClass || !type.FullName.EndsWith("." + task.MapClassName))
-							continue;
+				foreach (var type in assembly.GetTypes()) {
+					if (!type.IsClass || !type.FullName.EndsWith("." + task.MapClassName, StringComparison.InvariantCultureIgnoreCase))
+						continue;
 
-						var mapperClassObj = Activator.CreateInstance(type);
-						object[] args = { data };
+					var mapperClassObj = Activator.CreateInstance(type);
+					object[] args = { data };
 
-						var result = (IList<KeyValuePair<string, string>>)type.InvokeMember("Map",
-							BindingFlags.Default | BindingFlags.InvokeMethod, null, mapperClassObj, args);
+					var result = (IList<KeyValuePair<string, string>>)type.InvokeMember("Map",
+						BindingFlags.Default | BindingFlags.InvokeMethod, null, mapperClassObj, args);
 
-						Trace.WriteLine("Map call result was: ");
-						foreach (var p in result)
-							Trace.WriteLine("key: " + p.Key + ", value: " + p.Value);
+					Trace.WriteLine("Map call result was: ");
+					foreach (var p in result)
+						Trace.WriteLine("key: " + p.Key + ", value: " + p.Value);
 
-						var outputReceiver = (IClientOutputReceiverService)Activator.GetObject(
-							typeof(IClientOutputReceiverService),
-							task.OutputReceiverUrl);
+					var outputReceiver = (IClientOutputReceiverService)Activator.GetObject(
+						typeof(IClientOutputReceiverService),
+						task.OutputReceiverUrl);
 
-						outputReceiver.ReceiveMapOutputFragment(
-							task.FileName
-							, (from r in result select r.Key + " " + r.Value).ToArray()
-							, task.SplitNumber);
+					outputReceiver.ReceiveMapOutputFragment(
+						task.FileName
+						, (from r in result select r.Key + " " + r.Value).ToArray()
+						, task.SplitNumber);
 
-						return true;
-					}
-					return false;
-				} finally {
-					thrPassiveTracker.Abort();
+					return true;
+				}
+				return false;
+			} finally {
+				Trace.WriteLine("Send alives thread finished on worker [ID: '" + WorkerId + "'].");
+
+				lock (workerLock) {
+					Status = WorkerStatus.Available;
 				}
 			}
 		}
 
-		internal Dictionary<int, IWorker> GetActiveWorkers() {
-			//TODO: Implement this
-			return null;
+		public void AsyncExecuteMapJob(int split,
+				string fileName, List<int> fileSplits, Uri jobTrackerUri, string mapClassName,
+				byte[] mapFunctionName, string outputReceiverUrl, string splitProviderUrl) {
+
+			//var fnExecuteMapJob = new ExecuteMapJobDelegate(ExecuteMapJob);
+			var newTask = new JobTask {
+				FileName = fileName,
+				SplitNumber = split,
+				FileSplits = fileSplits,
+				JobTrackerUri = jobTrackerUri,
+				MapClassName = mapClassName,
+				MapFunctionAssembly = mapFunctionName,
+				OutputReceiverUrl = outputReceiverUrl,
+				SplitProviderUrl = splitProviderUrl
+			};
+
+			// The callback called after the execution of the async method call.
+			//var callback = new AsyncCallback(result => {
+			//});
+
+			Trace.WriteLine("Begin invoke job on worker [ID: " + WorkerId + "].");
+			//fnExecuteMapJob.BeginInvoke(newTask, callback, null);
+			ExecuteMapJob(newTask);
 		}
 
 		internal static Worker Run(int workerId, Uri serviceUrl, Dictionary<int, IWorker> workers) {
@@ -187,25 +214,21 @@ namespace PlatformCore
 		}
 
 		public void Freeze() {
-			foreach (var tracker in trackers)
-				tracker.FreezeCommunication();
+			activeTracker.FreezeCommunication();
 			freezeHandle.WaitOne();
 		}
 
 		public void UnFreeze() {
 			freezeHandle.Set();
-			foreach (var tracker in trackers)
-				tracker.UnfreezeCommunication();
+			activeTracker.UnfreezeCommunication();
 		}
 
 		public void FreezeCommunication() {
-			foreach (var tracker in trackers)
-				tracker.FreezeCommunication();
+			activeTracker.FreezeCommunication();
 		}
 
 		public void UnfreezeCommunication() {
-			foreach (var tracker in trackers)
-				tracker.UnfreezeCommunication();
+			activeTracker.UnfreezeCommunication();
 		}
 	}
 }

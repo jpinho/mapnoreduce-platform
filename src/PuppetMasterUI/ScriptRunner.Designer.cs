@@ -55,7 +55,7 @@
 			this.tpMonitoring = new System.Windows.Forms.TabPage();
 			this.cbMonitoring = new System.Windows.Forms.CheckBox();
 			this.cbLiveUpdate = new System.Windows.Forms.CheckBox();
-			this.label1 = new System.Windows.Forms.Label();
+			this.lblPltObjects = new System.Windows.Forms.Label();
 			this.gvRemoteObjects = new System.Windows.Forms.DataGridView();
 			this.ObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
 			this.ObjectUri = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -65,6 +65,7 @@
 			this.txtLogFile = new System.Windows.Forms.TextBox();
 			this.bwScriptWorker = new System.ComponentModel.BackgroundWorker();
 			this.tmrMonitoring = new System.Windows.Forms.Timer(this.components);
+			this.cbAutoScroll = new System.Windows.Forms.CheckBox();
 			this.tsTopNavigation.SuspendLayout();
 			this.tcScriptContainer.SuspendLayout();
 			this.tpNewScript.SuspendLayout();
@@ -248,6 +249,7 @@
 			this.tsDdbMonitoring.Size = new System.Drawing.Size(87, 22);
 			this.tsDdbMonitoring.Text = "Monitoring";
 			this.tsDdbMonitoring.CheckedChanged += new System.EventHandler(this.tsDdbMonitoring_CheckedChanged);
+			this.tsDdbMonitoring.Click += new System.EventHandler(this.tsDdbMonitoring_Click);
 			// 
 			// ofdOpenFile
 			// 
@@ -321,9 +323,10 @@
 			// tpMonitoring
 			// 
 			this.tpMonitoring.BackColor = System.Drawing.Color.Transparent;
+			this.tpMonitoring.Controls.Add(this.cbAutoScroll);
 			this.tpMonitoring.Controls.Add(this.cbMonitoring);
 			this.tpMonitoring.Controls.Add(this.cbLiveUpdate);
-			this.tpMonitoring.Controls.Add(this.label1);
+			this.tpMonitoring.Controls.Add(this.lblPltObjects);
 			this.tpMonitoring.Controls.Add(this.gvRemoteObjects);
 			this.tpMonitoring.Controls.Add(this.lblLogfile);
 			this.tpMonitoring.Controls.Add(this.txtLogFile);
@@ -336,10 +339,11 @@
 			// 
 			// cbMonitoring
 			// 
+			this.cbMonitoring.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.cbMonitoring.AutoSize = true;
 			this.cbMonitoring.Checked = true;
 			this.cbMonitoring.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.cbMonitoring.Location = new System.Drawing.Point(649, 8);
+			this.cbMonitoring.Location = new System.Drawing.Point(545, 8);
 			this.cbMonitoring.Name = "cbMonitoring";
 			this.cbMonitoring.Size = new System.Drawing.Size(117, 17);
 			this.cbMonitoring.TabIndex = 5;
@@ -349,6 +353,7 @@
 			// 
 			// cbLiveUpdate
 			// 
+			this.cbLiveUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.cbLiveUpdate.AutoSize = true;
 			this.cbLiveUpdate.Checked = true;
 			this.cbLiveUpdate.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -359,24 +364,21 @@
 			this.cbLiveUpdate.Text = "Log Live Update";
 			this.cbLiveUpdate.UseVisualStyleBackColor = true;
 			// 
-			// label1
+			// lblPltObjects
 			// 
-			this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.label1.AutoSize = true;
-			this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-			this.label1.Location = new System.Drawing.Point(1, 11);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(111, 13);
-			this.label1.TabIndex = 3;
-			this.label1.Text = "PLATFORM OBJECTS";
+			this.lblPltObjects.AutoSize = true;
+			this.lblPltObjects.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+			this.lblPltObjects.Location = new System.Drawing.Point(1, 11);
+			this.lblPltObjects.Name = "lblPltObjects";
+			this.lblPltObjects.Size = new System.Drawing.Size(111, 13);
+			this.lblPltObjects.TabIndex = 3;
+			this.lblPltObjects.Text = "PLATFORM OBJECTS";
 			// 
 			// gvRemoteObjects
 			// 
 			this.gvRemoteObjects.AllowUserToAddRows = false;
 			this.gvRemoteObjects.AllowUserToDeleteRows = false;
-			this.gvRemoteObjects.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+			this.gvRemoteObjects.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.gvRemoteObjects.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
 			this.gvRemoteObjects.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
@@ -424,7 +426,7 @@
 			// 
 			// lblLogfile
 			// 
-			this.lblLogfile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+			this.lblLogfile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.lblLogfile.AutoSize = true;
 			this.lblLogfile.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
@@ -436,8 +438,10 @@
 			// 
 			// txtLogFile
 			// 
+			this.txtLogFile.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.txtLogFile.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-			this.txtLogFile.Dock = System.Windows.Forms.DockStyle.Bottom;
 			this.txtLogFile.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
 			this.txtLogFile.ForeColor = System.Drawing.Color.YellowGreen;
 			this.txtLogFile.Location = new System.Drawing.Point(3, 268);
@@ -460,6 +464,17 @@
 			this.tmrMonitoring.Interval = 2000;
 			this.tmrMonitoring.Tick += new System.EventHandler(this.tmrMonitoring_Tick);
 			// 
+			// cbAutoScroll
+			// 
+			this.cbAutoScroll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.cbAutoScroll.AutoSize = true;
+			this.cbAutoScroll.Location = new System.Drawing.Point(668, 8);
+			this.cbAutoScroll.Name = "cbAutoScroll";
+			this.cbAutoScroll.Size = new System.Drawing.Size(98, 17);
+			this.cbAutoScroll.TabIndex = 6;
+			this.cbAutoScroll.Text = "Auto Scroll Log";
+			this.cbAutoScroll.UseVisualStyleBackColor = true;
+			// 
 			// ScriptRunner
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -468,11 +483,11 @@
 			this.Controls.Add(this.tsTopNavigation);
 			this.Controls.Add(this.tcScriptContainer);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.IsMdiContainer = true;
 			this.Name = "ScriptRunner";
-			this.ShowIcon = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "Puppet Master / Script Runner";
+			this.Text = "[ Puppet Master UI - Script Runner ]";
 			this.tsTopNavigation.ResumeLayout(false);
 			this.tsTopNavigation.PerformLayout();
 			this.tcScriptContainer.ResumeLayout(false);
@@ -518,7 +533,7 @@
 		private System.Windows.Forms.Label lblLogfile;
 		private System.Windows.Forms.TextBox txtLogFile;
 		private System.Windows.Forms.DataGridView gvRemoteObjects;
-		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label lblPltObjects;
 		private System.Windows.Forms.DataGridViewTextBoxColumn ObjectName;
 		private System.Windows.Forms.DataGridViewTextBoxColumn ObjectUri;
 		private System.Windows.Forms.DataGridViewTextBoxColumn Status;
@@ -526,6 +541,7 @@
 		private System.Windows.Forms.Timer tmrMonitoring;
 		private System.Windows.Forms.CheckBox cbLiveUpdate;
 		private System.Windows.Forms.CheckBox cbMonitoring;
+		private System.Windows.Forms.CheckBox cbAutoScroll;
     }
 }
 
