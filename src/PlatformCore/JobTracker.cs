@@ -9,15 +9,15 @@ using SharedTypes;
 
 namespace PlatformCore
 {
+	[Serializable]
 	public class JobTracker : MarshalByRefObject, IJobTracker
 	{
-		private const int NOTIFY_TIMEOUT = 1000 * 5;
 		private const int PROCESSING_DELAY_TIMEOUT = 2000;
 		private readonly object trackerMutex = new object();
 		private readonly Worker worker;
 		private readonly Queue<IJobTask> jobQueue = new Queue<IJobTask>();
-		private readonly Dictionary</*splitnumber*/ int, /*workerid*/ int> splitsBeingProcessed = new Dictionary<int, int>();
-		private readonly Dictionary</*workerid*/ int, /*lastupdate*/DateTime> workerAliveSignals = new Dictionary<int, DateTime>();
+		private volatile Dictionary</*splitnumber*/ int, /*workerid*/ int> splitsBeingProcessed = new Dictionary<int, int>();
+		private volatile Dictionary</*workerid*/ int, /*lastupdate*/DateTime> workerAliveSignals = new Dictionary<int, DateTime>();
 		/// <summary>
 		/// The job splits priority queue.
 		/// </summary>
@@ -37,19 +37,25 @@ namespace PlatformCore
 			: this() {
 			this.worker = worker;
 			Mode = trackerMode;
+
+			ServiceUri = Mode == JobTrackerMode.Active ?
+				new Uri("tcp://localhost:" + worker.ServiceUrl.Port + "/MasterJobTracker-W" + worker.WorkerId) :
+				new Uri("tcp://localhost:" + worker.ServiceUrl.Port + "/SlaveJobTracker-W" + worker.WorkerId);
 		}
 
 		[SuppressMessage("ReSharper", "FunctionNeverReturns")]
 		public void Start() {
 			switch (Mode) {
 				case JobTrackerMode.Active:
-					ServiceUri = new Uri("tcp://localhost:" + worker.ServiceUrl.Port + "MasterJobTracker-W" + worker.WorkerId);
+					if (ServiceUri == null)
+						ServiceUri = new Uri("tcp://localhost:" + worker.ServiceUrl.Port + "/MasterJobTracker-W" + worker.WorkerId);
 					RemotingServices.Marshal(this, "MasterJobTracker-W" + worker.WorkerId, typeof(IJobTracker));
 					while (true) {
 						MasterTrackerMain();
 					}
 				case JobTrackerMode.Passive:
-					ServiceUri = new Uri("tcp://localhost:" + worker.ServiceUrl.Port + "SlaveJobTracker-W" + worker.WorkerId);
+					if (ServiceUri == null)
+						ServiceUri = new Uri("tcp://localhost:" + worker.ServiceUrl.Port + "/SlaveJobTracker-W" + worker.WorkerId);
 					RemotingServices.Marshal(this, "SlaveJobTracker-W" + worker.WorkerId, typeof(IJobTracker));
 					while (true) {
 						SlaveTrackerMain();
@@ -76,7 +82,7 @@ namespace PlatformCore
 			while (splitsQueue.Count > 0 || splitsBeingProcessed.Count != 0) {
 				// Selects from all online workers, those that are not busy.
 				var availableWorkers = new Queue<IWorker>((
-						from w in worker.WorkersList
+						from w in worker.GetWorkersList()
 						where w.Value.GetStatus() == WorkerStatus.Available
 						select w.Value
 					).ToList());
@@ -112,32 +118,56 @@ namespace PlatformCore
 			while (worker.GetStatus() == WorkerStatus.Busy) {
 				var masterTracker = RemotingHelper.GetRemoteObject<IJobTracker>(currentJob.JobTrackerUri);
 				masterTracker.Alive(worker.WorkerId);
-				Thread.Sleep(NOTIFY_TIMEOUT);
+				Thread.Sleep(Worker.NOTIFY_TIMEOUT);
 			}
 		}
 
 		private void SplitsDelivery(Queue<IWorker> availableWorkers, IJobTask job) {
+			int splitsCount;
+
+			lock (trackerMutex) {
+				splitsCount = splitsQueue.Count;
+				if (splitsCount == 0) {
+					return;
+				}
+			}
+
 			// Delivers as many splits as it cans, considering the number of available workers.
-			for (var i = 0; i < Math.Min(availableWorkers.Count, splitsQueue.Count); i++) {
-				var remoteWorker = availableWorkers.Dequeue();
-				var split = splitsQueue.Peek();
+			for (var i = 0; i < Math.Min(availableWorkers.Count, splitsCount); i++) {
+				IWorker remoteWorker;
+				int split;
+
+				lock (trackerMutex) {
+					var wrk = availableWorkers.Dequeue();
+					remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(wrk.ServiceUrl);
+					split = splitsQueue.Peek();
+				}
 
 				try {
-					// The callback called after the execution of the async method call.
-					var callback = new AsyncCallback(result => {
+					// Async call to ExecuteMapJob.
+					Trace.WriteLine(string.Format("Job split {0} sent to worker at '{1}'.", split, remoteWorker.ServiceUrl));
+					remoteWorker.SetStatus(WorkerStatus.Busy);
+
+					new Thread(() => {
+						remoteWorker.AsyncExecuteMapJob(split, job.FileName, job.FileSplits, job.JobTrackerUri,
+							job.MapClassName, job.MapFunctionAssembly, job.OutputReceiverUrl, job.SplitProviderUrl);
+
+						lock (trackerMutex) {
+							splitsBeingProcessed.Remove(split);
+						}
+
+						remoteWorker.SetStatus(WorkerStatus.Available);
 						Trace.WriteLine(string.Format("Worker '{0}' finished processing split number '{1}'."
 							, remoteWorker.ServiceUrl, split));
-					});
+					}).Start();
 
-					// Async call to ExecuteMapJob.
-					Trace.WriteLine(string.Format("Job split {0} sent to worker at '{1}'.", job.SplitNumber, remoteWorker.ServiceUrl));
-					remoteWorker.AsyncExecuteMapJob(this, split, remoteWorker, callback, job);
+					lock (trackerMutex) {
+						splitsQueue.Dequeue();
+						Trace.WriteLine("Split " + split + " removed from splits queue.");
 
-					splitsQueue.Dequeue();
-					Trace.WriteLine("Split " + job.SplitNumber + " removed from splits queue.");
-
-					workerAliveSignals[remoteWorker.WorkerId] = DateTime.Now;
-					splitsBeingProcessed.Add(split, remoteWorker.WorkerId);
+						workerAliveSignals[remoteWorker.WorkerId] = DateTime.Now;
+						splitsBeingProcessed.Add(split, remoteWorker.WorkerId);
+					}
 				} catch (RemotingException ex) {
 					Trace.WriteLine(ex.GetType().FullName + " - " + ex.Message
 						+ " -->> " + ex.StackTrace);
@@ -150,21 +180,20 @@ namespace PlatformCore
 				lock (trackerMutex) {
 					if (CurrentJob == null)
 						return;
-				}
 
-				foreach (var keyValue in splitsBeingProcessed) {
-					var workerId = keyValue.Value;
-					var split = keyValue.Key;
-					TimeSpan tspan;
+					var splitsInProcess = splitsBeingProcessed.ToArray();
+					foreach (var keyValue in splitsInProcess) {
+						var workerId = keyValue.Value;
+						var split = keyValue.Key;
+						TimeSpan tspan;
 
-					lock (trackerMutex) {
-						tspan = DateTime.Now.Subtract(workerAliveSignals[workerId]);
-					}
+						lock (trackerMutex) {
+							tspan = DateTime.Now.Subtract(workerAliveSignals[workerId]);
+						}
 
-					if (!(tspan.TotalSeconds > NOTIFY_TIMEOUT * 3))
-						continue;
+						if (!(tspan.TotalSeconds > 120.0))
+							continue;
 
-					lock (trackerMutex) {
 						// Worker not responding.
 						worker.Status = WorkerStatus.Offline;
 						splitsQueue.Enqueue(split);
@@ -172,15 +201,16 @@ namespace PlatformCore
 					}
 				}
 
-				Thread.Sleep(NOTIFY_TIMEOUT);
+				Thread.Sleep(Worker.NOTIFY_TIMEOUT);
 			}
 		}
 
 		public void Alive(int wid) {
+			Trace.WriteLine("Alive signal worker '" + wid + "'.");
 			lock (trackerMutex) {
-				var w = ((Worker)worker.WorkersList[wid]);
+				var w = ((Worker)worker.GetWorkersList()[wid]);
 				if (w.Status == WorkerStatus.Offline)
-					w.Status = WorkerStatus.Available;
+					w.SetStatus(WorkerStatus.Available);
 				workerAliveSignals[wid] = DateTime.Now;
 			}
 		}

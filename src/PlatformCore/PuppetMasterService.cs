@@ -6,6 +6,7 @@ using SharedTypes;
 
 namespace PlatformCore
 {
+	[Serializable]
 	public class PuppetMasterService : MarshalByRefObject, IPuppetMasterService
 	{
 		private readonly object globalLock = new object();
@@ -24,15 +25,16 @@ namespace PlatformCore
 			lock (globalLock) {
 				var serviceUri = new Uri(serviceUrl);
 				RemotingHelper.RegisterChannel(serviceUri);
-				var worker = Worker.Run(workerId, serviceUri, workers);
-				workers.Add(workerId, worker);
-				worker.UpdateAvailableWorkers(workers);
+
+				var remoteWorker = Worker.Run(workerId, serviceUri, workers);
+				workers.Add(workerId, remoteWorker);
+				remoteWorker.UpdateAvailableWorkers(workers);
 
 				Trace.WriteLine(string.Format("New worker created: id '{0}', url '{1}'."
-					, workerId, worker.ServiceUrl));
+					, workerId, serviceUri));
 
 				if (!string.IsNullOrWhiteSpace(entryUrl))
-					NotifyWorkerCreation(worker);
+					NotifyWorkerCreation(remoteWorker);
 			}
 		}
 
@@ -110,7 +112,7 @@ namespace PlatformCore
 			worker.UnfreezeCommunication();
 		}
 
-		private void NotifyWorkerCreation(Worker worker) {
+		private void NotifyWorkerCreation(IWorker worker) {
 			Trace.WriteLine("Sends notification to worker at ENTRY_URL informing worker creation.");
 			//TODO: Contact worker at ENTRY_URL and announce new worker available.
 		}

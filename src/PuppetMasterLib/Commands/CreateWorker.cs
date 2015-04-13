@@ -18,8 +18,8 @@ namespace PuppetMasterLib.Commands
 		public void Execute() {
 			var pMaster = (IPuppetMasterService)Activator.GetObject(
 				typeof(IPuppetMasterService),
-				PuppetMasterUrl);
-			pMaster.CreateWorker(WorkerId, ServiceUrl, EntryUrl);
+				PuppetMasterUrl.Trim());
+			pMaster.CreateWorker(WorkerId, ServiceUrl.Trim(), EntryUrl);
 		}
 
 		public override string ToString() {
