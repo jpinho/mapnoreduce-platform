@@ -4,7 +4,8 @@
 	{
 		Busy,
 		ReceivingJob,
-		Available
+		Available,
+		Offline
 	}
 
 	public enum JobTrackerState

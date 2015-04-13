@@ -35,14 +35,9 @@ namespace PlatformCore
 		public int WorkerId { get; set; }
 
 		/// <summary>
-		/// List of all workers known by this worker, that are online.
+		/// List of all workers known by this worker.
 		/// </summary>
-		public Dictionary<int /*worker id*/, IWorker> OnlineWorkers { get; private set; }
-
-		/// <summary>
-		/// List of workers that are not responding anymore.
-		/// </summary>
-		public List<IWorker> OfflineWorkers { get; private set; }
+		public Dictionary<int /*worker id*/, IWorker> WorkersList { get; private set; }
 
 		/// <summary>
 		/// The service URL used to reach this work remotely.
@@ -69,7 +64,7 @@ namespace PlatformCore
 			: this() {
 			WorkerId = workerId;
 			ServiceUrl = serviceUrl;
-			OnlineWorkers = availableWorkers;
+			WorkersList = availableWorkers;
 		}
 
 		/// <summary>
@@ -82,7 +77,7 @@ namespace PlatformCore
 		}
 
 		public void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers) {
-			OnlineWorkers = availableWorkers;
+			WorkersList = availableWorkers;
 		}
 
 		public WorkerStatus GetStatus() {

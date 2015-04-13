@@ -16,7 +16,8 @@ namespace PlatformCore
 		private readonly object trackerMutex = new object();
 		private readonly Worker worker;
 		private readonly Queue<IJobTask> jobQueue = new Queue<IJobTask>();
-		private readonly Dictionary<int, DateTime> workerAliveSignals = new Dictionary<int, DateTime>();
+		private readonly Dictionary</*splitnumber*/ int, /*workerid*/ int> splitsBeingProcessed = new Dictionary<int, int>();
+		private readonly Dictionary</*workerid*/ int, /*lastupdate*/DateTime> workerAliveSignals = new Dictionary<int, DateTime>();
 		/// <summary>
 		/// The job splits priority queue.
 		/// </summary>
@@ -57,33 +58,40 @@ namespace PlatformCore
 		}
 
 		private void MasterTrackerMain() {
-			IJobTask currentJob = null;
-
-			// Updates master job tracker shared state.
 			lock (trackerMutex) {
-				if (jobQueue.Count > 0) {
-					currentJob = CurrentJob = jobQueue.Dequeue();
-					splitsQueue = new Queue<int>(currentJob.FileSplits);
-					Status = JobTrackerState.Busy;
-				} else
-					Status = JobTrackerState.Available;
+				// If job tracker busy or without jobs to process exit.
+				if (!(jobQueue.Count > 0) || Status != JobTrackerState.Available)
+					return;
+
+				// Get next job and set state to busy.
+				CurrentJob = jobQueue.Dequeue();
+				splitsQueue = new Queue<int>(CurrentJob.FileSplits);
+				Status = JobTrackerState.Busy;
 			}
 
-			if (currentJob == null)
-				return;
+			var thrMonitor = new Thread(MonitorSplitProcessing);
+			thrMonitor.Start();
 
-			// Loops until all splits are processed => Job Done.
-			while (splitsQueue.Count > 0) {
-				// Selects from all online workers those that are not busy.
+			// Loops until all splits are processed, i.e, job done.
+			while (splitsQueue.Count > 0 || splitsBeingProcessed.Count != 0) {
+				// Selects from all online workers, those that are not busy.
 				var availableWorkers = new Queue<IWorker>((
-						from onlineWorker in worker.OnlineWorkers
-						where onlineWorker.Value.GetStatus() == WorkerStatus.Available
-						select onlineWorker.Value
+						from w in worker.WorkersList
+						where w.Value.GetStatus() == WorkerStatus.Available
+						select w.Value
 					).ToList());
 
-				SplitsDelivery(availableWorkers, currentJob);
+				SplitsDelivery(availableWorkers, CurrentJob);
 				Thread.Sleep(PROCESSING_DELAY_TIMEOUT);
 			}
+
+			lock (trackerMutex) {
+				CurrentJob = null;
+				splitsBeingProcessed.Clear();
+				splitsQueue.Clear();
+			}
+
+			thrMonitor.Join();
 		}
 
 		private void SlaveTrackerMain() {
@@ -116,7 +124,7 @@ namespace PlatformCore
 
 				try {
 					// The callback called after the execution of the async method call.
-					var callback = new AsyncCallback((result) => {
+					var callback = new AsyncCallback(result => {
 						Trace.WriteLine(string.Format("Worker '{0}' finished processing split number '{1}'."
 							, remoteWorker.ServiceUrl, split));
 					});
@@ -128,7 +136,8 @@ namespace PlatformCore
 					splitsQueue.Dequeue();
 					Trace.WriteLine("Split " + job.SplitNumber + " removed from splits queue.");
 
-					//new Thread(() => MonitorSplitProcessing(job, split)).Start();
+					workerAliveSignals[remoteWorker.WorkerId] = DateTime.Now;
+					splitsBeingProcessed.Add(split, remoteWorker.WorkerId);
 				} catch (RemotingException ex) {
 					Trace.WriteLine(ex.GetType().FullName + " - " + ex.Message
 						+ " -->> " + ex.StackTrace);
@@ -136,28 +145,42 @@ namespace PlatformCore
 			}
 		}
 
-		/// <summary>
-		/// TODO: I was doing this! Very probably it haves a bug!
-		/// </summary>
-		/// <param name="job"></param>
-		/// <param name="splitNumber"></param>
-		private void MonitorSplitProcessing(IJobTask job, int splitNumber) {
+		private void MonitorSplitProcessing() {
 			while (true) {
-				foreach (var aliveSignal in workerAliveSignals) {
-					if (DateTime.Now.Subtract(aliveSignal.Value).Seconds > 30) {
-						lock (trackerMutex) {
-							splitsQueue.Enqueue(splitNumber);
-						}
+				lock (trackerMutex) {
+					if (CurrentJob == null)
+						return;
+				}
+
+				foreach (var keyValue in splitsBeingProcessed) {
+					var workerId = keyValue.Value;
+					var split = keyValue.Key;
+					TimeSpan tspan;
+
+					lock (trackerMutex) {
+						tspan = DateTime.Now.Subtract(workerAliveSignals[workerId]);
+					}
+
+					if (!(tspan.TotalSeconds > NOTIFY_TIMEOUT * 3))
+						continue;
+
+					lock (trackerMutex) {
+						// Worker not responding.
+						worker.Status = WorkerStatus.Offline;
+						splitsQueue.Enqueue(split);
+						splitsBeingProcessed.Remove(split);
 					}
 				}
+
 				Thread.Sleep(NOTIFY_TIMEOUT);
 			}
 		}
 
 		public void Alive(int wid) {
 			lock (trackerMutex) {
-				if (Mode != JobTrackerMode.Active)
-					return;
+				var w = ((Worker)worker.WorkersList[wid]);
+				if (w.Status == WorkerStatus.Offline)
+					w.Status = WorkerStatus.Available;
 				workerAliveSignals[wid] = DateTime.Now;
 			}
 		}

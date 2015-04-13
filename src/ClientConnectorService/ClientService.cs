@@ -113,7 +113,7 @@ namespace ClientServices
             while (!corSvc.IsMapResultReady(filePath, nSplits)) {
                 if (waitCount++ >= RESULT_WAIT_LIMIT)
                     throw new TimeoutException("ClientOutputResult service 'IsMapResultReady' wait timed out!");
-                Thread.Sleep(RESULT_WAIT_TIMEOUT);
+                Thread.Sleep(RESULT_WAIT_TIMEOUT*3);
             }
 
             // Saves the map job output to disk.
