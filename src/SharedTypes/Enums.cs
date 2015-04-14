@@ -5,6 +5,7 @@
 		Busy,
 		ReceivingJob,
 		Available,
+        Frozen,
 		Offline
 	}
 
