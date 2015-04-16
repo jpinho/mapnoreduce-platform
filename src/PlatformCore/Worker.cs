@@ -266,10 +266,10 @@ namespace PlatformCore
             {    
                 lock (workerLock)
                 {
-                    status = WorkerStatus.Frozen;
+                    Status = WorkerStatus.Frozen;
                 }
                 frozenRequests.Clear();
-                activeTracker.FreezeCommunication();
+                //activeTracker.FreezeCommunication();
             }
 		}
 
@@ -283,11 +283,11 @@ namespace PlatformCore
             {
                 lock (workerLock)
                 {
-                    Status = WorkerStatus.Busy;
+                    Status = WorkerStatus.Available;
                 }
                 bool frozenWakeResult = processFrozenRequests();
             }
-			activeTracker.UnfreezeCommunication();
+			//activeTracker.UnfreezeCommunication();
 		}
 
 		public void FreezeCommunication() {

@@ -3,6 +3,8 @@ using System.IO;
 using ClientServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharedTypes;
+using System.Threading;
+using System.Diagnostics;
 
 namespace PlatformCore.Tests
 {
@@ -39,6 +41,49 @@ namespace PlatformCore.Tests
 
 			//TODO: finish result verification (read results from the output folder)!
 		}
+
+        [TestMethod]
+        public void TestFreezeWorker()
+        {
+            // Creates the client services to provide splits data and receive split results.
+            var clientService = new ClientService();
+            clientService.Init(worker1ServiceUrl);
+
+            // Creates a worker at the given URL.
+            puppetMaster.CreateWorker(1, worker1ServiceUrl, null);
+
+
+            // Fetchs the object from 'server'.
+            var remoteWorker1 = RemotingHelper.GetRemoteObject<IWorker>(worker1ServiceUrl);
+            var jobFilePath = Path.Combine(Environment.CurrentDirectory, "Resources", "job.txt");
+            var jobOutputPath = string.Concat(jobFilePath, "." + DateTime.Now.ToString("ddMMyyHHmmssfff") + ".out");
+            var asmPath = Path.Combine(Environment.CurrentDirectory, "Resources", "UserMappersLib.dll");
+
+            new Thread(() => clientService.Submit(jobFilePath, 5, jobOutputPath, "MonkeyMapper", asmPath)).Start();
+
+            Trace.WriteLine("Lets freeze");
+            /*My code works and I dont know why*/
+            new Thread(() => remoteWorker1.Freeze()).Start();
+
+            Thread.Sleep(10 * 1000);
+
+            Trace.WriteLine("Lets Work");
+            remoteWorker1.UnFreeze();
+
+            Thread.Sleep(1000);
+
+            /*Again*/
+            Trace.WriteLine("Lets freeze again");
+            /*My code works and I dont know why*/
+            new Thread(() => remoteWorker1.Freeze()).Start();
+
+            Thread.Sleep(10 * 1000);
+
+            Trace.WriteLine("Lets Work again");
+            remoteWorker1.UnFreeze();
+
+            Thread.Sleep(10 * 1000);
+        }
 
 		[TestMethod]
 		public void TestJobTrackerStart() {
