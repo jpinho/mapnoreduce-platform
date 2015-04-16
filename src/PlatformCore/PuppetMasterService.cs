@@ -39,8 +39,9 @@ namespace PlatformCore
 		}
 
 		public void GetStatus() {
-			foreach (var worker in workers.Values) {
-				worker.GetStatus();
+            foreach (var worker in workers.Values) {
+                var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+                remoteWorker.GetStatus();
 			}
 		}
 
@@ -61,7 +62,8 @@ namespace PlatformCore
 				throw new InvalidWorkerIdException(workerId, e);
 			}
 
-			worker.Slow(seconds);
+			var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+            remoteWorker.Slow(seconds);
 		}
 
 		public void FreezeWorker(int workerId) {
@@ -73,7 +75,8 @@ namespace PlatformCore
 				throw new InvalidWorkerIdException(workerId, e);
 			}
 
-			worker.Freeze();
+            var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+            remoteWorker.Freeze();
 		}
 
 		public void UnfreezeWorker(int workerId) {
@@ -85,7 +88,8 @@ namespace PlatformCore
 				throw new InvalidWorkerIdException(workerId, e);
 			}
 
-			worker.UnFreeze();
+            var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+            remoteWorker.UnFreeze();
 		}
 
 		public void FreezeCommunication(int workerId) {
@@ -97,7 +101,8 @@ namespace PlatformCore
 				throw new InvalidWorkerIdException(workerId, e);
 			}
 
-			worker.FreezeCommunication();
+            var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+            remoteWorker.FreezeCommunication();
 		}
 
 		public void UnfreezeCommunication(int workerId) {
@@ -109,7 +114,8 @@ namespace PlatformCore
 				throw new InvalidWorkerIdException(workerId, e);
 			}
 
-			worker.UnfreezeCommunication();
+			var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+            remoteWorker.UnfreezeCommunication();
 		}
 
 		private void NotifyWorkerCreation(IWorker worker) {
