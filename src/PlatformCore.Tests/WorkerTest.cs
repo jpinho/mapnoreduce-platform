@@ -62,8 +62,8 @@ namespace PlatformCore.Tests
             new Thread(() => clientService.Submit(jobFilePath, 5, jobOutputPath, "MonkeyMapper", asmPath)).Start();
 
             Trace.WriteLine("Lets freeze");
-            /*My code works and I dont know why*/
-            new Thread(() => remoteWorker1.Freeze()).Start();
+            
+            remoteWorker1.Freeze();
 
             Thread.Sleep(10 * 1000);
 
@@ -74,8 +74,8 @@ namespace PlatformCore.Tests
 
             /*Again*/
             Trace.WriteLine("Lets freeze again");
-            /*My code works and I dont know why*/
-            new Thread(() => remoteWorker1.Freeze()).Start();
+            
+            remoteWorker1.Freeze();
 
             Thread.Sleep(10 * 1000);
 
