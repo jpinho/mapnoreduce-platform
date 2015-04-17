@@ -12,7 +12,8 @@
 	public enum JobTrackerState
 	{
 		Busy,
-		Available
+		Available,
+        Frozen
 	}
 
 	public enum JobTrackerMode

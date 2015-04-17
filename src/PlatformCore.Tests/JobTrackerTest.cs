@@ -1,29 +1,60 @@
 ﻿using System;
+using System.IO;
+using ClientServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PlatformCore;
 using SharedTypes;
+using System.Threading;
+using System.Diagnostics;
 
 
 namespace PlatformCore.Tests
 {
+    
+    
     [TestClass]
     public class JobTrackerTest
     {
-        PuppetMasterService puppetMaster = new PuppetMasterService();
+        private readonly PuppetMasterService puppetMaster = new PuppetMasterService();
+	    private readonly String worker1ServiceUrl = "tcp://localhost:20000/worker" + Guid.NewGuid().ToString("D");
+	    private readonly String worker2ServiceUrl = "tcp://localhost:20001/worker" + Guid.NewGuid().ToString("D");
+	    private readonly String worker3ServiceUrl = "tcp://localhost:20002/worker" + Guid.NewGuid().ToString("D");
+	    private readonly String worker4ServiceUrl = "tcp://localhost:20003/worker" + Guid.NewGuid().ToString("D");
+	    private readonly String worker5ServiceUrl = "tcp://localhost:20004/worker" + Guid.NewGuid().ToString("D");
+    
         String remoteServiceUrl = "tcp://localhost:9000/worker";
+
         [TestMethod]
         public void TestJobTrackerFreeze()
-        {
-            puppetMaster.CreateWorker(1, remoteServiceUrl,null);
-            var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(remoteServiceUrl);
-            //the point was freezing only jobtracker component
+        { 
+            // Creates the client services to provide splits data and receive split results.
+            var clientService = new ClientService();
+            clientService.Init(worker1ServiceUrl);
+
+            // Creates a worker at the given URL.
+            puppetMaster.CreateWorker(1, worker1ServiceUrl, null);
+
+
+            // Fetchs the object from 'server'.
+            var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker1ServiceUrl);
+            var jobFilePath = Path.Combine(Environment.CurrentDirectory, "Resources", "job.txt");
+            var jobOutputPath = string.Concat(jobFilePath, "." + DateTime.Now.ToString("ddMMyyHHmmssfff") + ".out");
+            var asmPath = Path.Combine(Environment.CurrentDirectory, "Resources", "UserMappersLib.dll");
+
+            new Thread(() => clientService.Submit(jobFilePath, 5, jobOutputPath, "MonkeyMapper", asmPath)).Start();
+
+            //giving time to initiate trackers
+            Thread.Sleep(2000);
+
+            Trace.WriteLine("Freeze tracker");
             remoteWorker.FreezeCommunication();
 
-            //testing if worker is working -- yap its working
-            remoteWorker.GetStatus();
-            
-            //unfreezing jobtracker
+            Thread.Sleep(10 * 1000);
+
+            Trace.WriteLine("Unfreeze tracker");
             remoteWorker.UnfreezeCommunication();
+
+            Thread.Sleep(1000);
+            Trace.WriteLine("The end");
 
         }
     }
