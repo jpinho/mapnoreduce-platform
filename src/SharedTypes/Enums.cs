@@ -5,13 +5,15 @@
 		Busy,
 		ReceivingJob,
 		Available,
+        Frozen,
 		Offline
 	}
 
 	public enum JobTrackerState
 	{
 		Busy,
-		Available
+		Available,
+        Frozen
 	}
 
 	public enum JobTrackerMode

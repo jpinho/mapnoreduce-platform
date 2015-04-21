@@ -23,6 +23,9 @@ namespace PlatformCore
 		/// </summary>
 		private Queue<int> splitsQueue;
 
+        // initial state
+        private List<ManualResetEvent> frozenRequests = new List<ManualResetEvent>();
+
 		public IJobTask CurrentJob { get; private set; }
 		public Uri ServiceUri { get; set; }
 		public JobTrackerMode Mode { get; set; }
@@ -45,6 +48,7 @@ namespace PlatformCore
 
 		[SuppressMessage("ReSharper", "FunctionNeverReturns")]
 		public void Start() {
+            stateCheck();
 			switch (Mode) {
 				case JobTrackerMode.Active:
 					if (ServiceUri == null)
@@ -64,6 +68,7 @@ namespace PlatformCore
 		}
 
 		private void MasterTrackerMain() {
+            stateCheck();
 			lock (trackerMutex) {
 				// If job tracker busy or without jobs to process exit.
 				if (!(jobQueue.Count > 0) || Status != JobTrackerState.Available)
@@ -101,6 +106,7 @@ namespace PlatformCore
 		}
 
 		private void SlaveTrackerMain() {
+            stateCheck();
 			IJobTask currentJob = null;
 
 			// Updates slave job tracker shared state.
@@ -123,6 +129,7 @@ namespace PlatformCore
 		}
 
 		private void SplitsDelivery(Queue<IWorker> availableWorkers, IJobTask job) {
+            stateCheck();
 			int splitsCount;
 
 			lock (trackerMutex) {
@@ -176,6 +183,7 @@ namespace PlatformCore
 		}
 
 		private void MonitorSplitProcessing() {
+            stateCheck();
 			while (true) {
 				lock (trackerMutex) {
 					if (CurrentJob == null)
@@ -206,6 +214,7 @@ namespace PlatformCore
 		}
 
 		public void Alive(int wid) {
+            stateCheck();
 			Trace.WriteLine("Alive signal worker '" + wid + "'.");
 			lock (trackerMutex) {
 				var w = ((Worker)worker.GetWorkersList()[wid]);
@@ -216,18 +225,67 @@ namespace PlatformCore
 		}
 
 		public void FreezeCommunication() {
-			var dte = new EnvDTE.DTE();
-			var thread = dte.Debugger.CurrentThread;
-			thread.Freeze();
+            JobTrackerState state;
+            lock (trackerMutex)
+            {
+                state = Status;
+            }
+            if (state != JobTrackerState.Frozen)
+            {
+                lock (trackerMutex)
+                {
+                    Status = JobTrackerState.Frozen;
+                }
+                frozenRequests.Clear();
+            }
 		}
 
 		public void UnfreezeCommunication() {
-			var dte = new EnvDTE.DTE();
-			var thread = dte.Debugger.CurrentThread;
-			thread.Thaw();
+            JobTrackerState state;
+            lock (trackerMutex)
+            {
+                state = Status;
+            }
+            if (state == JobTrackerState.Frozen)
+            {
+                lock (trackerMutex)
+                {
+                    Status = JobTrackerState.Available;
+                }
+                bool frozenWakeResult = processFrozenRequests();
+            }
 		}
 
+        //wakes requests frozen during frozen state
+        private bool processFrozenRequests()
+        {
+            for (int i = 0; i < frozenRequests.Count; i++)
+            {
+                ManualResetEvent mre = frozenRequests[i];
+                mre.Set();
+            }
+            return true;
+        }
+
+        //puts to sleep all incoming requests while worker is frozen
+        private void stateCheck()
+        {
+            JobTrackerState state;
+            lock (trackerMutex)
+            {
+                state = Status;
+            }
+
+            if (state == JobTrackerState.Frozen)
+            {
+                var mre = new ManualResetEvent(false);
+                frozenRequests.Add(mre);
+                mre.WaitOne();
+            }
+        }
+
 		public void ScheduleJob(IJobTask job) {
+            stateCheck();
 			lock (trackerMutex) {
 				jobQueue.Enqueue(job);
 			}

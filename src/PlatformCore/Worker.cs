@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using SharedTypes;
+using System.Runtime.Remoting;
 
 namespace PlatformCore
 {
@@ -26,6 +27,11 @@ namespace PlatformCore
 		private JobTracker passiveTracker;
 		private Thread thrPassiveTracker;
 		private bool trackersInitialized;
+        // possible worker states
+        enum State { Running, Failed, Frozen };
+
+        // initial state
+        private List<ManualResetEvent> frozenRequests = new List<ManualResetEvent>();
 		/// <summary>
 		/// List of all workers known by this worker.
 		/// </summary>
@@ -66,10 +72,43 @@ namespace PlatformCore
 		}
 
 		public void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers) {
+            stateCheck();
 			lock (workerLock) {
 				workersList = availableWorkers;
 			}
 		}
+
+        //wakes requests frozen during frozen state
+
+        private bool processFrozenRequests()
+        {
+            for (int i = 0; i < frozenRequests.Count; i++) 
+            {
+                ManualResetEvent mre = frozenRequests[i];
+                mre.Set();
+            }
+            return true;
+        }
+
+        //puts to sleep all incoming requests while worker is frozen
+
+        private void stateCheck()
+        {
+            WorkerStatus status;
+            lock (workerLock)
+            {
+                status = Status;
+            }
+
+            if (status == WorkerStatus.Offline)
+                throw new RemotingException("Server is Offline;");
+            else if (status == WorkerStatus.Frozen)
+            {
+                var mre = new ManualResetEvent(false);
+                frozenRequests.Add(mre);
+                mre.WaitOne();
+            }
+        }
 
 		public Dictionary<int, IWorker> GetWorkersList() {
 			lock (workerLock) {
@@ -97,6 +136,7 @@ namespace PlatformCore
 		/// </summary>
 		/// <param name="task">The job to be processed.</param>
 		public void ReceiveMapJob(IJobTask task) {
+            stateCheck();
 			lock (workerReceiveJobLock) {
 				if (!trackersInitialized)
 					InitTrackers();
@@ -126,6 +166,7 @@ namespace PlatformCore
 		}
 
 		public bool ExecuteMapJob(IJobTask task) {
+            stateCheck();
 			lock (workerLock) {
 				if (!trackersInitialized)
 					InitTrackers();
@@ -181,6 +222,7 @@ namespace PlatformCore
 		public void AsyncExecuteMapJob(int split,
 				string fileName, List<int> fileSplits, Uri jobTrackerUri, string mapClassName,
 				byte[] mapFunctionName, string outputReceiverUrl, string splitProviderUrl) {
+            stateCheck();
 
 			//var fnExecuteMapJob = new ExecuteMapJobDelegate(ExecuteMapJob);
 			var newTask = new JobTask {
@@ -210,24 +252,51 @@ namespace PlatformCore
 		}
 
 		public void Slow(int secs) {
+            stateCheck();
 			Thread.Sleep(secs * 1000);
 		}
 
 		public void Freeze() {
-			activeTracker.FreezeCommunication();
-			freezeHandle.WaitOne();
+            WorkerStatus status;
+            lock (workerLock)
+            {
+                status = Status;
+            }
+            if (status != WorkerStatus.Frozen)
+            {    
+                lock (workerLock)
+                {
+                    Status = WorkerStatus.Frozen;
+                }
+                frozenRequests.Clear();
+                //activeTracker.FreezeCommunication();
+            }
 		}
 
 		public void UnFreeze() {
-			freezeHandle.Set();
-			activeTracker.UnfreezeCommunication();
+            WorkerStatus status;
+            lock (workerLock)
+            {
+                status = Status;
+            }
+            if (status == WorkerStatus.Offline || status == WorkerStatus.Frozen)
+            {
+                lock (workerLock)
+                {
+                    Status = WorkerStatus.Available;
+                }
+                bool frozenWakeResult = processFrozenRequests();
+            }
+			//activeTracker.UnfreezeCommunication();
 		}
 
 		public void FreezeCommunication() {
+            stateCheck();
 			activeTracker.FreezeCommunication();
 		}
 
 		public void UnfreezeCommunication() {
+            stateCheck();
 			activeTracker.UnfreezeCommunication();
 		}
 	}
