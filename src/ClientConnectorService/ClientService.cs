@@ -16,30 +16,18 @@ namespace ClientServices
 	public class ClientService : MarshalByRefObject, IClientService
 	{
 		public const int CLIENT_CHANNEL_PORT = 8090;
+		private const int RESULT_WAIT_TIMEOUT = 5000;
 		public const string CLIENT_OUTPUTRECV_SVCNAME = "MNRP-ClientORS";
 		public const string CLIENT_SPLITPROV_SVCNAME = "MNRP-ClientSPS";
-		private const int RESULT_WAIT_TIMEOUT = 5000;
-		private const int RESULT_WAIT_LIMIT = 6;
 
-		private ClientOutputReceiverService corSvc;
-		private ClientSplitProviderService cspSvc;
 		public string EntryUrl { get; set; }
-		public static bool IsStarted { get; private set; }
 
-		/// <summary>
-		/// TODO: comment me.
-		/// </summary>
-		/// <returns></returns>
-		public string GetOutputReceiverServiceUrl() {
-			return corSvc.ServiceURL;
+		public static Uri ClientOutputServiceUri {
+			get { return new Uri(string.Format("tcp://localhost:{0}/{1}", CLIENT_CHANNEL_PORT, CLIENT_OUTPUTRECV_SVCNAME)); }
 		}
 
-		/// <summary>
-		/// TODO: comment me.
-		/// </summary>
-		/// <returns></returns>
-		public string GetSplitProviderServiceUrl() {
-			return cspSvc.ServiceURL;
+		public static Uri ClientSplitProviderServiceUri {
+			get { return new Uri(string.Format("tcp://localhost:{0}/{1}", CLIENT_CHANNEL_PORT, CLIENT_SPLITPROV_SVCNAME)); }
 		}
 
 		/// <summary>
@@ -47,31 +35,28 @@ namespace ClientServices
 		/// </summary>
 		/// <param name="entryUrl"></param>
 		public void Init(string entryUrl) {
-			if (IsStarted)
+			TcpChannel channel;
+
+			try {
+				EntryUrl = entryUrl;
+				var provider = new BinaryServerFormatterSinkProvider {
+					TypeFilterLevel = TypeFilterLevel.Full
+				};
+
+				IDictionary props = new Hashtable();
+				props["port"] = CLIENT_CHANNEL_PORT;
+				channel = new TcpChannel(props, null, provider);
+			} catch {
+				Trace.WriteLine("Client channel already registered, skipping step.");
 				return;
-			IsStarted = true;
+			}
 
-			EntryUrl = entryUrl;
-			var provider = new BinaryServerFormatterSinkProvider {
-				TypeFilterLevel = TypeFilterLevel.Full
-			};
-
-			IDictionary props = new Hashtable();
-			props["port"] = CLIENT_CHANNEL_PORT;
-
-			var channel = new TcpChannel(props, null, provider);
 			ChannelServices.RegisterChannel(channel, true);
+			RemotingServices.Marshal(new ClientOutputReceiverService(), CLIENT_OUTPUTRECV_SVCNAME, typeof(ClientOutputReceiverService));
+			RemotingServices.Marshal(new ClientSplitProviderService(), CLIENT_SPLITPROV_SVCNAME, typeof(ClientSplitProviderService));
 
-			corSvc = new ClientOutputReceiverService(
-				string.Format("tcp://localhost:{0}/{1}", CLIENT_CHANNEL_PORT, CLIENT_OUTPUTRECV_SVCNAME));
-			cspSvc = new ClientSplitProviderService(
-				string.Format("tcp://localhost:{0}/{1}", CLIENT_CHANNEL_PORT, CLIENT_SPLITPROV_SVCNAME));
-
-			RemotingServices.Marshal(corSvc, CLIENT_OUTPUTRECV_SVCNAME, typeof(ClientOutputReceiverService));
-			RemotingServices.Marshal(cspSvc, CLIENT_SPLITPROV_SVCNAME, typeof(ClientSplitProviderService));
-
-			Trace.WriteLine("Client Output Receiver Service, available at {0}.", corSvc.ServiceURL);
-			Trace.WriteLine("Client Split Provider Service, available at {0}.", cspSvc.ServiceURL);
+			Trace.WriteLine("Client Output Receiver Service, available at {0}.", ClientOutputServiceUri.ToString());
+			Trace.WriteLine("Client Split Provider Service, available at {0}.", ClientSplitProviderServiceUri.ToString());
 		}
 
 		/// <summary>
@@ -85,6 +70,9 @@ namespace ClientServices
 		/// <param name="mapClassName">The name of the Map Class.</param>
 		/// <param name="assemblyFilePath">The file path to the assembly containning the map functions.</param>
 		public void Submit(string filePath, int nSplits, string outputDir, string mapClassName, string assemblyFilePath) {
+			var corSvc = RemotingHelper.GetRemoteObject<ClientOutputReceiverService>(ClientOutputServiceUri);
+			var cspSvc = RemotingHelper.GetRemoteObject<ClientSplitProviderService>(ClientSplitProviderServiceUri);
+
 			// Calls the server reference of the Split Provider to split and save of the file splits
 			// to a memory store.
 			cspSvc.SplitAndSave(filePath, nSplits);
@@ -95,8 +83,8 @@ namespace ClientServices
 				FileName = filePath,
 				MapClassName = mapClassName,
 				MapFunctionAssembly = File.ReadAllBytes(assemblyFilePath),
-				SplitProviderUrl = cspSvc.ServiceURL,
-				OutputReceiverUrl = corSvc.ServiceURL,
+				SplitProviderUrl = ClientSplitProviderServiceUri.ToString(),
+				OutputReceiverUrl = ClientOutputServiceUri.ToString(),
 				SplitNumber = -1,
 				FileSplits = new List<int>()
 			};
@@ -109,7 +97,7 @@ namespace ClientServices
 			masterWorker.ReceiveMapJob(job);
 
 			// Blocks the current thread until the result is ready.
-			var waitCount = 0;
+			//var waitCount = 0;
 			while (!corSvc.IsMapResultReady(filePath, nSplits)) {
 				//if (waitCount++ >= RESULT_WAIT_LIMIT)
 				//    throw new TimeoutException("ClientOutputResult service 'IsMapResultReady' wait timed out!");
@@ -125,7 +113,7 @@ namespace ClientServices
 
 			using (var outFile = File.CreateText(outFilePath)) {
 				foreach (var splitResult in result)
-					outFile.WriteLine(String.Join("\n", splitResult));
+					outFile.WriteLine(string.Join("\n", splitResult));
 			}
 		}
 	}
