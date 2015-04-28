@@ -53,6 +53,7 @@
 			this.tpNewScript = new System.Windows.Forms.TabPage();
 			this.txtScripts = new System.Windows.Forms.TextBox();
 			this.tpMonitoring = new System.Windows.Forms.TabPage();
+			this.cbAutoScroll = new System.Windows.Forms.CheckBox();
 			this.cbMonitoring = new System.Windows.Forms.CheckBox();
 			this.cbLiveUpdate = new System.Windows.Forms.CheckBox();
 			this.lblPltObjects = new System.Windows.Forms.Label();
@@ -65,7 +66,6 @@
 			this.txtLogFile = new System.Windows.Forms.TextBox();
 			this.bwScriptWorker = new System.ComponentModel.BackgroundWorker();
 			this.tmrMonitoring = new System.Windows.Forms.Timer(this.components);
-			this.cbAutoScroll = new System.Windows.Forms.CheckBox();
 			this.tsTopNavigation.SuspendLayout();
 			this.tcScriptContainer.SuspendLayout();
 			this.tpNewScript.SuspendLayout();
@@ -249,7 +249,6 @@
 			this.tsDdbMonitoring.Size = new System.Drawing.Size(87, 22);
 			this.tsDdbMonitoring.Text = "Monitoring";
 			this.tsDdbMonitoring.CheckedChanged += new System.EventHandler(this.tsDdbMonitoring_CheckedChanged);
-			this.tsDdbMonitoring.Click += new System.EventHandler(this.tsDdbMonitoring_Click);
 			// 
 			// ofdOpenFile
 			// 
@@ -337,12 +336,23 @@
 			this.tpMonitoring.TabIndex = 1;
 			this.tpMonitoring.Text = "Monitoring";
 			// 
+			// cbAutoScroll
+			// 
+			this.cbAutoScroll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.cbAutoScroll.AutoSize = true;
+			this.cbAutoScroll.Checked = true;
+			this.cbAutoScroll.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.cbAutoScroll.Location = new System.Drawing.Point(668, 8);
+			this.cbAutoScroll.Name = "cbAutoScroll";
+			this.cbAutoScroll.Size = new System.Drawing.Size(98, 17);
+			this.cbAutoScroll.TabIndex = 6;
+			this.cbAutoScroll.Text = "Auto Scroll Log";
+			this.cbAutoScroll.UseVisualStyleBackColor = true;
+			// 
 			// cbMonitoring
 			// 
 			this.cbMonitoring.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.cbMonitoring.AutoSize = true;
-			this.cbMonitoring.Checked = true;
-			this.cbMonitoring.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.cbMonitoring.Location = new System.Drawing.Point(545, 8);
 			this.cbMonitoring.Name = "cbMonitoring";
 			this.cbMonitoring.Size = new System.Drawing.Size(117, 17);
@@ -355,8 +365,6 @@
 			// 
 			this.cbLiveUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.cbLiveUpdate.AutoSize = true;
-			this.cbLiveUpdate.Checked = true;
-			this.cbLiveUpdate.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.cbLiveUpdate.Location = new System.Drawing.Point(772, 8);
 			this.cbLiveUpdate.Name = "cbLiveUpdate";
 			this.cbLiveUpdate.Size = new System.Drawing.Size(105, 17);
@@ -460,20 +468,8 @@
 			// 
 			// tmrMonitoring
 			// 
-			this.tmrMonitoring.Enabled = true;
-			this.tmrMonitoring.Interval = 2000;
+			this.tmrMonitoring.Interval = 5000;
 			this.tmrMonitoring.Tick += new System.EventHandler(this.tmrMonitoring_Tick);
-			// 
-			// cbAutoScroll
-			// 
-			this.cbAutoScroll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.cbAutoScroll.AutoSize = true;
-			this.cbAutoScroll.Location = new System.Drawing.Point(668, 8);
-			this.cbAutoScroll.Name = "cbAutoScroll";
-			this.cbAutoScroll.Size = new System.Drawing.Size(98, 17);
-			this.cbAutoScroll.TabIndex = 6;
-			this.cbAutoScroll.Text = "Auto Scroll Log";
-			this.cbAutoScroll.UseVisualStyleBackColor = true;
 			// 
 			// ScriptRunner
 			// 

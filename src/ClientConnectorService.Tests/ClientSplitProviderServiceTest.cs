@@ -11,6 +11,7 @@ namespace ClientServices.Tests
 		private string filePath = Path.Combine(Environment.CurrentDirectory, "Resources\\job.txt");
 		private int splits = 2;
 		private static ClientService client = new ClientService();
+		private Guid clientId = Guid.NewGuid();
 
 		[TestMethod]
 		public void TestSplitAndSave() {
@@ -24,7 +25,7 @@ namespace ClientServices.Tests
 				typeof(ClientSplitProviderService),
 				ClientService.ClientSplitProviderServiceUri.ToString());
 
-				cspSvc.SplitAndSave(filePath, splits);
+				cspSvc.SplitAndSave(filePath, splits, clientId);
 
 			} catch (Exception e) {
 				Assert.Fail("Something went wrong: " + e);

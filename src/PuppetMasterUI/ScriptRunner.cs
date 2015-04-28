@@ -24,7 +24,9 @@ namespace PuppetMasterUI
 			bwScriptWorker.DoWork += ScriptWorker_DoWork;
 
 			puppetMasterService = RemotingHelper.GetRemoteObject<PuppetMasterService>(PuppetMasterService.ServiceUrl);
-			tmrMonitoring.Start();
+
+			if (cbMonitoring.Enabled)
+				tmrMonitoring.Start();
 		}
 
 		private TextBox GetCurrentTextBox() {
@@ -81,64 +83,72 @@ namespace PuppetMasterUI
 			}
 			operationStatus.Invoke(new MethodInvoker(() => operationStatus.OperationsCount = commands.Count));
 
-			if (!operationStatus.SteppedOperation) {
-				foreach (var cmd in commands) {
-					var operation = cmd.ToString().ToUpper();
+			if (!operationStatus.SteppedOperation)
+				ExecuteNonSteppedOperations(commands, operationStatus, errorsCount);
+			else
+				ExecuteSteppedOperations(commands, operationStatus, errorsCount);
+		}
 
-					try {
-						operationStatus.Invoke(new MethodInvoker(
+		private static int ExecuteSteppedOperations(List<ICommand> commands, LongRunningOperation operationStatus, int errorsCount) {
+			var qCommands = new Queue<ICommand>(commands);
+			operationStatus.ExecuteNextCommand += (src, args) => {
+				var cmd = qCommands.Dequeue();
+				var operation = cmd.ToString().ToUpper();
+
+				try {
+					operationStatus.Invoke(
+						new MethodInvoker(
 							() => operationStatus.ReportProgress("Executing '" + operation + "' command...", true)));
 
-						cmd.Execute();
-						Thread.Sleep(/*fast*/ 200);
+					cmd.Execute();
+					Thread.Sleep( /*fast*/ 200);
 
-						operationStatus.Invoke(new MethodInvoker(
+					operationStatus.Invoke(
+						new MethodInvoker(
 							() => operationStatus.ReportProgress(operation + " executed successfully!")));
-					} catch (Exception ex) {
-						errorsCount++;
-
-						try {
-							operationStatus.Invoke(new MethodInvoker(() => {
-								operationStatus.ReportProgress(
-									operation + " failed due to an error '" + ex.Message + "'.");
-							}));
-						} catch {
-							// window handle not created.
-						}
-					}
+				} catch (Exception ex) {
+					errorsCount++;
+					operationStatus.Invoke(
+						new MethodInvoker(
+							() => operationStatus.ReportProgress(operation + " failed due to an error '" + ex.Message + "'.")));
+				} finally {
+					if (qCommands.Count == 0)
+						operationStatus.Invoke(
+							new MethodInvoker(
+								() => operationStatus.ReportProgress("Script completed" + (errorsCount > 0 ? ", with errors!" : "."))));
 				}
-				operationStatus.Invoke(new MethodInvoker(
-					() => operationStatus.ReportProgress("Script completed" + (errorsCount > 0 ? ", with errors!" : "."))));
-			} else {
-				var qCommands = new Queue<ICommand>(commands);
-				operationStatus.ExecuteNextCommand += (src, args) => {
-					var cmd = qCommands.Dequeue();
-					var operation = cmd.ToString().ToUpper();
+			};
+			return errorsCount;
+		}
+
+		private static int ExecuteNonSteppedOperations(List<ICommand> commands, LongRunningOperation operationStatus, int errorsCount) {
+			foreach (var cmd in commands) {
+				var operation = cmd.ToString().ToUpper();
+
+				try {
+					operationStatus.Invoke(new MethodInvoker(
+						() => operationStatus.ReportProgress("Executing '" + operation + "' command...", true)));
+
+					cmd.Execute();
+
+					operationStatus.Invoke(new MethodInvoker(
+						() => operationStatus.ReportProgress(operation + " executed successfully!")));
+				} catch (Exception ex) {
+					errorsCount++;
 
 					try {
-						operationStatus.Invoke(
-							new MethodInvoker(
-								() => operationStatus.ReportProgress("Executing '" + operation + "' command...", true)));
-
-						cmd.Execute();
-						Thread.Sleep(/*fast*/ 200);
-
-						operationStatus.Invoke(
-							new MethodInvoker(
-								() => operationStatus.ReportProgress(operation + " executed successfully!")));
-					} catch (Exception ex) {
-						errorsCount++;
-						operationStatus.Invoke(
-							new MethodInvoker(
-								() => operationStatus.ReportProgress(operation + " failed due to an error '" + ex.Message + "'.")));
-					} finally {
-						if (qCommands.Count == 0)
-							operationStatus.Invoke(
-								new MethodInvoker(
-									() => operationStatus.ReportProgress("Script completed" + (errorsCount > 0 ? ", with errors!" : "."))));
+						operationStatus.Invoke(new MethodInvoker(() => {
+							operationStatus.ReportProgress(
+								operation + " failed due to an error '" + ex.Message + "'.");
+						}));
+					} catch {
+						// window handle not created.
 					}
-				};
+				}
 			}
+			operationStatus.Invoke(new MethodInvoker(
+				() => operationStatus.ReportProgress("Script completed" + (errorsCount > 0 ? ", with errors!" : "."))));
+			return errorsCount;
 		}
 
 		private void tsCleanScript_Click(object sender, EventArgs e) {
@@ -257,6 +267,11 @@ namespace PuppetMasterUI
 		}
 
 		private async void tmrMonitoring_Tick(object sender, EventArgs e) {
+			if (!cbMonitoring.Checked) {
+				tmrMonitoring.Stop();
+				return;
+			}
+
 			if (cbLiveUpdate.Checked) {
 				using (var fs = new FileStream(Path.Combine(Environment.CurrentDirectory, "mnr-trace.log"),
 					FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
@@ -278,20 +293,22 @@ namespace PuppetMasterUI
 			var workers = puppetMasterService.GetWorkers();
 
 			gvRemoteObjects.Rows.Add(new object[] {
-				"Puppet Master Service (local)",
-				PuppetMasterService.ServiceUrl,
-				"Online",
-				"Workers #: " + puppetMasterService.GetWorkers().Count
-			});
+					"Puppet Master Service (local)",
+					PuppetMasterService.ServiceUrl,
+					"Online",
+					"Workers #: " + puppetMasterService.GetWorkers().Count
+				});
 			gvRemoteObjects.Rows[0].MinimumHeight = 25;
 			gvRemoteObjects.Rows[0].DefaultCellStyle.BackColor = Color.SaddleBrown;
 			gvRemoteObjects.Rows[0].DefaultCellStyle.ForeColor = Color.White;
 
 			foreach (var worker in workers) {
+				var wk = RemotingHelper.GetRemoteObject<IWorker>(worker.Value.ServiceUrl);
+				var status = wk.GetStatus();
 				gvRemoteObjects.Rows.Add(new object[] {
 					"Worker Service [ID: " + worker.Value.WorkerId + "]",
 					worker.Value.ServiceUrl,
-					RemotingHelper.GetRemoteObject<IWorker>(worker.Value.ServiceUrl).GetStatus().ToString(),
+					status,
 					"N/A"
 				});
 			}
@@ -299,10 +316,6 @@ namespace PuppetMasterUI
 
 		private void cbMonitoring_CheckedChanged(object sender, EventArgs e) {
 			tmrMonitoring.Enabled = cbMonitoring.Checked;
-		}
-
-		private void tsDdbMonitoring_Click(object sender, EventArgs e) {
-
 		}
 	}
 }

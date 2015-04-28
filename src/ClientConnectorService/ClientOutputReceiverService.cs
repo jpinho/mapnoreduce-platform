@@ -13,6 +13,15 @@ namespace ClientServices
 		public ClientOutputReceiverService() {
 		}
 
+		/// <summary>
+		/// Overrides the default object leasing behavior such that the object is kept in memory as
+		/// long as the host application domain is running.
+		/// </summary>
+		/// <see><cref>https://msdn.microsoft.com/en-us/library/ms973841.aspx</cref></see>
+		public override Object InitializeLifetimeService() {
+			return null;
+		}
+
 		public void ReceiveMapOutputFragment(string filePath, string[] result, int splitNumber) {
 			lock (mapResultStore) {
 				if (!mapResultStore.ContainsKey(filePath))

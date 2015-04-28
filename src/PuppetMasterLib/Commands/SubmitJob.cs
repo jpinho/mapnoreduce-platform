@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using SharedTypes;
+﻿using SharedTypes;
 
 namespace PuppetMasterLib.Commands
 {
@@ -15,9 +14,9 @@ namespace PuppetMasterLib.Commands
 		public string AssemblyFilePath { get; set; }
 
 		public void Execute() {
-			new Thread(() => UserApplicationSample.Program.ExecuteMapJob(
+			UserApplicationSample.Program.ExecuteMapJob(
 				EntryUrl, FilePath, OutputPath, Splits,
-				MapClassName, AssemblyFilePath)).Start();
+				MapClassName, AssemblyFilePath);
 		}
 
 		public override string ToString() {

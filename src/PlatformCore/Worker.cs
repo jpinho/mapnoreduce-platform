@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting;
 using System.Threading;
 using SharedTypes;
-using System.Runtime.Remoting;
 
 namespace PlatformCore
 {
@@ -27,11 +27,11 @@ namespace PlatformCore
 		private JobTracker passiveTracker;
 		private Thread thrPassiveTracker;
 		private bool trackersInitialized;
-        // possible worker states
-        enum State { Running, Failed, Frozen };
+		// possible worker states
+		private enum State { Running, Failed, Frozen };
 
-        // initial state
-        private List<ManualResetEvent> frozenRequests = new List<ManualResetEvent>();
+		// initial state
+		private List<ManualResetEvent> frozenRequests = new List<ManualResetEvent>();
 		/// <summary>
 		/// List of all workers known by this worker.
 		/// </summary>
@@ -72,43 +72,38 @@ namespace PlatformCore
 		}
 
 		public void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers) {
-            stateCheck();
+			stateCheck();
 			lock (workerLock) {
 				workersList = availableWorkers;
 			}
 		}
 
-        //wakes requests frozen during frozen state
+		//wakes requests frozen during frozen state
 
-        private bool processFrozenRequests()
-        {
-            for (int i = 0; i < frozenRequests.Count; i++) 
-            {
-                ManualResetEvent mre = frozenRequests[i];
-                mre.Set();
-            }
-            return true;
-        }
+		private bool processFrozenRequests() {
+			for (int i = 0; i < frozenRequests.Count; i++) {
+				ManualResetEvent mre = frozenRequests[i];
+				mre.Set();
+			}
+			return true;
+		}
 
-        //puts to sleep all incoming requests while worker is frozen
+		//puts to sleep all incoming requests while worker is frozen
 
-        private void stateCheck()
-        {
-            WorkerStatus status;
-            lock (workerLock)
-            {
-                status = Status;
-            }
+		private void stateCheck() {
+			WorkerStatus status;
+			lock (workerLock) {
+				status = Status;
+			}
 
-            if (status == WorkerStatus.Offline)
-                throw new RemotingException("Server is Offline;");
-            else if (status == WorkerStatus.Frozen)
-            {
-                var mre = new ManualResetEvent(false);
-                frozenRequests.Add(mre);
-                mre.WaitOne();
-            }
-        }
+			if (status == WorkerStatus.Offline)
+				throw new RemotingException("Server is Offline;");
+			else if (status == WorkerStatus.Frozen) {
+				var mre = new ManualResetEvent(false);
+				frozenRequests.Add(mre);
+				mre.WaitOne();
+			}
+		}
 
 		public Dictionary<int, IWorker> GetWorkersList() {
 			lock (workerLock) {
@@ -136,7 +131,7 @@ namespace PlatformCore
 		/// </summary>
 		/// <param name="task">The job to be processed.</param>
 		public void ReceiveMapJob(IJobTask task) {
-            stateCheck();
+			stateCheck();
 			lock (workerReceiveJobLock) {
 				if (!trackersInitialized)
 					InitTrackers();
@@ -166,7 +161,7 @@ namespace PlatformCore
 		}
 
 		public bool ExecuteMapJob(IJobTask task) {
-            stateCheck();
+			stateCheck();
 			lock (workerLock) {
 				if (!trackersInitialized)
 					InitTrackers();
@@ -222,7 +217,7 @@ namespace PlatformCore
 		public void AsyncExecuteMapJob(int split,
 				string fileName, List<int> fileSplits, Uri jobTrackerUri, string mapClassName,
 				byte[] mapFunctionName, string outputReceiverUrl, string splitProviderUrl) {
-            stateCheck();
+			stateCheck();
 
 			//var fnExecuteMapJob = new ExecuteMapJobDelegate(ExecuteMapJob);
 			var newTask = new JobTask {
@@ -252,51 +247,45 @@ namespace PlatformCore
 		}
 
 		public void Slow(int secs) {
-            stateCheck();
+			stateCheck();
 			Thread.Sleep(secs * 1000);
 		}
 
 		public void Freeze() {
-            WorkerStatus status;
-            lock (workerLock)
-            {
-                status = Status;
-            }
-            if (status != WorkerStatus.Frozen)
-            {    
-                lock (workerLock)
-                {
-                    Status = WorkerStatus.Frozen;
-                }
-                frozenRequests.Clear();
-                //activeTracker.FreezeCommunication();
-            }
+			WorkerStatus status;
+			lock (workerLock) {
+				status = Status;
+			}
+			if (status != WorkerStatus.Frozen) {
+				lock (workerLock) {
+					Status = WorkerStatus.Frozen;
+				}
+				frozenRequests.Clear();
+				//activeTracker.FreezeCommunication();
+			}
 		}
 
 		public void UnFreeze() {
-            WorkerStatus status;
-            lock (workerLock)
-            {
-                status = Status;
-            }
-            if (status == WorkerStatus.Offline || status == WorkerStatus.Frozen)
-            {
-                lock (workerLock)
-                {
-                    Status = WorkerStatus.Available;
-                }
-                bool frozenWakeResult = processFrozenRequests();
-            }
+			WorkerStatus status;
+			lock (workerLock) {
+				status = Status;
+			}
+			if (status == WorkerStatus.Offline || status == WorkerStatus.Frozen) {
+				lock (workerLock) {
+					Status = WorkerStatus.Available;
+				}
+				bool frozenWakeResult = processFrozenRequests();
+			}
 			//activeTracker.UnfreezeCommunication();
 		}
 
 		public void FreezeCommunication() {
-            stateCheck();
+			stateCheck();
 			activeTracker.FreezeCommunication();
 		}
 
 		public void UnfreezeCommunication() {
-            stateCheck();
+			stateCheck();
 			activeTracker.UnfreezeCommunication();
 		}
 	}

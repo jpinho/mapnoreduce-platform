@@ -19,6 +19,7 @@ namespace ClientServices
 		private const int RESULT_WAIT_TIMEOUT = 5000;
 		public const string CLIENT_OUTPUTRECV_SVCNAME = "MNRP-ClientORS";
 		public const string CLIENT_SPLITPROV_SVCNAME = "MNRP-ClientSPS";
+		private Guid clientId = Guid.NewGuid();
 
 		public string EntryUrl { get; set; }
 
@@ -37,17 +38,18 @@ namespace ClientServices
 		public void Init(string entryUrl) {
 			TcpChannel channel;
 
-			try {
-				EntryUrl = entryUrl;
-				var provider = new BinaryServerFormatterSinkProvider {
-					TypeFilterLevel = TypeFilterLevel.Full
-				};
+			EntryUrl = entryUrl;
+			var provider = new BinaryServerFormatterSinkProvider {
+				TypeFilterLevel = TypeFilterLevel.Full
+			};
 
-				IDictionary props = new Hashtable();
-				props["port"] = CLIENT_CHANNEL_PORT;
+			IDictionary props = new Hashtable();
+			props["port"] = CLIENT_CHANNEL_PORT;
+
+			try {
 				channel = new TcpChannel(props, null, provider);
 			} catch {
-				Trace.WriteLine("Client channel already registered, skipping step.");
+				Trace.WriteLine("Client channel already registered, skipping this step!");
 				return;
 			}
 
@@ -75,7 +77,7 @@ namespace ClientServices
 
 			// Calls the server reference of the Split Provider to split and save of the file splits
 			// to a memory store.
-			cspSvc.SplitAndSave(filePath, nSplits);
+			cspSvc.SplitAndSave(filePath, nSplits, clientId);
 			var masterWorker = RemotingHelper.GetRemoteObject<IWorker>(EntryUrl);
 
 			// Creates a job to submit to the master worker.
@@ -94,19 +96,27 @@ namespace ClientServices
 				;
 
 			// Calls the non blocking function to send the job to the master worker.
+			Trace.WriteLine("Job '" + filePath + "' setup is ready, sending it to master.");
 			masterWorker.ReceiveMapJob(job);
 
 			// Blocks the current thread until the result is ready.
 			//var waitCount = 0;
 			while (!corSvc.IsMapResultReady(filePath, nSplits)) {
-				//if (waitCount++ >= RESULT_WAIT_LIMIT)
-				//    throw new TimeoutException("ClientOutputResult service 'IsMapResultReady' wait timed out!");
-				Thread.Sleep(RESULT_WAIT_TIMEOUT * 3);
+				Trace.WriteLine(string.Format("Waiting for 'corSvc.IsMapResultReady' for file '{0}' with '{1}' splits.", filePath, nSplits));
+				Thread.Sleep(RESULT_WAIT_TIMEOUT);
 			}
 
 			// Saves the map job output to disk.
 			var result = corSvc.GetMapResult(filePath);
 			var outFilePath = Path.Combine(outputDir, filePath + ".out");
+
+			Trace.WriteLine("Result received, rows returned: '" + (result != null ? result.Count : 0) + "'.");
+			Trace.WriteLine("Sending output to '" + outputDir + "'.");
+
+			if (result == null) {
+				Trace.WriteLine("Map result received is NULL, ups we have a problem!");
+				return;
+			}
 
 			if (File.Exists(outFilePath))
 				File.Delete(outFilePath);
@@ -114,6 +124,7 @@ namespace ClientServices
 			using (var outFile = File.CreateText(outFilePath)) {
 				foreach (var splitResult in result)
 					outFile.WriteLine(string.Join("\n", splitResult));
+				Trace.WriteLine("Result committed to out file. All done!");
 			}
 		}
 	}

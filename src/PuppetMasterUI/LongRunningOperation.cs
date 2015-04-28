@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace PuppetMasterUI
@@ -39,16 +40,22 @@ namespace PuppetMasterUI
 		public void ReportProgress(string operation, bool incOperationNumber) {
 			if (incOperationNumber)
 				++currentOperation;
+
 			lblOperationStatus.Visible = true;
 			lblOperationStatus.Text = string.Format(EXECUTING_OPERATION, currentOperation, OperationsCount, operation);
+
 			if (OperationsCount > 0)
 				pbOperationStatus.Value = ((int)Math.Round(((double)currentOperation / (double)OperationsCount) * 100.0, 0) % 101);
+
 			txtLog.Text += "[" + DateTime.Now.ToString("dd/MM/yy HH:mm:ss") + "] " + lblOperationStatus.Text + Environment.NewLine;
+			Trace.WriteLine(txtLog.Text);
+
 			txtLog.Select(txtLog.Text.Length - 1, 1);
 			txtLog.ScrollToCaret();
 
 			if (currentOperation != OperationsCount)
 				return;
+
 			pbOperationStatus.Value = 100;
 			btnAbort.Visible = false;
 			btnClose.Visible = true;
