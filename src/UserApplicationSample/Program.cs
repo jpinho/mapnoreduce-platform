@@ -5,7 +5,7 @@ namespace UserApplicationSample
 {
 	public class Program
 	{
-		private static string HELP = Resources.HelpMessage;
+		private static readonly string HELP = Resources.HelpMessage;
 
 		public static void Main(string[] args) {
 			if (args.Length == 1)

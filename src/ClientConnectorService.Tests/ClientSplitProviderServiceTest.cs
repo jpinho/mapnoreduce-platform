@@ -4,56 +4,57 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClientServices.Tests
 {
-    [TestClass]
-    public class ClientSplitProviderServiceTest
-    {
-        private string entryURL = "TCP://LOCALHOST:9009/WORKERTEST";
-        private string filePath = Path.Combine(Environment.CurrentDirectory, "Resources\\job.txt");
-        private int splits = 2;
-        private static ClientService client = new ClientService();
+	[TestClass]
+	public class ClientSplitProviderServiceTest
+	{
+		private string entryURL = "TCP://LOCALHOST:9009/WORKERTEST";
+		private string filePath = Path.Combine(Environment.CurrentDirectory, "Resources\\job.txt");
+		private int splits = 2;
+		private static ClientService client = new ClientService();
+		private Guid clientId = Guid.NewGuid();
 
-        [TestMethod]
-        public void TestSplitAndSave() {
+		[TestMethod]
+		public void TestSplitAndSave() {
 
-            try {
-                // arrange
-                client.Init(entryURL);
+			try {
+				// arrange
+				client.Init(entryURL);
 
-                // act
-                ClientSplitProviderService cspSvc = (ClientSplitProviderService)Activator.GetObject(
-                typeof(ClientSplitProviderService),
-                client.GetSplitProviderServiceUrl());
+				// act
+				var cspSvc = (ClientSplitProviderService)Activator.GetObject(
+				typeof(ClientSplitProviderService),
+				ClientService.ClientSplitProviderServiceUri.ToString());
 
-                cspSvc.SplitAndSave(filePath, splits);
+				cspSvc.SplitAndSave(filePath, splits, clientId);
 
-            } catch (Exception e) {
-                Assert.Fail("Something went wrong: " + e);
-            }
+			} catch (Exception e) {
+				Assert.Fail("Something went wrong: " + e);
+			}
 
-            // assert
-            Assert.IsTrue(true);
-        }
+			// assert
+			Assert.IsTrue(true);
+		}
 
-        [TestMethod]
-        public void TestGetFileSplit() {
-            string split = null;
+		[TestMethod]
+		public void TestGetFileSplit() {
+			string split = null;
 
-            try {
-                // arrange
-                client.Init(entryURL);
+			try {
+				// arrange
+				client.Init(entryURL);
 
-                // act
-                ClientSplitProviderService cspSvc = (ClientSplitProviderService)Activator.GetObject(
-                    typeof(ClientSplitProviderService),
-                    client.GetSplitProviderServiceUrl());
+				// act
+				var cspSvc = (ClientSplitProviderService)Activator.GetObject(
+					typeof(ClientSplitProviderService),
+					ClientService.ClientSplitProviderServiceUri.ToString());
 
-                split = cspSvc.GetFileSplit(filePath, 1);
-            } catch (Exception e) {
-                Assert.Fail("Something went wrong: " + e);
-            }
+				split = cspSvc.GetFileSplit(filePath, 1);
+			} catch (Exception e) {
+				Assert.Fail("Something went wrong: " + e);
+			}
 
-            // assert
-            Assert.IsTrue(split.Length > 0);
-        }
-    }
+			// assert
+			Assert.IsTrue(split.Length > 0);
+		}
+	}
 }

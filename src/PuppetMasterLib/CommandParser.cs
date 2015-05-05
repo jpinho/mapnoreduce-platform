@@ -27,10 +27,10 @@ namespace PuppetMasterLib
 			foreach (var keyWords in commands.Select(cmd => cmd.Split(' '))) {
 				int workerId;
 
-				switch (keyWords[0].ToLower()) {
+				switch (keyWords[0].Trim().ToLower()) {
 					case Commands.CreateWorker.NAME:
 						try {
-							workerId = int.Parse(keyWords[1]);
+							workerId = int.Parse(keyWords[1].Trim());
 						} catch (Exception e) {
 							throw new CommandInvalidParameterException(
 								string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
@@ -40,16 +40,16 @@ namespace PuppetMasterLib
 							case 5:
 								parsedCommands.Add(new Commands.CreateWorker() {
 									WorkerId = workerId,
-									PuppetMasterUrl = keyWords[2],
-									ServiceUrl = keyWords[3],
-									EntryUrl = keyWords[4]
+									PuppetMasterUrl = keyWords[2].Trim(),
+									ServiceUrl = keyWords[3].Trim(),
+									EntryUrl = keyWords[4].Trim()
 								});
 								break;
 							case 4:
 								parsedCommands.Add(new Commands.CreateWorker() {
 									WorkerId = workerId,
-									PuppetMasterUrl = keyWords[2],
-									ServiceUrl = keyWords[3]
+									PuppetMasterUrl = keyWords[2].Trim(),
+									ServiceUrl = keyWords[3].Trim()
 								});
 								break;
 						}
@@ -59,17 +59,17 @@ namespace PuppetMasterLib
 					case Commands.SubmitJob.NAME:
 						int splits;
 						try {
-							splits = int.Parse(keyWords[4]);
+							splits = int.Parse(keyWords[4].Trim());
 						} catch (Exception e) {
 							throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[4], "Integer"), e);
 						}
 						parsedCommands.Add(new Commands.SubmitJob() {
-							EntryUrl = keyWords[1],
-							FilePath = keyWords[2],
-							OutputPath = keyWords[3],
+							EntryUrl = keyWords[1].Trim(),
+							FilePath = keyWords[2].Trim(),
+							OutputPath = keyWords[3].Trim(),
 							Splits = splits,
-							MapClassName = keyWords[5],
-							AssemblyFilePath = keyWords[6]
+							MapClassName = keyWords[5].Trim(),
+							AssemblyFilePath = keyWords[6].Trim()
 						});
 
 						break;
@@ -77,7 +77,7 @@ namespace PuppetMasterLib
 					case Commands.Wait.NAME:
 						int secs;
 						try {
-							secs = int.Parse(keyWords[1]);
+							secs = int.Parse(keyWords[1].Trim());
 						} catch (Exception e) {
 							throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
 						}
@@ -95,12 +95,12 @@ namespace PuppetMasterLib
 
 					case Commands.SlowWorker.NAME:
 						try {
-							workerId = int.Parse(keyWords[1]);
+							workerId = int.Parse(keyWords[1].Trim());
 						} catch (Exception e) {
 							throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
 						}
 						try {
-							secs = int.Parse(keyWords[2]);
+							secs = int.Parse(keyWords[2].Trim());
 						} catch (Exception e) {
 							throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[2], "Integer"), e);
 						}
@@ -113,7 +113,7 @@ namespace PuppetMasterLib
 
 					case Commands.FreezeWorker.NAME:
 						try {
-							workerId = int.Parse(keyWords[1]);
+							workerId = int.Parse(keyWords[1].Trim());
 						} catch (Exception e) {
 							throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
 						}
@@ -125,7 +125,7 @@ namespace PuppetMasterLib
 
 					case Commands.UnfreezeWorker.NAME:
 						try {
-							workerId = int.Parse(keyWords[1]);
+							workerId = int.Parse(keyWords[1].Trim());
 						} catch (Exception e) {
 							throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
 						}
@@ -137,7 +137,7 @@ namespace PuppetMasterLib
 
 					case Commands.FreezeCommunication.NAME:
 						try {
-							workerId = int.Parse(keyWords[1]);
+							workerId = int.Parse(keyWords[1].Trim());
 						} catch (Exception e) {
 							throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
 						}
@@ -149,7 +149,7 @@ namespace PuppetMasterLib
 
 					case Commands.UnfreezeCommunication.NAME:
 						try {
-							workerId = int.Parse(keyWords[1]);
+							workerId = int.Parse(keyWords[1].Trim());
 						} catch (Exception e) {
 							throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[1], "Integer"), e);
 						}
@@ -160,7 +160,7 @@ namespace PuppetMasterLib
 						break;
 					default:
 						Trace.TraceWarning("Ignoring unknown command '" + keyWords[0] + "'. Script received was: '"
-							+ String.Join(" ", keyWords) + "'.");
+							+ string.Join(" ", keyWords) + "'.");
 						break;
 				}
 			}

@@ -6,52 +6,65 @@ using SharedTypes;
 
 namespace ClientServices
 {
-    public class ClientSplitProviderService : MarshalByRefObject, IClientSplitProviderService
-    {
-        private Dictionary<string, List<string>> splitsStore = new Dictionary<string, List<string>>();
-        public string ServiceURL { get; private set; }
+	public class ClientSplitProviderService : MarshalByRefObject, IClientSplitProviderService
+	{
+		private readonly Dictionary<string, List<string>> splitsStore = new Dictionary<string, List<string>>();
+		private static Guid _clientId;
 
-        public ClientSplitProviderService(string serviceURL) {
-            ServiceURL = serviceURL;
-        }
+		public ClientSplitProviderService() {
+		}
 
-        public string GetFileSplit(string filePath, int splitNumber) {
-            return splitsStore[filePath][splitNumber - 1];
-        }
+		/// <summary>
+		/// Overrides the default object leasing behavior such that the object is kept in memory as
+		/// long as the host application domain is running.
+		/// </summary>
+		/// <see><cref>https://msdn.microsoft.com/en-us/library/ms973841.aspx</cref></see>
+		public override Object InitializeLifetimeService() {
+			return null;
+		}
 
-        public void SplitAndSave(string filePath, int nSplits) {
-            List<string> lstSplits = new List<string>();
-            StreamReader sr = new StreamReader(System.IO.Path.GetFullPath(filePath));
+		public string GetFileSplit(string filePath, int splitNumber) {
+			string split = null;
+			Trace.WriteLine("Trying to get split <" + _clientId.ToString() + "," + (splitNumber - 1) + ">");
+			try {
+				split = splitsStore[_clientId.ToString()][splitNumber - 1];
+			} catch (Exception e) {
+				Trace.WriteLine("Exception in GetFileSplit: " + e.Message + " " + _clientId.ToString());
+			}
 
-            string[] lines = sr.ReadToEnd().Split('\n');
-            int splitSize = (int)Math.Floor((double)lines.Length / (double)nSplits);
+			return split;
+		}
 
-            // performs the attributions of lines to their splits
-            List<string> splitContent = new List<string>();
-            for (int i = 0; i < lines.Length; i++)
-            //foreach (string line in lines)
-                {
-                // adds the line to the current split
-                splitContent.Add(lines[i]);
+		public void SplitAndSave(string filePath, int nSplits, Guid clientId) {
+			_clientId = clientId;
+			var lstSplits = new List<string>();
+			var sr = new StreamReader(Path.GetFullPath(filePath));
 
-                // split size reached
-                if (splitContent.Count >= splitSize) {
-                    // saves the split
-                    lstSplits.Add(String.Join("\n", splitContent));
-                    // the next cycle is the new split
-                    splitContent = new List<string>();
-                }
-            }
+			var lines = sr.ReadToEnd().Split('\n');
+			var splitSize = (int)Math.Floor((double)lines.Length / (double)nSplits);
 
-            // adds last split (if incomplete)
-            if (splitContent.Count >= 0)
-                lstSplits.Add(String.Join("\n", splitContent));
+			// performs the attributions of lines to their splits
+			var splitContent = new List<string>();
+			foreach (var t in lines) {
+				// adds the line to the current split
+				splitContent.Add(t);
 
-            foreach (string split in lstSplits)
-                Trace.WriteLine(split);
+				// split size reached
+				if (splitContent.Count < splitSize)
+					continue;
 
-            // saves the splits of the file on the store
-            splitsStore.Add(filePath, lstSplits);
-        }
-    }
+				// saves the split
+				lstSplits.Add(string.Join("\n", splitContent));
+				// the next cycle is the new split
+				splitContent = new List<string>();
+			}
+
+			// adds last split (if incomplete)
+			if (splitContent.Count >= 0)
+				lstSplits.Add(string.Join("\n", splitContent));
+
+			// saves the splits of the file on the store
+			splitsStore.Add(_clientId.ToString(), lstSplits);
+		}
+	}
 }
