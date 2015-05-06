@@ -23,10 +23,15 @@ namespace SharedTypes
 				}
 			}
 
-			RemotingServices.Marshal(
-				(MarshalByRefObject)remoteObject
-				, serviceUrl.AbsolutePath.TrimStart('/')
-				, remoteObject.GetType());
+			//RemotingServices.Marshal(
+			//	(MarshalByRefObject)remoteObject
+			//	, serviceUrl.AbsolutePath.TrimStart('/')
+			//	, remoteObject.GetType());
+
+			RemotingConfiguration.RegisterWellKnownServiceType(
+				remoteObject.GetType(),
+				serviceUrl.AbsolutePath.TrimStart('/'),
+				WellKnownObjectMode.Singleton);
 		}
 
 		public static void RegisterChannel(Uri serviceUrl) {

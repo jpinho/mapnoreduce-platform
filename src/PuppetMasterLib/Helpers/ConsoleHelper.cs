@@ -27,7 +27,7 @@ namespace PuppetMasterLib.Helpers
         public static extern bool FreeConsole();
 
         [DllImport("kernel32")]
-        public static extern bool SetConsoleCtrlHandler(HandlerRoutine HandlerRoutine, bool Add);
+        public static extern bool SetConsoleCtrlHandler(HandlerRoutine handlerRoutine, bool add);
 
         public delegate bool HandlerRoutine(uint dwControlType);
     }

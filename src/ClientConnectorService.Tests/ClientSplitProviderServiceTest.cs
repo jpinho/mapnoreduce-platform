@@ -7,10 +7,10 @@ namespace ClientServices.Tests
 	[TestClass]
 	public class ClientSplitProviderServiceTest
 	{
-		private string entryURL = "TCP://LOCALHOST:9009/WORKERTEST";
+		private string entryUrl = "TCP://LOCALHOST:9009/WORKERTEST";
 		private string filePath = Path.Combine(Environment.CurrentDirectory, "Resources\\job.txt");
 		private int splits = 2;
-		private static ClientService client = new ClientService();
+		private static ClientService _client = new ClientService();
 		private Guid clientId = Guid.NewGuid();
 
 		[TestMethod]
@@ -18,7 +18,7 @@ namespace ClientServices.Tests
 
 			try {
 				// arrange
-				client.Init(entryURL);
+				_client.Init(entryUrl);
 
 				// act
 				var cspSvc = (ClientSplitProviderService)Activator.GetObject(
@@ -41,7 +41,7 @@ namespace ClientServices.Tests
 
 			try {
 				// arrange
-				client.Init(entryURL);
+				_client.Init(entryUrl);
 
 				// act
 				var cspSvc = (ClientSplitProviderService)Activator.GetObject(

@@ -16,7 +16,7 @@ namespace PlatformCore
 		private readonly object workerLock = new object();
 		private readonly object workerReceiveJobLock = new object();
 		private readonly AutoResetEvent freezeHandle = new AutoResetEvent(false);
-        public bool passiveInitialized = false;
+		public bool PassiveInitialized = false;
 		/// <summary>
 		/// The job activeTracker used to coordinate a job or to report progress about it's own job
 		/// execution. Whether this job activeTracker performes in one way or the other depends on
@@ -72,7 +72,7 @@ namespace PlatformCore
 		}
 
 		public void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers) {
-			stateCheck();
+			StateCheck();
 			lock (workerLock) {
 				workersList = availableWorkers;
 			}
@@ -80,7 +80,7 @@ namespace PlatformCore
 
 		//wakes requests frozen during frozen state
 
-		private bool processFrozenRequests() {
+		private bool ProcessFrozenRequests() {
 			for (int i = 0; i < frozenRequests.Count; i++) {
 				ManualResetEvent mre = frozenRequests[i];
 				mre.Set();
@@ -90,7 +90,7 @@ namespace PlatformCore
 
 		//puts to sleep all incoming requests while worker is frozen
 
-		private void stateCheck() {
+		private void StateCheck() {
 			WorkerStatus status;
 			lock (workerLock) {
 				status = Status;
@@ -131,28 +131,27 @@ namespace PlatformCore
 		/// </summary>
 		/// <param name="task">The job to be processed.</param>
 		public void ReceiveMapJob(IJobTask task) {
-			stateCheck();
+			StateCheck();
 			lock (workerReceiveJobLock) {
-                if (!trackersInitialized)
-                    InitTrackers();
+				if (!trackersInitialized)
+					InitTrackers();
 
 				Trace.WriteLine("New map job received by worker [ID: " + WorkerId + "].\n"
 					+ "Master Job Tracker Uri: '" + activeTracker.ServiceUri + "'");
 				task.JobTrackerUri = activeTracker.ServiceUri;
 				activeTracker.ScheduleJob(task);
-                wakeTrackers();
-                
+				WakeTrackers();
+
 			}
 		}
 
-        private void wakeTrackers()
-        {
-            this.activeTracker.Wake();
-        }
+		private void WakeTrackers() {
+			this.activeTracker.Wake();
+		}
 
 		private void InitTrackers() {
 			trackersInitialized = true;
-            InitPassiveTracker();
+			InitPassiveTracker();
 			activeTracker = new JobTracker(this, JobTrackerMode.Active);
 
 			thrActiveTracker = new Thread(() => {
@@ -162,28 +161,26 @@ namespace PlatformCore
 			thrActiveTracker.Start();
 		}
 
-        private void InitPassiveTracker()
-        {
-            if (passiveInitialized)
-                return;
-            passiveInitialized = true;
-            passiveTracker = new JobTracker(this, JobTrackerMode.Passive);
+		private void InitPassiveTracker() {
+			if (PassiveInitialized)
+				return;
+			PassiveInitialized = true;
+			passiveTracker = new JobTracker(this, JobTrackerMode.Passive);
 
-            thrPassiveTracker = new Thread(() =>
-            {
-                passiveTracker.Start();
-            });
-            thrPassiveTracker.Start();
-        }
+			thrPassiveTracker = new Thread(() => {
+				passiveTracker.Start();
+			});
+			thrPassiveTracker.Start();
+		}
 
 		public bool ExecuteMapJob(IJobTask task) {
-			stateCheck();
+			StateCheck();
 			lock (workerLock) {
-				if (!passiveInitialized)
+				if (!PassiveInitialized)
 					InitPassiveTracker();
-                else {
-                    Trace.WriteLine("Trackers already initialized");
-                }
+				else {
+					Trace.WriteLine("Trackers already initialized");
+				}
 				passiveTracker.ScheduleJob(task);
 				Status = WorkerStatus.Busy;
 			}
@@ -236,7 +233,7 @@ namespace PlatformCore
 		public void AsyncExecuteMapJob(int split,
 				string fileName, List<int> fileSplits, Uri jobTrackerUri, string mapClassName,
 				byte[] mapFunctionName, string outputReceiverUrl, string splitProviderUrl) {
-			stateCheck();
+			StateCheck();
 
 			//var fnExecuteMapJob = new ExecuteMapJobDelegate(ExecuteMapJob);
 			var newTask = new JobTask {
@@ -266,7 +263,7 @@ namespace PlatformCore
 		}
 
 		public void Slow(int secs) {
-			stateCheck();
+			StateCheck();
 			Thread.Sleep(secs * 1000);
 		}
 
@@ -293,21 +290,20 @@ namespace PlatformCore
 				lock (workerLock) {
 					Status = WorkerStatus.Available;
 				}
-				bool frozenWakeResult = processFrozenRequests();
+				bool frozenWakeResult = ProcessFrozenRequests();
 			}
 			//activeTracker.UnfreezeCommunication();
 		}
 
 		public void FreezeCommunication() {
-			stateCheck();
+			StateCheck();
 			activeTracker.FreezeCommunication();
 		}
 
 		public void UnfreezeCommunication() {
-			stateCheck();
+			StateCheck();
 			activeTracker.UnfreezeCommunication();
 		}
 
-
-    }
+	}
 }
