@@ -7,8 +7,8 @@ namespace PlatformCore.Exceptions
 {
     public class InvalidWorkerServiceUrlException : Exception
     {
-        public InvalidWorkerServiceUrlException(int workerId, string serviceUrl)
+        public InvalidWorkerServiceUrlException(int workerId, string serviceURL)
             : base(string.Format("The service URL '{0}' for worker '{1}' is invalid.",
-                serviceUrl, workerId)) { }
+                serviceURL, workerId)) { }
     }
 }

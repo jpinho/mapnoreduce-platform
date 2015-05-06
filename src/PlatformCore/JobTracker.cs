@@ -13,20 +13,19 @@ namespace PlatformCore
 	public class JobTracker : MarshalByRefObject, IJobTracker
 	{
 		private const int PROCESSING_DELAY_TIMEOUT = 2000;
-		public static AutoResetEvent MainResetEvent = new AutoResetEvent(false);
+        public static AutoResetEvent mainResetEvent = new AutoResetEvent(false);
 		private readonly object trackerMutex = new object();
 		private readonly Worker worker;
 		private readonly Queue<IJobTask> jobQueue = new Queue<IJobTask>();
 		private volatile Dictionary</*splitnumber*/ int, /*workerid*/ int> splitsBeingProcessed = new Dictionary<int, int>();
 		private volatile Dictionary</*workerid*/ int, /*lastupdate*/DateTime> workerAliveSignals = new Dictionary<int, DateTime>();
-
 		/// <summary>
 		/// The job splits priority queue.
 		/// </summary>
 		private Queue<int> splitsQueue;
 
-		// initial state
-		private List<ManualResetEvent> frozenRequests = new List<ManualResetEvent>();
+        // initial state
+        private List<ManualResetEvent> frozenRequests = new List<ManualResetEvent>();
 
 		public IJobTask CurrentJob { get; private set; }
 		public Uri ServiceUri { get; set; }
@@ -50,43 +49,48 @@ namespace PlatformCore
 
 		[SuppressMessage("ReSharper", "FunctionNeverReturns")]
 		public void Start() {
-			StateCheck();
+            stateCheck();
 			switch (Mode) {
 				case JobTrackerMode.Active:
 					if (ServiceUri == null)
 						ServiceUri = new Uri("tcp://localhost:" + worker.ServiceUrl.Port + "/MasterJobTracker-W" + worker.WorkerId);
 					RemotingServices.Marshal(this, "MasterJobTracker-W" + worker.WorkerId, typeof(IJobTracker));
-					new Thread(delegate() {
-						while (true) {
-							Thread.Sleep(100);
-							MasterTrackerMain();
-							MainResetEvent.WaitOne();
-						}
-					}).Start();
-					break;
+                    new Thread(delegate()
+                    {
+                        while (true)
+                        {
+                            Thread.Sleep(100);
+                            MasterTrackerMain();
+                            mainResetEvent.WaitOne();
+                        }
+                    }).Start();
+                    break;
 				case JobTrackerMode.Passive:
 					if (ServiceUri == null)
 						ServiceUri = new Uri("tcp://localhost:" + worker.ServiceUrl.Port + "/SlaveJobTracker-W" + worker.WorkerId);
 					RemotingServices.Marshal(this, "SlaveJobTracker-W" + worker.WorkerId, typeof(IJobTracker));
-					new Thread(delegate() {
-						while (true) {
-							Thread.Sleep(100);
-							SlaveTrackerMain();
-						}
-					}).Start();
-					break;
+                    new Thread(delegate()
+                    {
+                        while (true)
+                        {
+                            Thread.Sleep(100);
+                            SlaveTrackerMain();
+                        }
+                    }).Start();
+                    break;
 			}
 		}
 
 		private void MasterTrackerMain() {
-			//Trace.WriteLine("Tracker Running --------" + worker.WorkerId);
-			StateCheck();
+            //Trace.WriteLine("Tracker Running --------" + worker.WorkerId);
+            stateCheck();
 			lock (trackerMutex) {
 				// If job tracker busy or without jobs to process exit.
-				if (!(jobQueue.Count > 0) || (!(jobQueue.Count > 0) && Status != JobTrackerState.Available)) {
-					Status = JobTrackerState.Available;
+                if (!(jobQueue.Count > 0) || (!(jobQueue.Count > 0) && Status != JobTrackerState.Available))
+                {
+                    Status = JobTrackerState.Available;
 					return;
-				}
+                }
 				// Get next job and set state to busy.
 				CurrentJob = jobQueue.Dequeue();
 				splitsQueue = new Queue<int>(CurrentJob.FileSplits);
@@ -119,7 +123,7 @@ namespace PlatformCore
 		}
 
 		private void SlaveTrackerMain() {
-			StateCheck();
+            stateCheck();
 			IJobTask currentJob = null;
 
 			// Updates slave job tracker shared state.
@@ -142,7 +146,7 @@ namespace PlatformCore
 		}
 
 		private void SplitsDelivery(Queue<IWorker> availableWorkers, IJobTask job) {
-			StateCheck();
+            stateCheck();
 			int splitsCount;
 
 			lock (trackerMutex) {
@@ -161,7 +165,7 @@ namespace PlatformCore
 					var wrk = availableWorkers.Dequeue();
 					remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(wrk.ServiceUrl);
 					split = splitsQueue.Peek();
-
+                    
 				}
 
 				try {
@@ -197,7 +201,7 @@ namespace PlatformCore
 		}
 
 		private void MonitorSplitProcessing() {
-			StateCheck();
+            stateCheck();
 			while (true) {
 				lock (trackerMutex) {
 					if (CurrentJob == null)
@@ -228,7 +232,7 @@ namespace PlatformCore
 		}
 
 		public void Alive(int wid) {
-			StateCheck();
+            stateCheck();
 			Trace.WriteLine("Alive signal worker '" + wid + "'.");
 			lock (trackerMutex) {
 				var w = ((Worker)worker.GetWorkersList()[wid]);
@@ -239,63 +243,75 @@ namespace PlatformCore
 		}
 
 		public void FreezeCommunication() {
-			JobTrackerState state;
-			lock (trackerMutex) {
-				state = Status;
-			}
-			if (state != JobTrackerState.Frozen) {
-				lock (trackerMutex) {
-					Status = JobTrackerState.Frozen;
-				}
-				frozenRequests.Clear();
-			}
+            JobTrackerState state;
+            lock (trackerMutex)
+            {
+                state = Status;
+            }
+            if (state != JobTrackerState.Frozen)
+            {
+                lock (trackerMutex)
+                {
+                    Status = JobTrackerState.Frozen;
+                }
+                frozenRequests.Clear();
+            }
 		}
 
 		public void UnfreezeCommunication() {
-			JobTrackerState state;
-			lock (trackerMutex) {
-				state = Status;
-			}
-			if (state == JobTrackerState.Frozen) {
-				lock (trackerMutex) {
-					Status = JobTrackerState.Available;
-				}
-				bool frozenWakeResult = ProcessFrozenRequests();
-			}
+            JobTrackerState state;
+            lock (trackerMutex)
+            {
+                state = Status;
+            }
+            if (state == JobTrackerState.Frozen)
+            {
+                lock (trackerMutex)
+                {
+                    Status = JobTrackerState.Available;
+                }
+                bool frozenWakeResult = processFrozenRequests();
+            }
 		}
 
-		//wakes requests frozen during frozen state
-		private bool ProcessFrozenRequests() {
-			for (int i = 0; i < frozenRequests.Count; i++) {
-				ManualResetEvent mre = frozenRequests[i];
-				mre.Set();
-			}
-			return true;
-		}
+        //wakes requests frozen during frozen state
+        private bool processFrozenRequests()
+        {
+            for (int i = 0; i < frozenRequests.Count; i++)
+            {
+                ManualResetEvent mre = frozenRequests[i];
+                mre.Set();
+            }
+            return true;
+        }
 
-		//puts to sleep all incoming requests while worker is frozen
-		private void StateCheck() {
-			JobTrackerState state;
-			lock (trackerMutex) {
-				state = Status;
-			}
+        //puts to sleep all incoming requests while worker is frozen
+        private void stateCheck()
+        {
+            JobTrackerState state;
+            lock (trackerMutex)
+            {
+                state = Status;
+            }
 
-			if (state == JobTrackerState.Frozen) {
-				var mre = new ManualResetEvent(false);
-				frozenRequests.Add(mre);
-				mre.WaitOne();
-			}
-		}
+            if (state == JobTrackerState.Frozen)
+            {
+                var mre = new ManualResetEvent(false);
+                frozenRequests.Add(mre);
+                mre.WaitOne();
+            }
+        }
 
 		public void ScheduleJob(IJobTask job) {
-			StateCheck();
+            stateCheck();
 			lock (trackerMutex) {
 				jobQueue.Enqueue(job);
 			}
 		}
 
-		internal void Wake() {
-			MainResetEvent.Set();
-		}
-	}
+        internal void Wake()
+        {
+            mainResetEvent.Set();
+        }
+    }
 }
