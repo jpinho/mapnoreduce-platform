@@ -13,6 +13,7 @@ namespace PlatformCore
 	public class JobTracker : MarshalByRefObject, IJobTracker
 	{
 		private const int PROCESSING_DELAY_TIMEOUT = 2000;
+        public static AutoResetEvent mainResetEvent = new AutoResetEvent(false);
 		private readonly object trackerMutex = new object();
 		private readonly Worker worker;
 		private readonly Queue<IJobTask> jobQueue = new Queue<IJobTask>();
@@ -54,26 +55,42 @@ namespace PlatformCore
 					if (ServiceUri == null)
 						ServiceUri = new Uri("tcp://localhost:" + worker.ServiceUrl.Port + "/MasterJobTracker-W" + worker.WorkerId);
 					RemotingServices.Marshal(this, "MasterJobTracker-W" + worker.WorkerId, typeof(IJobTracker));
-					while (true) {
-						MasterTrackerMain();
-					}
+                    new Thread(delegate()
+                    {
+                        while (true)
+                        {
+                            Thread.Sleep(100);
+                            MasterTrackerMain();
+                            mainResetEvent.WaitOne();
+                        }
+                    }).Start();
+                    break;
 				case JobTrackerMode.Passive:
 					if (ServiceUri == null)
 						ServiceUri = new Uri("tcp://localhost:" + worker.ServiceUrl.Port + "/SlaveJobTracker-W" + worker.WorkerId);
 					RemotingServices.Marshal(this, "SlaveJobTracker-W" + worker.WorkerId, typeof(IJobTracker));
-					while (true) {
-						SlaveTrackerMain();
-					}
+                    new Thread(delegate()
+                    {
+                        while (true)
+                        {
+                            Thread.Sleep(100);
+                            SlaveTrackerMain();
+                        }
+                    }).Start();
+                    break;
 			}
 		}
 
 		private void MasterTrackerMain() {
+            //Trace.WriteLine("Tracker Running --------" + worker.WorkerId);
             stateCheck();
 			lock (trackerMutex) {
 				// If job tracker busy or without jobs to process exit.
-				if (!(jobQueue.Count > 0) || Status != JobTrackerState.Available)
+                if (!(jobQueue.Count > 0) || (!(jobQueue.Count > 0) && Status != JobTrackerState.Available))
+                {
+                    Status = JobTrackerState.Available;
 					return;
-
+                }
 				// Get next job and set state to busy.
 				CurrentJob = jobQueue.Dequeue();
 				splitsQueue = new Queue<int>(CurrentJob.FileSplits);
@@ -148,6 +165,7 @@ namespace PlatformCore
 					var wrk = availableWorkers.Dequeue();
 					remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(wrk.ServiceUrl);
 					split = splitsQueue.Peek();
+                    
 				}
 
 				try {
@@ -290,5 +308,10 @@ namespace PlatformCore
 				jobQueue.Enqueue(job);
 			}
 		}
-	}
+
+        internal void Wake()
+        {
+            mainResetEvent.Set();
+        }
+    }
 }

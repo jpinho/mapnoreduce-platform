@@ -16,7 +16,7 @@ namespace PlatformCore
 		private readonly object workerLock = new object();
 		private readonly object workerReceiveJobLock = new object();
 		private readonly AutoResetEvent freezeHandle = new AutoResetEvent(false);
-
+        public bool passiveInitialized = false;
 		/// <summary>
 		/// The job activeTracker used to coordinate a job or to report progress about it's own job
 		/// execution. Whether this job activeTracker performes in one way or the other depends on
@@ -133,38 +133,57 @@ namespace PlatformCore
 		public void ReceiveMapJob(IJobTask task) {
 			stateCheck();
 			lock (workerReceiveJobLock) {
-				if (!trackersInitialized)
-					InitTrackers();
+                if (!trackersInitialized)
+                    InitTrackers();
 
 				Trace.WriteLine("New map job received by worker [ID: " + WorkerId + "].\n"
 					+ "Master Job Tracker Uri: '" + activeTracker.ServiceUri + "'");
 				task.JobTrackerUri = activeTracker.ServiceUri;
 				activeTracker.ScheduleJob(task);
+                wakeTrackers();
+                
 			}
 		}
 
+        private void wakeTrackers()
+        {
+            this.activeTracker.Wake();
+        }
+
 		private void InitTrackers() {
 			trackersInitialized = true;
+            InitPassiveTracker();
 			activeTracker = new JobTracker(this, JobTrackerMode.Active);
-			passiveTracker = new JobTracker(this, JobTrackerMode.Passive);
 
 			thrActiveTracker = new Thread(() => {
 				activeTracker.Start();
 			});
 
-			thrPassiveTracker = new Thread(() => {
-				passiveTracker.Start();
-			});
-
 			thrActiveTracker.Start();
-			thrPassiveTracker.Start();
 		}
+
+        private void InitPassiveTracker()
+        {
+            if (passiveInitialized)
+                return;
+            passiveInitialized = true;
+            passiveTracker = new JobTracker(this, JobTrackerMode.Passive);
+
+            thrPassiveTracker = new Thread(() =>
+            {
+                passiveTracker.Start();
+            });
+            thrPassiveTracker.Start();
+        }
 
 		public bool ExecuteMapJob(IJobTask task) {
 			stateCheck();
 			lock (workerLock) {
-				if (!trackersInitialized)
-					InitTrackers();
+				if (!passiveInitialized)
+					InitPassiveTracker();
+                else {
+                    Trace.WriteLine("Trackers already initialized");
+                }
 				passiveTracker.ScheduleJob(task);
 				Status = WorkerStatus.Busy;
 			}
@@ -288,5 +307,7 @@ namespace PlatformCore
 			stateCheck();
 			activeTracker.UnfreezeCommunication();
 		}
-	}
+
+
+    }
 }
