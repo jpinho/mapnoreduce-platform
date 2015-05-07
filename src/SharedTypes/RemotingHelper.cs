@@ -29,6 +29,11 @@ namespace SharedTypes
 				, remoteObject.GetType());
 		}
 
+		public static void CreateWellKnownService(Type serviceType, string serviceName) {
+			RemotingConfiguration.RegisterWellKnownServiceType(
+				serviceType, serviceName, WellKnownObjectMode.Singleton);
+		}
+
 		public static void RegisterChannel(Uri serviceUrl) {
 			var provider = new BinaryServerFormatterSinkProvider();
 

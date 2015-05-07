@@ -11,6 +11,7 @@ namespace PlatformCore
 	{
 		private readonly object globalLock = new object();
 		private readonly Dictionary<int, IWorker> workers = new Dictionary<int, IWorker>();
+		public static readonly string ServiceName = "MNRP-PuppetMasterService";
 		public static readonly Uri ServiceUrl = Globals.LocalPuppetMasterUri;
 
 		public PuppetMasterService() {
@@ -39,9 +40,9 @@ namespace PlatformCore
 		}
 
 		public void GetStatus() {
-            foreach (var worker in workers.Values) {
-                var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
-                remoteWorker.GetStatus();
+			foreach (var worker in workers.Values) {
+				var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+				remoteWorker.GetStatus();
 			}
 		}
 
@@ -63,7 +64,7 @@ namespace PlatformCore
 			}
 
 			var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
-            remoteWorker.Slow(seconds);
+			remoteWorker.Slow(seconds);
 		}
 
 		public void FreezeWorker(int workerId) {
@@ -75,8 +76,8 @@ namespace PlatformCore
 				throw new InvalidWorkerIdException(workerId, e);
 			}
 
-            var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
-            remoteWorker.Freeze();
+			var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+			remoteWorker.Freeze();
 		}
 
 		public void UnfreezeWorker(int workerId) {
@@ -88,8 +89,8 @@ namespace PlatformCore
 				throw new InvalidWorkerIdException(workerId, e);
 			}
 
-            var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
-            remoteWorker.UnFreeze();
+			var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+			remoteWorker.UnFreeze();
 		}
 
 		public void FreezeCommunication(int workerId) {
@@ -101,8 +102,8 @@ namespace PlatformCore
 				throw new InvalidWorkerIdException(workerId, e);
 			}
 
-            var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
-            remoteWorker.FreezeCommunication();
+			var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+			remoteWorker.FreezeCommunication();
 		}
 
 		public void UnfreezeCommunication(int workerId) {
@@ -115,7 +116,7 @@ namespace PlatformCore
 			}
 
 			var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
-            remoteWorker.UnfreezeCommunication();
+			remoteWorker.UnfreezeCommunication();
 		}
 
 		private void NotifyWorkerCreation(IWorker worker) {
@@ -127,9 +128,9 @@ namespace PlatformCore
 		/// Serves a Marshalled Puppet Master object at a specific IChannel under ChannelServices.
 		/// </summary>
 		public static void Run() {
-			var service = new PuppetMasterService();
-			RemotingHelper.CreateService(service, ServiceUrl, true);
-			Trace.WriteLine("Puppet Master Service listening at '" + ServiceUrl + "'");
+			RemotingHelper.RegisterChannel(ServiceUrl);
+			RemotingHelper.CreateWellKnownService(typeof(PuppetMasterService), ServiceName);
+			Trace.WriteLine("Puppet Master Service endpoint ready at '" + ServiceUrl + "'");
 		}
 	}
 }
