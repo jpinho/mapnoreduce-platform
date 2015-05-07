@@ -53,9 +53,11 @@ namespace ClientServices
 				return;
 			}
 
-			ChannelServices.RegisterChannel(channel, true);
-			RemotingServices.Marshal(new ClientOutputReceiverService(), CLIENT_OUTPUTRECV_SVCNAME, typeof(ClientOutputReceiverService));
-			RemotingServices.Marshal(new ClientSplitProviderService(), CLIENT_SPLITPROV_SVCNAME, typeof(ClientSplitProviderService));
+			ChannelServices.RegisterChannel(channel, false);
+			RemotingConfiguration.RegisterWellKnownServiceType(typeof(ClientOutputReceiverService), CLIENT_OUTPUTRECV_SVCNAME, WellKnownObjectMode.Singleton);
+			RemotingConfiguration.RegisterWellKnownServiceType(typeof(ClientSplitProviderService), CLIENT_SPLITPROV_SVCNAME, WellKnownObjectMode.Singleton);
+			//RemotingServices.Marshal(new ClientOutputReceiverService(), CLIENT_OUTPUTRECV_SVCNAME, typeof(ClientOutputReceiverService));
+			//RemotingServices.Marshal(new ClientSplitProviderService(), CLIENT_SPLITPROV_SVCNAME, typeof(ClientSplitProviderService));
 
 			Trace.WriteLine("Client Output Receiver Service, available at {0}.", ClientOutputServiceUri.ToString());
 			Trace.WriteLine("Client Split Provider Service, available at {0}.", ClientSplitProviderServiceUri.ToString());

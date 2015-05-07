@@ -43,7 +43,7 @@ namespace SharedTypes
 			props["name"] = serviceUrl.AbsolutePath.TrimStart('/');
 
 			var channel = new TcpChannel(props, null, provider);
-			ChannelServices.RegisterChannel(channel, true);
+			ChannelServices.RegisterChannel(channel, false);
 		}
 
 		public static T GetRemoteObject<T>(string serviceUrl) {
