@@ -24,11 +24,11 @@ namespace ClientServices
 		public string EntryUrl { get; set; }
 
 		public static Uri ClientOutputServiceUri {
-			get { return new Uri(string.Format("tcp://localhost:{0}/{1}", CLIENT_CHANNEL_PORT, CLIENT_OUTPUTRECV_SVCNAME)); }
+			get { return new Uri(string.Format("tcp://{2}:{0}/{1}", CLIENT_CHANNEL_PORT, CLIENT_OUTPUTRECV_SVCNAME, Util.GetHostIpAddress())); }
 		}
 
 		public static Uri ClientSplitProviderServiceUri {
-			get { return new Uri(string.Format("tcp://localhost:{0}/{1}", CLIENT_CHANNEL_PORT, CLIENT_SPLITPROV_SVCNAME)); }
+            get { return new Uri(string.Format("tcp://{2}:{0}/{1}", CLIENT_CHANNEL_PORT, CLIENT_SPLITPROV_SVCNAME, Util.GetHostIpAddress())); }
 		}
 
 		/// <summary>
