@@ -37,7 +37,7 @@ namespace PlatformCore
 					, workerId, serviceUri));
 
 				if (!string.IsNullOrWhiteSpace(entryUrl))
-					NotifyWorkerCreation(remoteWorker, entryUrl);
+					NotifyWorkerCreation(remoteWorker.ServiceUrl, entryUrl);
 			}
 		}
 
@@ -121,11 +121,11 @@ namespace PlatformCore
 			remoteWorker.UnfreezeCommunication();
 		}
 
-		private void NotifyWorkerCreation(IWorker worker, String entryUrl) {
+		private void NotifyWorkerCreation(Uri workerServiceUri, String entryUrl) {
 			Trace.WriteLine("Sends notification to worker at ENTRY_URL informing worker creation.");
 
             var masterWorker = RemotingHelper.GetRemoteObject<IWorker>(entryUrl);
-            masterWorker.NotifyWorkerJoin(worker.ServiceUrl);
+            masterWorker.NotifyWorkerJoin(workerServiceUri);
 		}
 
 		/// <summary>
