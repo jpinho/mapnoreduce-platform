@@ -15,28 +15,29 @@ namespace PlatformCore
 		public const int NOTIFY_TIMEOUT = 1000 * 5;
 		private readonly object workerLock = new object();
 		private readonly object workerReceiveJobLock = new object();
-		private readonly AutoResetEvent freezeHandle = new AutoResetEvent(false);
-        public bool passiveInitialized = false;
+		private Thread thrActiveTracker;
+		private JobTracker passiveTracker;
+		private Thread thrPassiveTracker;
+		private bool trackersInitialized;
+
+		// possible worker states
+		public enum State { Running, Failed, Frozen };
+
 		/// <summary>
 		/// The job activeTracker used to coordinate a job or to report progress about it's own job
 		/// execution. Whether this job activeTracker performes in one way or the other depends on
 		/// its mode property <see cref="JobTrackerState"/>.
 		/// </summary>
 		private JobTracker activeTracker;
-		private Thread thrActiveTracker;
-		private JobTracker passiveTracker;
-		private Thread thrPassiveTracker;
-		private bool trackersInitialized;
-		// possible worker states
-		private enum State { Running, Failed, Frozen };
 
 		// initial state
-		private List<ManualResetEvent> frozenRequests = new List<ManualResetEvent>();
+		private readonly List<ManualResetEvent> frozenRequests = new List<ManualResetEvent>();
 		/// <summary>
 		/// List of all workers known by this worker.
 		/// </summary>
 		private Dictionary<int /*worker id*/, IWorker> workersList;
 
+		public bool PassiveInitialized;
 		public delegate bool ExecuteMapJobDelegate(JobTask task);
 
 		/// <summary>
@@ -72,36 +73,28 @@ namespace PlatformCore
 		}
 
 		public void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers) {
-			stateCheck();
+			StateCheck();
 			lock (workerLock) {
 				workersList = availableWorkers;
 			}
 		}
 
-        public void NotifyWorkerJoin(Uri serviceUri)
-        {
-            stateCheck();
-            var workerToAdd = RemotingHelper.GetRemoteObject<IWorker>(serviceUri);
-            lock (workerLock)
-            {
-                try
-                {
-                    workersList.Add(workerToAdd.WorkerId, workerToAdd);
+		public void NotifyWorkerJoin(Uri serviceUri) {
+			StateCheck();
+			var workerToAdd = RemotingHelper.GetRemoteObject<IWorker>(serviceUri);
+			lock (workerLock) {
+				try {
+					workersList.Add(workerToAdd.WorkerId, workerToAdd);
 
-                }
-                catch (Exception e)
-                {
-                    Trace.WriteLine(e.Message);
-                }
-            }
-
-        }
+				} catch (Exception e) {
+					Trace.WriteLine(e.Message);
+				}
+			}
+		}
 
 		//wakes requests frozen during frozen state
-
-		private bool processFrozenRequests() {
-			for (int i = 0; i < frozenRequests.Count; i++) {
-				ManualResetEvent mre = frozenRequests[i];
+		private bool ProcessFrozenRequests() {
+			foreach (var mre in frozenRequests) {
 				mre.Set();
 			}
 			return true;
@@ -109,18 +102,20 @@ namespace PlatformCore
 
 		//puts to sleep all incoming requests while worker is frozen
 
-		private void stateCheck() {
+		private void StateCheck() {
 			WorkerStatus status;
 			lock (workerLock) {
 				status = Status;
 			}
 
-			if (status == WorkerStatus.Offline)
-				throw new RemotingException("Server is Offline;");
-			else if (status == WorkerStatus.Frozen) {
-				var mre = new ManualResetEvent(false);
-				frozenRequests.Add(mre);
-				mre.WaitOne();
+			switch (status) {
+				case WorkerStatus.Offline:
+					throw new RemotingException("Server is Offline;");
+				case WorkerStatus.Frozen:
+					var mre = new ManualResetEvent(false);
+					frozenRequests.Add(mre);
+					mre.WaitOne();
+					break;
 			}
 		}
 
@@ -132,7 +127,7 @@ namespace PlatformCore
 
 		public WorkerStatus GetStatus() {
 			lock (workerLock) {
-				//Trace.WriteLine("Worker [ID: " + WorkerId + "] - Status: '" + Status.ToString() + "'.");
+				Trace.WriteLine("Worker [ID: " + WorkerId + "] - Status: '" + Status.ToString() + "'.");
 				return Status;
 			}
 		}
@@ -150,28 +145,27 @@ namespace PlatformCore
 		/// </summary>
 		/// <param name="task">The job to be processed.</param>
 		public void ReceiveMapJob(IJobTask task) {
-			stateCheck();
+			StateCheck();
 			lock (workerReceiveJobLock) {
-                if (!trackersInitialized)
-                    InitTrackers();
+				if (!trackersInitialized)
+					InitTrackers();
 
 				Trace.WriteLine("New map job received by worker [ID: " + WorkerId + "].\n"
 					+ "Master Job Tracker Uri: '" + activeTracker.ServiceUri + "'");
 				task.JobTrackerUri = activeTracker.ServiceUri;
 				activeTracker.ScheduleJob(task);
-                wakeTrackers();
-                
+				WakeTrackers();
+
 			}
 		}
 
-        private void wakeTrackers()
-        {
-            this.activeTracker.Wake();
-        }
+		private void WakeTrackers() {
+			activeTracker.Wake();
+		}
 
 		private void InitTrackers() {
 			trackersInitialized = true;
-            InitPassiveTracker();
+			InitPassiveTracker();
 			activeTracker = new JobTracker(this, JobTrackerMode.Active);
 
 			thrActiveTracker = new Thread(() => {
@@ -181,28 +175,26 @@ namespace PlatformCore
 			thrActiveTracker.Start();
 		}
 
-        private void InitPassiveTracker()
-        {
-            if (passiveInitialized)
-                return;
-            passiveInitialized = true;
-            passiveTracker = new JobTracker(this, JobTrackerMode.Passive);
+		private void InitPassiveTracker() {
+			if (PassiveInitialized)
+				return;
+			PassiveInitialized = true;
+			passiveTracker = new JobTracker(this, JobTrackerMode.Passive);
 
-            thrPassiveTracker = new Thread(() =>
-            {
-                passiveTracker.Start();
-            });
-            thrPassiveTracker.Start();
-        }
+			thrPassiveTracker = new Thread(() => {
+				passiveTracker.Start();
+			});
+			thrPassiveTracker.Start();
+		}
 
 		public bool ExecuteMapJob(IJobTask task) {
-			stateCheck();
+			StateCheck();
 			lock (workerLock) {
-				if (!passiveInitialized)
+				if (!PassiveInitialized)
 					InitPassiveTracker();
-                else {
-                    Trace.WriteLine("Trackers already initialized");
-                }
+				else {
+					Trace.WriteLine("Trackers already initialized");
+				}
 				passiveTracker.ScheduleJob(task);
 				Status = WorkerStatus.Busy;
 			}
@@ -255,7 +247,7 @@ namespace PlatformCore
 		public void AsyncExecuteMapJob(int split,
 				string fileName, List<int> fileSplits, Uri jobTrackerUri, string mapClassName,
 				byte[] mapFunctionName, string outputReceiverUrl, string splitProviderUrl) {
-			stateCheck();
+			StateCheck();
 
 			//var fnExecuteMapJob = new ExecuteMapJobDelegate(ExecuteMapJob);
 			var newTask = new JobTask {
@@ -278,7 +270,6 @@ namespace PlatformCore
 			ExecuteMapJob(newTask);
 		}
 
-
 		internal static Worker Run(int workerId, Uri serviceUrl, Dictionary<int, IWorker> workers) {
 			var wrk = new Worker(workerId, serviceUrl, workers);
 			RemotingHelper.CreateService(wrk, serviceUrl);
@@ -286,7 +277,7 @@ namespace PlatformCore
 		}
 
 		public void Slow(int secs) {
-			stateCheck();
+			StateCheck();
 			Thread.Sleep(secs * 1000);
 		}
 
@@ -295,13 +286,13 @@ namespace PlatformCore
 			lock (workerLock) {
 				status = Status;
 			}
-			if (status != WorkerStatus.Frozen) {
-				lock (workerLock) {
-					Status = WorkerStatus.Frozen;
-				}
-				frozenRequests.Clear();
-				//activeTracker.FreezeCommunication();
+			if (status == WorkerStatus.Frozen)
+				return;
+
+			lock (workerLock) {
+				Status = WorkerStatus.Frozen;
 			}
+			frozenRequests.Clear();
 		}
 
 		public void UnFreeze() {
@@ -313,21 +304,18 @@ namespace PlatformCore
 				lock (workerLock) {
 					Status = WorkerStatus.Available;
 				}
-				bool frozenWakeResult = processFrozenRequests();
+				ProcessFrozenRequests();
 			}
-			//activeTracker.UnfreezeCommunication();
 		}
 
 		public void FreezeCommunication() {
-			stateCheck();
+			StateCheck();
 			activeTracker.FreezeCommunication();
 		}
 
 		public void UnfreezeCommunication() {
-			stateCheck();
+			StateCheck();
 			activeTracker.UnfreezeCommunication();
 		}
-
-
-    }
+	}
 }
