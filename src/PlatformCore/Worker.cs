@@ -78,6 +78,25 @@ namespace PlatformCore
 			}
 		}
 
+        public void NotifyWorkerJoin(Uri serviceUri)
+        {
+            stateCheck();
+            var workerToAdd = RemotingHelper.GetRemoteObject<IWorker>(serviceUri);
+            lock (workerLock)
+            {
+                try
+                {
+                    workersList.Add(workerToAdd.WorkerId, workerToAdd);
+
+                }
+                catch (Exception e)
+                {
+                    Trace.WriteLine(e.Message);
+                }
+            }
+
+        }
+
 		//wakes requests frozen during frozen state
 
 		private bool processFrozenRequests() {
@@ -258,6 +277,7 @@ namespace PlatformCore
 			//fnExecuteMapJob.BeginInvoke(newTask, callback, null);
 			ExecuteMapJob(newTask);
 		}
+
 
 		internal static Worker Run(int workerId, Uri serviceUrl, Dictionary<int, IWorker> workers) {
 			var wrk = new Worker(workerId, serviceUrl, workers);

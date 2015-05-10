@@ -28,14 +28,12 @@ namespace PlatformCore
 				RemotingHelper.RegisterChannel(serviceUri);
 
 				var remoteWorker = Worker.Run(workerId, serviceUri, workers);
-				workers.Add(workerId, remoteWorker);
-				remoteWorker.UpdateAvailableWorkers(workers);
 
 				Trace.WriteLine(string.Format("New worker created: id '{0}', url '{1}'."
 					, workerId, serviceUri));
 
 				if (!string.IsNullOrWhiteSpace(entryUrl))
-					NotifyWorkerCreation(remoteWorker);
+					NotifyWorkerCreation(remoteWorker, entryUrl);
 			}
 		}
 
@@ -119,9 +117,11 @@ namespace PlatformCore
 			remoteWorker.UnfreezeCommunication();
 		}
 
-		private void NotifyWorkerCreation(IWorker worker) {
+		private void NotifyWorkerCreation(IWorker worker, String entryUrl) {
 			Trace.WriteLine("Sends notification to worker at ENTRY_URL informing worker creation.");
-			//TODO: Contact worker at ENTRY_URL and announce new worker available.
+
+            var masterWorker = RemotingHelper.GetRemoteObject<IWorker>(entryUrl);
+            masterWorker.NotifyWorkerJoin(worker.ServiceUrl);
 		}
 
 		/// <summary>

@@ -17,9 +17,11 @@ namespace SharedTypes
 		void FreezeCommunication();
 		void UnfreezeCommunication();
 		void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers);
+        void NotifyWorkerJoin(Uri uri);
 
 		void AsyncExecuteMapJob(int split,
 			string fileName, List<int> fileSplits, Uri jobTrackerUri, string mapClassName,
 			byte[] mapFunctionName, string outputReceiverUrl, string splitProviderUrl);
-	}
+
+    }
 }
