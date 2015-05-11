@@ -27,9 +27,9 @@ namespace PlatformCore
 				var serviceUri = new Uri(serviceUrl);
 				RemotingHelper.RegisterChannel(serviceUri);
 
-                var remoteWorker = Worker.Run(workerId, serviceUri, new Dictionary<int, IWorker>(workers));
+                var remoteWorker = Worker.Run(workerId, serviceUri, workers, GetServiceUri());
                 workers.Add(remoteWorker.WorkerId, remoteWorker);
-                remoteWorker.UpdateAvailableWorkers(new Dictionary<int, IWorker>(workers));
+                remoteWorker.UpdateAvailableWorkers(workers);
 
 
 				Trace.WriteLine(string.Format("New worker created: id '{0}', url '{1}'."

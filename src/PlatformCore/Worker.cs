@@ -34,17 +34,19 @@ namespace PlatformCore
 		/// The service URL used to reach this work remotely.
 		/// </summary>
 		public Uri ServiceUrl { get; set; }
+        public Uri puppetMasterUri { get; set; }
 		public WorkerStatus Status { get; set; }
 
 		public Worker() {
 			Status = WorkerStatus.Available;
 		}
 
-		public Worker(int workerId, Uri serviceUrl, Dictionary<int, IWorker> availableWorkers)
+		public Worker(int workerId, Uri serviceUrl, Dictionary<int, IWorker> availableWorkers, Uri puppetMasterServiceUri)
 			: this() {
 			WorkerId = workerId;
 			ServiceUrl = serviceUrl;
-			workersList = availableWorkers;
+            workersList = new Dictionary<int, IWorker>(availableWorkers);
+            puppetMasterUri = puppetMasterServiceUri;
 		}
 
 		/// <summary>
@@ -59,7 +61,7 @@ namespace PlatformCore
 		public void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers) {
 			StateCheck();
 			lock (workerMutex) {
-				workersList = availableWorkers;
+				workersList = new Dictionary<int, IWorker>(availableWorkers);
 			}
 		}
 
@@ -156,9 +158,17 @@ namespace PlatformCore
 
 				task.JobTrackerUri = masterTracker.ServiceUri;
 				masterTracker.ScheduleJob(task);
+                PullAvailableWorkers();
 				masterTracker.Wake();
 			}
 		}
+
+        private void PullAvailableWorkers() {
+            var pMaster = (IPuppetMasterService)Activator.GetObject(
+                typeof(IPuppetMasterService),
+                puppetMasterUri.ToString());
+            UpdateAvailableWorkers(pMaster.GetWorkers());
+        }
 
 		public void ExecuteMapJob(int split,
 				string fileName, List<int> fileSplits, Uri jobTrackerUri, string mapClassName,
@@ -189,7 +199,7 @@ namespace PlatformCore
 
 #if DEBUG
 			/*work delay simulation*/
-			Thread.Sleep(15000);
+//			Thread.Sleep(15000);
 			StateCheck();
 #endif
 
@@ -233,8 +243,8 @@ namespace PlatformCore
 			}
 		}
 
-		internal static Worker Run(int workerId, Uri serviceUrl, Dictionary<int, IWorker> workers) {
-			var wrk = new Worker(workerId, serviceUrl, workers);
+		internal static Worker Run(int workerId, Uri serviceUrl, Dictionary<int, IWorker> workers, Uri puppetMasterServiceUri) {
+			var wrk = new Worker(workerId, serviceUrl, workers, puppetMasterServiceUri);
 			RemotingHelper.CreateService(wrk, serviceUrl);
 			return wrk;
 		}
