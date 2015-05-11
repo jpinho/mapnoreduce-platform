@@ -5,7 +5,7 @@
 		Busy,
 		ReceivingJob,
 		Available,
-        Frozen,
+		Frozen,
 		Offline
 	}
 
@@ -13,12 +13,6 @@
 	{
 		Busy,
 		Available,
-        Frozen
-	}
-
-	public enum JobTrackerMode
-	{
-		Active,
-		Passive
+		Frozen
 	}
 }

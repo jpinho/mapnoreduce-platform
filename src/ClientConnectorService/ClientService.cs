@@ -28,7 +28,7 @@ namespace ClientServices
 		}
 
 		public static Uri ClientSplitProviderServiceUri {
-            get { return new Uri(string.Format("tcp://{2}:{0}/{1}", CLIENT_CHANNEL_PORT, CLIENT_SPLITPROV_SVCNAME, Util.GetHostIpAddress())); }
+			get { return new Uri(string.Format("tcp://{2}:{0}/{1}", CLIENT_CHANNEL_PORT, CLIENT_SPLITPROV_SVCNAME, Util.GetHostIpAddress())); }
 		}
 
 		/// <summary>
@@ -36,8 +36,6 @@ namespace ClientServices
 		/// </summary>
 		/// <param name="entryUrl"></param>
 		public void Init(string entryUrl) {
-			TcpChannel channel;
-
 			EntryUrl = entryUrl;
 			var provider = new BinaryServerFormatterSinkProvider {
 				TypeFilterLevel = TypeFilterLevel.Full
@@ -47,8 +45,8 @@ namespace ClientServices
 			props["port"] = CLIENT_CHANNEL_PORT;
 
 			try {
-				channel = new TcpChannel(props, null, provider);
-                ChannelServices.RegisterChannel(channel, false);
+				var channel = new TcpChannel(props, null, provider);
+				ChannelServices.RegisterChannel(channel, false);
 			} catch {
 				Trace.WriteLine("Client channel already registered, skipping this step!");
 			}
