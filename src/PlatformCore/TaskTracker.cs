@@ -1,4 +1,5 @@
 ﻿using SharedTypes;
+using System.Threading;
 
 namespace PlatformCore
 {
@@ -11,6 +12,7 @@ namespace PlatformCore
 		public override void Run() {
 			base.Run();
 			while (Enabled) {
+                Thread.Sleep(100);
 				TrackJob();
 			}
 		}
