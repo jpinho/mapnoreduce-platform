@@ -194,7 +194,7 @@ namespace PlatformCore
 		}
 
 		public void ReceiveJobTrackerState(JobTrackerStateInfo getState) {
-
+			//TODO: create job tracker slave
 		}
 
 		public void ExecuteMapJob(IJobTask task) {
