@@ -12,6 +12,7 @@ namespace PlatformCore
 	/// <summary>
 	/// Default Job Scheduler - Schedules job splits to workers using a FIFO data structure.
 	/// </summary>
+	[Serializable]
 	public class DefaultJobScheduler
 	{
 		public readonly JobTracker Tracker;
@@ -45,12 +46,12 @@ namespace PlatformCore
 							from w in Tracker.Worker.GetWorkersList()
 							where w.Value.GetStatus() == WorkerStatus.Available
 							select w.Value
-						).ToList()); 
+						).ToList());
 					SplitsDelivery(availableWorkers, CurrentJob);
 				} else
 					break;
 
-                CheckWorkersState();
+				CheckWorkersState();
 				Thread.Sleep(Worker.NOTIFY_TIMEOUT);
 			}
 
@@ -60,33 +61,33 @@ namespace PlatformCore
 			}
 		}
 
-        private void CheckWorkersState() {
-            lock (schedulerMutex) {
-                var splitsInProcess = splitsBeingProcessed.ToArray();
+		private void CheckWorkersState() {
+			lock (schedulerMutex) {
+				var splitsInProcess = splitsBeingProcessed.ToArray();
 
-                foreach (var keyValue in splitsInProcess) {
-                    var workerId = keyValue.Value;
-                    var split = keyValue.Key;
-                    TimeSpan tspan;
+				foreach (var keyValue in splitsInProcess) {
+					var workerId = keyValue.Value;
+					var split = keyValue.Key;
+					TimeSpan tspan;
 
-                    lock (schedulerMutex) {
-                        tspan = DateTime.Now.Subtract(Tracker.WorkerAliveSignals[workerId]);
-                    }
+					lock (schedulerMutex) {
+						tspan = DateTime.Now.Subtract(Tracker.WorkerAliveSignals[workerId]);
+					}
 
-                    if (!(tspan.TotalSeconds > 60.0))
-                        continue;
+					if (!(tspan.TotalSeconds > 60.0))
+						continue;
 
-                    // Worker not responding.
-                    Trace.WriteLine("Worker '" + workerId + "' not responding (split '" + split + "').");
-                    var worker = Tracker.Worker.GetWorkersList()[workerId];
-                    if (worker != null) {
-                        worker.SetStatus(WorkerStatus.Offline);
-                    }
-                    splitsQueue.Enqueue(split);
-                    splitsBeingProcessed.Remove(split);
-                }
-            }
-        }
+					// Worker not responding.
+					Trace.WriteLine("Worker '" + workerId + "' not responding (split '" + split + "').");
+					var worker = Tracker.Worker.GetWorkersList()[workerId];
+					if (worker != null) {
+						worker.SetStatus(WorkerStatus.Offline);
+					}
+					splitsQueue.Enqueue(split);
+					splitsBeingProcessed.Remove(split);
+				}
+			}
+		}
 
 		private void SplitsDelivery(Queue<IWorker> availableWorkers, IJobTask job) {
 			Tracker.StateCheck();

@@ -1,8 +1,10 @@
-﻿using SharedTypes;
+﻿using System;
 using System.Threading;
+using SharedTypes;
 
 namespace PlatformCore
 {
+	[Serializable]
 	public class TaskTracker : JobTracker
 	{
 		public TaskTracker(Worker worker)
@@ -12,7 +14,7 @@ namespace PlatformCore
 		public override void Run() {
 			base.Run();
 			while (Enabled) {
-                Thread.Sleep(100);
+				Thread.Sleep(100);
 				TrackJob();
 			}
 		}

@@ -15,11 +15,11 @@ namespace PlatformCore
 
 		private volatile Dictionary</*workerid*/ int, /*lastupdate*/DateTime> workerAliveSignals = new Dictionary<int, DateTime>();
 		private readonly List<ManualResetEvent> frozenRequests = new List<ManualResetEvent>();
-		private readonly Queue<IJobTask> jobsQueue = new Queue<IJobTask>();
+		private Queue<IJobTask> jobsQueue = new Queue<IJobTask>();
 		protected readonly object TrackerMutex = new object();
 
 		public volatile bool Enabled = true;
-		public readonly Worker Worker;
+		public Worker Worker { get; set; }
 		public static AutoResetEvent MainResetEvent = new AutoResetEvent(false);
 		public Uri ServiceUri { get; protected set; }
 		public JobTrackerState Status { get; set; }
@@ -27,12 +27,12 @@ namespace PlatformCore
 
 		public Dictionary<int, DateTime> WorkerAliveSignals {
 			get { return workerAliveSignals; }
+			protected set { workerAliveSignals = value; }
 		}
 
 		public Queue<IJobTask> JobsQueue {
-			get {
-				return jobsQueue;
-			}
+			get { return jobsQueue; }
+			protected set { jobsQueue = value; }
 		}
 
 		protected JobTracker(Worker worker) {
@@ -80,6 +80,18 @@ namespace PlatformCore
 			lock (TrackerMutex) {
 				jobsQueue.Enqueue(job);
 			}
+		}
+
+		public JobTrackerStateInfo GetState() {
+			return new JobTrackerStateInfo() {
+				CurrentJob = CurrentJob,
+				ServiceUri = ServiceUri,
+				Worker = Worker,
+				Status = Status,
+				Enabled = Enabled,
+				JobsQueue = jobsQueue,
+				WorkerAliveSignals = workerAliveSignals
+			};
 		}
 
 		public void Alive(int wid) {

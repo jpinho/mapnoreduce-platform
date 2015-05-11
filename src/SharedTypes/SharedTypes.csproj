@@ -45,6 +45,7 @@
     <Compile Include="IJobTask.cs" />
     <Compile Include="IJobTracker.cs" />
     <Compile Include="JobTask.cs" />
+    <Compile Include="JobTrackerStateInfo.cs" />
     <Compile Include="MnrTextTraceListener.cs" />
     <Compile Include="RemotingHelper.cs" />
     <Compile Include="IClientOutputReceiverService.cs" />

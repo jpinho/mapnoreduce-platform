@@ -22,5 +22,7 @@ namespace SharedTypes
 		void ExecuteMapJob(int split,
 			string fileName, List<int> fileSplits, Uri jobTrackerUri, string mapClassName,
 			byte[] mapFunctionName, string outputReceiverUrl, string splitProviderUrl);
+
+		void ReceiveJobTrackerState(JobTrackerStateInfo getState);
 	}
 }

@@ -34,7 +34,7 @@ namespace PlatformCore
 		/// The service URL used to reach this work remotely.
 		/// </summary>
 		public Uri ServiceUrl { get; set; }
-        public Uri puppetMasterUri { get; set; }
+		public Uri PuppetMasterUri { get; set; }
 		public WorkerStatus Status { get; set; }
 
 		public Worker() {
@@ -45,8 +45,8 @@ namespace PlatformCore
 			: this() {
 			WorkerId = workerId;
 			ServiceUrl = serviceUrl;
-            workersList = new Dictionary<int, IWorker>(availableWorkers);
-            puppetMasterUri = puppetMasterServiceUri;
+			workersList = new Dictionary<int, IWorker>(availableWorkers);
+			PuppetMasterUri = puppetMasterServiceUri;
 		}
 
 		/// <summary>
@@ -158,24 +158,21 @@ namespace PlatformCore
 
 				task.JobTrackerUri = masterTracker.ServiceUri;
 				masterTracker.ScheduleJob(task);
-                PullAvailableWorkers();
+				PullAvailableWorkers();
 				masterTracker.Wake();
 			}
 		}
 
-        private void PullAvailableWorkers() {
-            var pMaster = (IPuppetMasterService)Activator.GetObject(
-                typeof(IPuppetMasterService),
-                puppetMasterUri.ToString());
-            try
-            {
-                UpdateAvailableWorkers(pMaster.GetWorkers());
-            }
-            catch (Exception e)
-            {
-                Trace.WriteLine(e.Message);
-            }
-        }
+		private void PullAvailableWorkers() {
+			var pMaster = (IPuppetMasterService)Activator.GetObject(
+				typeof(IPuppetMasterService),
+				PuppetMasterUri.ToString());
+			try {
+				UpdateAvailableWorkers(pMaster.GetWorkers());
+			} catch (Exception e) {
+				Trace.WriteLine(e.Message);
+			}
+		}
 
 		public void ExecuteMapJob(int split,
 				string fileName, List<int> fileSplits, Uri jobTrackerUri, string mapClassName,
@@ -196,6 +193,10 @@ namespace PlatformCore
 			ExecuteMapJob(newTask);
 		}
 
+		public void ReceiveJobTrackerState(JobTrackerStateInfo getState) {
+
+		}
+
 		public void ExecuteMapJob(IJobTask task) {
 			StateCheck();
 			lock (workerMutex) {
@@ -206,7 +207,7 @@ namespace PlatformCore
 
 #if DEBUG
 			/*work delay simulation*/
-//			Thread.Sleep(15000);
+			// Thread.Sleep(15000);
 			StateCheck();
 #endif
 
@@ -241,7 +242,6 @@ namespace PlatformCore
 
 					return;
 				}
-				return;
 			} finally {
 				Trace.WriteLine("Send alives thread finished on worker [ID: '" + WorkerId + "'].");
 				lock (workerMutex) {
@@ -280,22 +280,26 @@ namespace PlatformCore
 			lock (workerMutex) {
 				status = Status;
 			}
-			if (status == WorkerStatus.Offline || status == WorkerStatus.Frozen) {
-				lock (workerMutex) {
-					Status = WorkerStatus.Available;
-				}
-				ProcessFrozenRequests();
+			if (status != WorkerStatus.Offline && status != WorkerStatus.Frozen)
+				return;
+			lock (workerMutex) {
+				Status = WorkerStatus.Available;
 			}
+			ProcessFrozenRequests();
 		}
 
 		public void FreezeCommunication() {
 			StateCheck();
-			masterTracker.FreezeCommunication();
+			lock (workerMutex) {
+				masterTracker.FreezeCommunication();
+			}
 		}
 
 		public void UnfreezeCommunication() {
 			StateCheck();
-			masterTracker.UnfreezeCommunication();
+			lock (workerMutex) {
+				masterTracker.UnfreezeCommunication();
+			}
 		}
 	}
 }

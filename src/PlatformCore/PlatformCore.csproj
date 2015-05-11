@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CoordinationManager.cs" />
     <Compile Include="DefaultJobScheduler.cs" />
     <Compile Include="Exception\InvalidWorkerServiceUrlException.cs" />
     <Compile Include="Exception\InvalidWorkerIdException.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PuppetMasterService.cs" />
+    <Compile Include="SlaveTracker.cs" />
     <Compile Include="TaskRunner.cs" />
     <Compile Include="TaskTracker.cs" />
     <Compile Include="Worker.cs" />

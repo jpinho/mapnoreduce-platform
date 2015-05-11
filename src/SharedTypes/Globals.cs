@@ -4,6 +4,6 @@ namespace SharedTypes
 {
 	public static class Globals
 	{
-		public static Uri LocalPuppetMasterUri = new Uri("TCP://LOCALHOST:20001/PM");
+		public static Uri LocalPuppetMasterUri = new Uri("TCP://" + Util.GetHostIpAddress() + ":20001/PM");
 	}
 }
