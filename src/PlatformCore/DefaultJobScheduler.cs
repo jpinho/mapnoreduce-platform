@@ -45,35 +45,12 @@ namespace PlatformCore
 							from w in Tracker.Worker.GetWorkersList()
 							where w.Value.GetStatus() == WorkerStatus.Available
 							select w.Value
-						).ToList());
-
+						).ToList()); 
 					SplitsDelivery(availableWorkers, CurrentJob);
 				} else
 					break;
 
-				lock (schedulerMutex) {
-					var splitsInProcess = splitsBeingProcessed.ToArray();
-
-					foreach (var keyValue in splitsInProcess) {
-						var workerId = keyValue.Value;
-						var split = keyValue.Key;
-						TimeSpan tspan;
-
-						lock (schedulerMutex) {
-							tspan = DateTime.Now.Subtract(Tracker.WorkerAliveSignals[workerId]);
-						}
-
-						if (!(tspan.TotalSeconds > 60.0))
-							continue;
-
-						// Worker not responding.
-						Trace.WriteLine("Worker '" + workerId + "' not responding (split '" + split + "').");
-						Tracker.Worker.Status = WorkerStatus.Offline;
-						splitsQueue.Enqueue(split);
-						splitsBeingProcessed.Remove(split);
-					}
-				}
-
+                CheckWorkersState();
 				Thread.Sleep(Worker.NOTIFY_TIMEOUT);
 			}
 
@@ -82,6 +59,35 @@ namespace PlatformCore
 				splitsQueue.Clear();
 			}
 		}
+
+        private void CheckWorkersState() {
+            lock (schedulerMutex) {
+                var splitsInProcess = splitsBeingProcessed.ToArray();
+
+                foreach (var keyValue in splitsInProcess) {
+                    var workerId = keyValue.Value;
+                    var split = keyValue.Key;
+                    TimeSpan tspan;
+
+                    lock (schedulerMutex) {
+                        tspan = DateTime.Now.Subtract(Tracker.WorkerAliveSignals[workerId]);
+                    }
+
+                    if (!(tspan.TotalSeconds > 60.0))
+                        continue;
+
+                    // Worker not responding.
+                    Trace.WriteLine("Worker '" + workerId + "' not responding (split '" + split + "').");
+                    var worker = Tracker.Worker.GetWorkersList()[workerId];
+                    if (worker != null) {
+                        worker.SetStatus(WorkerStatus.Offline);
+                        Tracker.Worker.GetBlackWorkersList().Add(worker.WorkerId, worker);
+                    }
+                    splitsQueue.Enqueue(split);
+                    splitsBeingProcessed.Remove(split);
+                }
+            }
+        }
 
 		private void SplitsDelivery(Queue<IWorker> availableWorkers, IJobTask job) {
 			Tracker.StateCheck();
