@@ -107,7 +107,6 @@ namespace ClientServices
 
 			// Saves the map job output to disk.
 			var result = corSvc.GetMapResult(filePath);
-			var outFilePath = Path.Combine(outputDir, filePath + ".out");
 
 			Trace.WriteLine("Result received, rows returned: '" + (result != null ? result.Count : 0) + "'.");
 			Trace.WriteLine("Sending output to '" + outputDir + "'.");
@@ -117,14 +116,19 @@ namespace ClientServices
 				return;
 			}
 
-			if (File.Exists(outFilePath))
-				File.Delete(outFilePath);
+            for (int i = 0; i < result.Count; i++)
+            {
+                var outFilePath = Path.Combine(outputDir, (i + 1) + ".out");
 
-			using (var outFile = File.CreateText(outFilePath)) {
-				foreach (var splitResult in result)
-					outFile.WriteLine(string.Join("\n", splitResult));
-				Trace.WriteLine("Result committed to out file. All done!");
-			}
+                if (File.Exists(outFilePath))
+                    File.Delete(outFilePath);
+
+                using (var outFile = File.CreateText(outFilePath))
+                {
+                    outFile.WriteLine(result[i]);
+                }
+            }
+            Trace.WriteLine("Result committed to out files. All done!");
 		}
 	}
 }
