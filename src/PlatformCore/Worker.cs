@@ -167,7 +167,14 @@ namespace PlatformCore
             var pMaster = (IPuppetMasterService)Activator.GetObject(
                 typeof(IPuppetMasterService),
                 puppetMasterUri.ToString());
-            UpdateAvailableWorkers(pMaster.GetWorkers());
+            try
+            {
+                UpdateAvailableWorkers(pMaster.GetWorkers());
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(e.Message);
+            }
         }
 
 		public void ExecuteMapJob(int split,

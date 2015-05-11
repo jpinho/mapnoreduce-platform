@@ -18,29 +18,31 @@ namespace PlatformCore.Tests
 		private readonly String worker4ServiceUrl = "tcp://localhost:20003/worker" + Guid.NewGuid().ToString("D");
 		private readonly String worker5ServiceUrl = "tcp://localhost:20004/worker" + Guid.NewGuid().ToString("D");
 
-		[TestMethod]
-		public void TestWorker() {
-			// Creates the client services to provide splits data and receive split results.
-			var clientService = new ClientService();
-			clientService.Init(worker1ServiceUrl);
+        [TestMethod]
+        public void TestWorkerSubmit()
+        {
+            // Creates the client services to provide splits data and receive split results.
+            var clientService = new ClientService();
+            clientService.Init(worker1ServiceUrl);
 
-			// Creates a worker at the given URL.
-			puppetMaster.CreateWorker(1, worker1ServiceUrl, null);
-			puppetMaster.CreateWorker(2, worker2ServiceUrl, null);
-			puppetMaster.CreateWorker(3, worker3ServiceUrl, null);
-			puppetMaster.CreateWorker(4, worker4ServiceUrl, null);
-			puppetMaster.CreateWorker(5, worker5ServiceUrl, null);
+            // Creates a worker at the given URL.
+            puppetMaster.CreateWorker(1, worker1ServiceUrl, null);
+            puppetMaster.CreateWorker(2, worker2ServiceUrl, null);
+            puppetMaster.CreateWorker(3, worker3ServiceUrl, null);
+            puppetMaster.CreateWorker(4, worker4ServiceUrl, null);
+            puppetMaster.CreateWorker(5, worker5ServiceUrl, null);
 
-			// Fetchs the object from 'server'.
-			var remoteWorker1 = RemotingHelper.GetRemoteObject<IWorker>(worker1ServiceUrl);
-			var jobFilePath = Path.Combine(Environment.CurrentDirectory, "Resources", "job.txt");
-			var jobOutputPath = string.Concat(jobFilePath, "." + DateTime.Now.ToString("ddMMyyHHmmssfff") + ".out");
-			var asmPath = Path.Combine(Environment.CurrentDirectory, "Resources", "UserMappersLib.dll");
+            // Fetchs the object from 'server'.
+            var remoteWorker1 = RemotingHelper.GetRemoteObject<IWorker>(worker1ServiceUrl);
+            var jobFilePath = Path.Combine(Environment.CurrentDirectory, "Resources", "job.txt");
+            var jobOutputPath = Path.Combine(Environment.CurrentDirectory, "Resources");
+            var asmPath = Path.Combine(Environment.CurrentDirectory, "Resources", "UserMappersLib.dll");
+            var nSplits = 5;
+            clientService.Submit(jobFilePath, nSplits, jobOutputPath, "MonkeyMapper", asmPath);
 
-			clientService.Submit(jobFilePath, 5, jobOutputPath, "MonkeyMapper", asmPath);
-
-			//TODO: finish result verification (read results from the output folder)!
-		}
+            for (int i = 0; i < nSplits; i++)
+                Assert.IsTrue(File.Exists(Path.Combine(Environment.CurrentDirectory, "Resources", (i + 1) + ".out")));
+        }
 		[TestMethod]
 		public void TestFreezeWorker() {
 			// Creates the client services to provide splits data and receive split results.
