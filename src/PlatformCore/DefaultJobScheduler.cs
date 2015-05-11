@@ -81,7 +81,6 @@ namespace PlatformCore
                     var worker = Tracker.Worker.GetWorkersList()[workerId];
                     if (worker != null) {
                         worker.SetStatus(WorkerStatus.Offline);
-                        Tracker.Worker.GetBlackWorkersList().Add(worker.WorkerId, worker);
                     }
                     splitsQueue.Enqueue(split);
                     splitsBeingProcessed.Remove(split);
