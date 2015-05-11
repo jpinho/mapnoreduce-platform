@@ -51,6 +51,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="JobTrackerTest.cs" />
+    <Compile Include="CreateWorkerTest.cs" />
     <Compile Include="WorkerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GetStatusTest.cs" />

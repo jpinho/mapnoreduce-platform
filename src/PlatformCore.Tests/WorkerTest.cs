@@ -38,10 +38,10 @@ namespace PlatformCore.Tests
             var jobOutputPath = Path.Combine(Environment.CurrentDirectory, "Resources");
             var asmPath = Path.Combine(Environment.CurrentDirectory, "Resources", "UserMappersLib.dll");
             var nSplits = 5;
-            clientService.Submit(jobFilePath, nSplits, jobOutputPath, "MonkeyMapper", asmPath);
+            //clientService.Submit(jobFilePath, nSplits, jobOutputPath, "MonkeyMapper", asmPath);
 
-            for (int i = 0; i < nSplits; i++)
-                Assert.IsTrue(File.Exists(Path.Combine(Environment.CurrentDirectory, "Resources", (i + 1) + ".out")));
+            //for (int i = 0; i < nSplits; i++)
+            //    Assert.IsTrue(File.Exists(Path.Combine(Environment.CurrentDirectory, "Resources", (i + 1) + ".out")));
         }
 		[TestMethod]
 		public void TestFreezeWorker() {

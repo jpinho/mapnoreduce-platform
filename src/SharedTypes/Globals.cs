@@ -4,6 +4,6 @@ namespace SharedTypes
 {
 	public static class Globals
 	{
-		public static Uri LocalPuppetMasterUri = new Uri("tcp://localhost:9008/MNRP-PuppetMasterService");
+		public static Uri LocalPuppetMasterUri = new Uri("TCP://LOCALHOST:20001/PM");
 	}
 }

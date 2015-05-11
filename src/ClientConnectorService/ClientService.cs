@@ -56,8 +56,8 @@ namespace ClientServices
 			//RemotingServices.Marshal(new ClientOutputReceiverService(), CLIENT_OUTPUTRECV_SVCNAME, typeof(ClientOutputReceiverService));
 			//RemotingServices.Marshal(new ClientSplitProviderService(), CLIENT_SPLITPROV_SVCNAME, typeof(ClientSplitProviderService));
 
-			Trace.WriteLine("Client Output Receiver Service, available at {0}.", ClientOutputServiceUri.ToString());
-			Trace.WriteLine("Client Split Provider Service, available at {0}.", ClientSplitProviderServiceUri.ToString());
+			Trace.WriteLine(string.Format("Client Output Receiver Service, available at {0}.", ClientOutputServiceUri.ToString()));
+			Trace.WriteLine(string.Format("Client Split Provider Service, available at {0}.", ClientSplitProviderServiceUri.ToString()));
 		}
 
 		/// <summary>

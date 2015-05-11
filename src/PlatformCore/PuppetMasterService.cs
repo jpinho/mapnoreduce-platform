@@ -11,7 +11,7 @@ namespace PlatformCore
 	{
 		private readonly object globalLock = new object();
 		private readonly Dictionary<int, IWorker> workers = new Dictionary<int, IWorker>();
-		public static readonly string ServiceName = "MNRP-PuppetMasterService";
+		public static readonly string ServiceName = "PM";
 		public static readonly Uri ServiceUrl = Globals.LocalPuppetMasterUri;
 
 		public PuppetMasterService() {
@@ -41,6 +41,7 @@ namespace PlatformCore
 		}
 
 		public void GetStatus() {
+            Trace.WriteLine("PuppetMaster [ID: " + ServiceName + "] - Running: '" + ServiceUrl + "'.");
 			foreach (var worker in workers.Values) {
 				var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
 				remoteWorker.GetStatus();
