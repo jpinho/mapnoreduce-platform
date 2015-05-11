@@ -198,6 +198,11 @@ namespace PlatformCore
 				passiveTracker.ScheduleJob(task);
 				Status = WorkerStatus.Busy;
 			}
+            
+            /*begin# testing, to remove*/
+            Thread.Sleep( /*work delay simulation*/ 15000);
+            StateCheck();
+            /*end*/
 
 			try {
 				var splitProvider = (IClientSplitProviderService)Activator.GetObject(
@@ -206,8 +211,6 @@ namespace PlatformCore
 
 				var data = splitProvider.GetFileSplit(task.FileName, task.SplitNumber);
 				var assembly = Assembly.Load(task.MapFunctionAssembly);
-
-				//Thread.Sleep( /*work delay simulation*/ 30 * 1000);
 
 				foreach (var type in assembly.GetTypes()) {
 					if (!type.IsClass || !type.FullName.EndsWith("." + task.MapClassName, StringComparison.InvariantCultureIgnoreCase))

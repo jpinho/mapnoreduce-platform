@@ -26,12 +26,12 @@
         /// </summary>
         private void InitializeComponent() {
             this.grpRunStatus = new System.Windows.Forms.GroupBox();
+            this.btnRunStep = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
             this.txtLog = new System.Windows.Forms.TextBox();
             this.btnAbort = new System.Windows.Forms.Button();
             this.lblOperationStatus = new System.Windows.Forms.Label();
             this.pbOperationStatus = new System.Windows.Forms.ProgressBar();
-            this.btnRunStep = new System.Windows.Forms.Button();
             this.grpRunStatus.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -52,6 +52,23 @@
             this.grpRunStatus.TabIndex = 7;
             this.grpRunStatus.TabStop = false;
             this.grpRunStatus.Text = "Running Script";
+            // 
+            // btnRunStep
+            // 
+            this.btnRunStep.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRunStep.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.btnRunStep.FlatAppearance.BorderColor = System.Drawing.Color.DimGray;
+            this.btnRunStep.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRunStep.Font = new System.Drawing.Font("Tahoma", 7F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnRunStep.ForeColor = System.Drawing.Color.Black;
+            this.btnRunStep.Location = new System.Drawing.Point(433, 49);
+            this.btnRunStep.Name = "btnRunStep";
+            this.btnRunStep.Size = new System.Drawing.Size(67, 23);
+            this.btnRunStep.TabIndex = 14;
+            this.btnRunStep.Text = "STEP";
+            this.btnRunStep.UseVisualStyleBackColor = false;
+            this.btnRunStep.Visible = false;
+            this.btnRunStep.Click += new System.EventHandler(this.btnRunStep_Click);
             // 
             // btnClose
             // 
@@ -121,37 +138,19 @@
             this.pbOperationStatus.Size = new System.Drawing.Size(485, 23);
             this.pbOperationStatus.TabIndex = 8;
             // 
-            // btnRunStep
-            // 
-            this.btnRunStep.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnRunStep.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.btnRunStep.FlatAppearance.BorderColor = System.Drawing.Color.DimGray;
-            this.btnRunStep.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnRunStep.Font = new System.Drawing.Font("Tahoma", 7F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRunStep.ForeColor = System.Drawing.Color.Black;
-            this.btnRunStep.Location = new System.Drawing.Point(433, 49);
-            this.btnRunStep.Name = "btnRunStep";
-            this.btnRunStep.Size = new System.Drawing.Size(67, 23);
-            this.btnRunStep.TabIndex = 14;
-            this.btnRunStep.Text = "STEP";
-            this.btnRunStep.UseVisualStyleBackColor = false;
-            this.btnRunStep.Visible = false;
-            this.btnRunStep.Click += new System.EventHandler(this.btnRunStep_Click);
-            // 
             // LongRunningOperation
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(593, 267);
-            this.ControlBox = false;
             this.Controls.Add(this.grpRunStatus);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.Name = "LongRunningOperation";
             this.Padding = new System.Windows.Forms.Padding(5);
             this.ShowIcon = false;
-            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "LongRunningOperation";
+            this.Text = "Script Status";
             this.grpRunStatus.ResumeLayout(false);
             this.grpRunStatus.PerformLayout();
             this.ResumeLayout(false);

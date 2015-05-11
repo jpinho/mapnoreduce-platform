@@ -67,8 +67,11 @@ namespace PuppetMasterUI
 		}
 
 		private void btnClose_Click(object sender, EventArgs e) {
-			this.DialogResult = System.Windows.Forms.DialogResult.OK;
-		}
+            if (this.Modal)
+                DialogResult = System.Windows.Forms.DialogResult.OK;
+            else
+                Close();
+        }
 
 		private void btnRunStep_Click(object sender, EventArgs e) {
 			OnExecuteNextCommand();

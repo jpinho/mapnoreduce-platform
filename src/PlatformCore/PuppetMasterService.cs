@@ -29,7 +29,6 @@ namespace PlatformCore
 
                 var remoteWorker = Worker.Run(workerId, serviceUri, new Dictionary<int, IWorker>(workers));
                 workers.Add(remoteWorker.WorkerId, remoteWorker);
-
                 remoteWorker.UpdateAvailableWorkers(new Dictionary<int, IWorker>(workers));
 
 

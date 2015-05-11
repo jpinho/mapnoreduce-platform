@@ -48,12 +48,11 @@ namespace ClientServices
 
 			try {
 				channel = new TcpChannel(props, null, provider);
+                ChannelServices.RegisterChannel(channel, false);
 			} catch {
 				Trace.WriteLine("Client channel already registered, skipping this step!");
-				return;
 			}
 
-			ChannelServices.RegisterChannel(channel, false);
 			RemotingConfiguration.RegisterWellKnownServiceType(typeof(ClientOutputReceiverService), CLIENT_OUTPUTRECV_SVCNAME, WellKnownObjectMode.Singleton);
 			RemotingConfiguration.RegisterWellKnownServiceType(typeof(ClientSplitProviderService), CLIENT_SPLITPROV_SVCNAME, WellKnownObjectMode.Singleton);
 			//RemotingServices.Marshal(new ClientOutputReceiverService(), CLIENT_OUTPUTRECV_SVCNAME, typeof(ClientOutputReceiverService));

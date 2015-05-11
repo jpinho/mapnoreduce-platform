@@ -42,8 +42,14 @@ namespace SharedTypes
 			props["typeFilterLevel"] = TypeFilterLevel.Full;
 			props["name"] = serviceUrl.AbsolutePath.TrimStart('/');
 
-			var channel = new TcpChannel(props, null, provider);
-			ChannelServices.RegisterChannel(channel, false);
+            try {
+                var channel = new TcpChannel(props, null, provider);
+                ChannelServices.RegisterChannel(channel, false);
+
+            } catch {
+                Trace.WriteLine("Client channel already registered, skipping this step!");
+                return;
+            }
 		}
 
 		public static T GetRemoteObject<T>(string serviceUrl) {
