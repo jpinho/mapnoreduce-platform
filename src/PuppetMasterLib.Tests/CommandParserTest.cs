@@ -6,6 +6,7 @@ using System.Threading;
 using System.Collections.Generic;
 using PuppetMasterLib.Exceptions;
 using SharedTypes;
+using PlatformCore;
 
 namespace PuppetMasterLib.Tests
 {
@@ -24,8 +25,9 @@ WAIT 5";
 
             List<ICommand> commands;
             try {
+                IPuppetMasterService pm = new PuppetMasterService();
                 // act
-                commands = CommandParser.Run(script);
+                commands = CommandParser.Run(script, pm);
             } catch (CommandInvalidParameterException) {
                 Assert.IsTrue(true);
                 return;

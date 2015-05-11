@@ -37,18 +37,22 @@ namespace ClientServices.Tests
 
 		[TestMethod]
 		public void TestGetFileSplit() {
-			string split = null;
+
+            string split = null;
 
 			try {
 				// arrange
 				client.Init(entryURL);
 
 				// act
-				var cspSvc = (ClientSplitProviderService)Activator.GetObject(
-					typeof(ClientSplitProviderService),
-					ClientService.ClientSplitProviderServiceUri.ToString());
+                var cspSvc = (ClientSplitProviderService)Activator.GetObject(
+                typeof(ClientSplitProviderService),
+                ClientService.ClientSplitProviderServiceUri.ToString());
+
+                cspSvc.SplitAndSave(filePath, splits, clientId);
 
 				split = cspSvc.GetFileSplit(filePath, 1);
+
 			} catch (Exception e) {
 				Assert.Fail("Something went wrong: " + e);
 			}
