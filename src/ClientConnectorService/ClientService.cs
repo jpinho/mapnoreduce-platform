@@ -15,7 +15,7 @@ namespace ClientServices
 {
 	public class ClientService : MarshalByRefObject, IClientService
 	{
-		public const int CLIENT_CHANNEL_PORT = 8090;
+		public const int CLIENT_CHANNEL_PORT = 10001;
 		private const int RESULT_WAIT_TIMEOUT = 5000;
 		public const string CLIENT_OUTPUTRECV_SVCNAME = "MNRP-ClientORS";
 		public const string CLIENT_SPLITPROV_SVCNAME = "MNRP-ClientSPS";
