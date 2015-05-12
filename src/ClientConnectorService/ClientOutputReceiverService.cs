@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using SharedTypes;
 
 namespace ClientServices
@@ -9,6 +11,8 @@ namespace ClientServices
 	{
 		private readonly Dictionary<string, List<KeyValuePair<int, string[]>>> mapResultStore
 			= new Dictionary<string, List<KeyValuePair<int, string[]>>>();
+
+		private readonly Dictionary<string, ManualResetEvent> waitResultEvents = new Dictionary<string, ManualResetEvent>();
 
 		public ClientOutputReceiverService() {
 		}
@@ -28,7 +32,7 @@ namespace ClientServices
 					mapResultStore.Add(filePath, new List<KeyValuePair<int, string[]>>());
 
 				mapResultStore[filePath].Add(new KeyValuePair<int, string[]>(splitNumber, result));
-				//TODO: trigger event to notify the receival of a new result from a file and to alert that the worker finished that split.
+				waitResultEvents[filePath].Set();
 			}
 		}
 
@@ -43,6 +47,20 @@ namespace ClientServices
 					select r.Value
 				).ToList();
 			}
+		}
+
+		public async Task<List<string[]>> GetMapResultAsync(string filePath, int nSplits) {
+			if (IsMapResultReady(filePath, nSplits))
+				return GetMapResult(filePath);
+
+			if (!waitResultEvents.ContainsKey(filePath))
+				waitResultEvents[filePath] = new ManualResetEvent(false);
+
+			while (!IsMapResultReady(filePath, nSplits)) {
+				waitResultEvents[filePath].WaitOne();
+			}
+
+			return GetMapResult(filePath);
 		}
 
 		public bool IsMapResultReady(string filePath, int nSplits) {

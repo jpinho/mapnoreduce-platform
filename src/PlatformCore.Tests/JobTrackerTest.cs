@@ -18,7 +18,6 @@ namespace PlatformCore.Tests
 		private readonly String worker3ServiceUrl = "tcp://localhost:20002/worker" + Guid.NewGuid().ToString("D");
 		private readonly String worker4ServiceUrl = "tcp://localhost:20003/worker" + Guid.NewGuid().ToString("D");
 		private readonly String worker5ServiceUrl = "tcp://localhost:20004/worker" + Guid.NewGuid().ToString("D");
-		private string remoteServiceUrl = "tcp://localhost:9000/worker";
 
 		[TestMethod]
 		public void TestJobTrackerFreeze() {
@@ -35,7 +34,7 @@ namespace PlatformCore.Tests
 			var jobOutputPath = string.Concat(jobFilePath, "." + DateTime.Now.ToString("ddMMyyHHmmssfff") + ".out");
 			var asmPath = Path.Combine(Environment.CurrentDirectory, "Resources", "UserMappersLib.dll");
 
-			new Thread(() => clientService.Submit(jobFilePath, 5, jobOutputPath, "MonkeyMapper", asmPath)).Start();
+			new Thread(() => clientService.SubmitAsync(jobFilePath, 5, jobOutputPath, "MonkeyMapper", asmPath)).Start();
 
 			//giving time to initiate trackers
 			Thread.Sleep(2000);

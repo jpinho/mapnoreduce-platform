@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace SharedTypes
+﻿namespace SharedTypes
 {
-    public interface IClientService
-    {
-        void Init(string entryUrl);
+	public interface IClientService
+	{
+		void Init(string entryUrl);
 
-        void Submit(string filePath, int nSplits, string outputDir, string mapClassName, string assemblyFilePath);
-    }
+		void SubmitAsync(string filePath, int nSplits, string outputDir, string mapClassName, string assemblyFilePath);
+	}
 }

@@ -81,5 +81,24 @@ namespace UserApplicationSample {
                 return ResourceManager.GetString("HelpMessage", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Job submitted waiting to completed! Please keep calm and be patient!.
+        /// </summary>
+        internal static string JOB_SUBMIT_WAIT {
+            get {
+                return ResourceManager.GetString("JOB_SUBMIT_WAIT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User Application, started with the following parameters:
+        ///-EntryURL={0} -FilePath={1} -OutputPath={2} -Splits={3} -MapClassName={4} -AssemblyFilePath={5}.
+        /// </summary>
+        internal static string USER_APP_LOG {
+            get {
+                return ResourceManager.GetString("USER_APP_LOG", resourceCulture);
+            }
+        }
     }
 }

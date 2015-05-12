@@ -7,7 +7,6 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Serialization.Formatters;
-using System.Threading;
 using PlatformCore;
 using SharedTypes;
 
@@ -70,7 +69,7 @@ namespace ClientServices
 		/// <param name="outputDir">The output directory where the result will be available.</param>
 		/// <param name="mapClassName">The name of the Map Class.</param>
 		/// <param name="assemblyFilePath">The file path to the assembly containning the map functions.</param>
-		public void Submit(string filePath, int nSplits, string outputDir, string mapClassName, string assemblyFilePath) {
+		public async void SubmitAsync(string filePath, int nSplits, string outputDir, string mapClassName, string assemblyFilePath) {
 			var corSvc = RemotingHelper.GetRemoteObject<ClientOutputReceiverService>(ClientOutputServiceUri);
 			var cspSvc = RemotingHelper.GetRemoteObject<ClientSplitProviderService>(ClientSplitProviderServiceUri);
 
@@ -98,16 +97,8 @@ namespace ClientServices
 			Trace.WriteLine("Job '" + filePath + "' setup is ready, sending it to master.");
 			masterWorker.ReceiveMapJob(job);
 
-			// Blocks the current thread until the result is ready.
-			//var waitCount = 0;
-			while (!corSvc.IsMapResultReady(filePath, nSplits)) {
-				Trace.WriteLine(string.Format("Waiting for 'corSvc.IsMapResultReady' for file '{0}' with '{1}' splits.", filePath, nSplits));
-				Thread.Sleep(RESULT_WAIT_TIMEOUT);
-			}
-
 			// Saves the map job output to disk.
-			var result = corSvc.GetMapResult(filePath);
-
+			var result = await corSvc.GetMapResultAsync(filePath, nSplits);
 			Trace.WriteLine("Result received, rows returned: '" + (result != null ? result.Count : 0) + "'.");
 			Trace.WriteLine("Sending output to '" + outputDir + "'.");
 
@@ -116,19 +107,17 @@ namespace ClientServices
 				return;
 			}
 
-            for (int i = 0; i < result.Count; i++)
-            {
-                var outFilePath = Path.Combine(outputDir, (i + 1) + ".out");
+			for (var i = 0; i < result.Count; i++) {
+				var outFilePath = Path.Combine(outputDir, (i + 1) + ".out");
 
-                if (File.Exists(outFilePath))
-                    File.Delete(outFilePath);
+				if (File.Exists(outFilePath))
+					File.Delete(outFilePath);
 
-                using (var outFile = File.CreateText(outFilePath))
-                {
-                    outFile.WriteLine(result[i]);
-                }
-            }
-            Trace.WriteLine("Result committed to out files. All done!");
+				using (var outFile = File.CreateText(outFilePath)) {
+					outFile.WriteLine(result[i]);
+				}
+			}
+			Trace.WriteLine("Result committed to out files. All done!");
 		}
 	}
 }

@@ -145,4 +145,11 @@
 
     UserApplicationSample.exe &lt;ENTRY-URL&gt; &lt;FILE&gt; &lt;OUTPUT&gt; &lt;S&gt; &lt;MAP&gt; &lt;DLL&gt;</value>
   </data>
+	<data name="USER_APP_LOG" xml:space="preserve">
+    <value>User Application, started with the following parameters:
+-EntryURL={0} -FilePath={1} -OutputPath={2} -Splits={3} -MapClassName={4} -AssemblyFilePath={5}</value>
+  </data>
+	<data name="JOB_SUBMIT_WAIT" xml:space="preserve">
+    <value>Job submitted waiting to completed! Please keep calm and be patient!</value>
+  </data>
 </root>
