@@ -18,7 +18,9 @@ namespace PlatformCore {
 
         public volatile bool Enabled = true;
         public Worker Worker { get; set; }
-        public static AutoResetEvent MainResetEvent = new AutoResetEvent(false);
+        public AutoResetEvent MainResetEvent = new AutoResetEvent(false);
+        public AutoResetEvent WaitForShareEvent = new AutoResetEvent(false);
+
         public Uri ServiceUri { get; protected set; }
         public JobTrackerState Status { get; set; }
         public IJobTask CurrentJob { get; protected set; }
