@@ -171,6 +171,7 @@ namespace PlatformCore {
         public void ReceiveMapJob(IJobTask task) {
             StateCheck();
             lock (workerReceiveJobLock) {
+                PullAvailableWorkers();
                 EnsureMasterTracker();
 
                 Trace.WriteLine("New map job received by worker [ID: " + WorkerId + "].\n"
@@ -178,9 +179,6 @@ namespace PlatformCore {
 
                 task.JobTrackerUri = masterTracker.ServiceUri;
                 masterTracker.ScheduleJob(task);
-                PullAvailableWorkers();
-                while (!(this.GetWorkersList().Count() > 0)) {
-                }
                 masterTracker.Wake();
             }
         }
@@ -190,12 +188,14 @@ namespace PlatformCore {
                 typeof(IPuppetMasterService),
                 PuppetMasterService.ServiceUrl.ToString());
             try {
-                UpdateAvailableWorkers(pMaster.GetWorkersShare(this));
+                UpdateAvailableWorkers(pMaster.GetWorkersShare(this.WorkerId));
             } catch (Exception e) {
                 Trace.WriteLine(e.Message);
             } finally {
-                if (!(GetWorkersList().Count > 0))
+                if (!(GetWorkersList().Count > 0)) {
+                    SetStatus(WorkerStatus.Busy);
                     WaitForShareEvent.WaitOne();
+                }
             }
         }
 
@@ -300,14 +300,14 @@ namespace PlatformCore {
         }
 
         public void ReleaseWorkers() {
-            UpdateAvailableWorkers(new Dictionary<int, IWorker>());
             try {
                 var ppm = RemotingHelper.GetRemoteObject<PuppetMasterService>(PuppetMasterService.ServiceUrl);
-                ppm.ReleaseWorkers(GetWorkersList());
+                ppm.ReleaseWorkers(GetWorkersList().Keys.ToList());
             } catch (Exception e) {
                 Trace.WriteLine(e.Message);
-                throw;
+
             }
+            UpdateAvailableWorkers(new Dictionary<int, IWorker>());
 
         }
 

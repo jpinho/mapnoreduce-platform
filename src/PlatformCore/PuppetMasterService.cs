@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 
 namespace PlatformCore {
@@ -42,13 +43,16 @@ namespace PlatformCore {
             }
         }
 
-        public Dictionary<int, IWorker> GetWorkersShare(IWorker jobTracker) {
+        public Dictionary<int, IWorker> GetWorkersShare(int jobTrackerId) {
+            IWorker jobTracker = GetWorkers()[jobTrackerId];
             EnsureRegistedWoker(jobTracker);
             int fairShare = FairScheduler();
             Dictionary<int, IWorker> share = new Dictionary<int, IWorker>();
+            Trace.WriteLine("Get workers request from : " + jobTracker.ServiceUrl);
             if (GetWorkers().Count >= fairShare) {
                 share = FairShareExecutor(fairShare);
             } else {
+                Trace.WriteLine("No workers available put JBTM in queue:{0}" + jobTracker.ServiceUrl);
                 lock (jobTrackersQueueLock) {
                     GetJobTrackersWaitingQueue().Enqueue(new Tuple<int, IWorker>(fairShare, jobTracker));
                 }
@@ -60,7 +64,8 @@ namespace PlatformCore {
             var filledShare = new Dictionary<int, IWorker>();
             lock (workersLock) {
                 for (int i = 0; i < fairShare; i++) {
-                    var worker = GetWorkers()[0];
+                    IWorker worker = GetWorkers().Take(1).First().Value;
+                    GetWorkers().Remove(worker.WorkerId);
                     filledShare.Add(worker.WorkerId, worker);
                     GetWorkersInUse().Add(worker.WorkerId, worker);
                     GetWorkers().Remove(worker.WorkerId);
@@ -71,6 +76,8 @@ namespace PlatformCore {
 
         private void ProcessPendingShares() {
             lock (jobTrackersQueueLock) {
+                if (!(GetJobTrackersWaitingQueue().Count > 0))
+                    return;
                 while (true) {
                     Tuple<int, IWorker> workerTuple = GetJobTrackersWaitingQueue().Peek();
                     lock (workersLock) {
@@ -89,13 +96,13 @@ namespace PlatformCore {
             GetJobTrackersMaster().Add(jobTracker.WorkerId, jobTracker);
         }
 
-        public void ReleaseWorkers(Dictionary<int, IWorker> workersUsed) {
-            lock (workersLock) {
-                foreach (KeyValuePair<int, IWorker> worker in workersUsed) {
-                    GetWorkersInUse().Remove(worker.Key);
-                    GetWorkers().Add(worker.Key, worker.Value);
+        public void ReleaseWorkers(List<int> workersUsed) {
+            lock (workersLock)
+                foreach (int workerKey in workersUsed) {
+                    var worker = GetWorkersInUse()[workerKey];
+                    GetWorkersInUse().Remove(workerKey);
+                    GetWorkers().Add(workerKey, worker);
                 }
-            }
             ProcessPendingShares();
         }
 
