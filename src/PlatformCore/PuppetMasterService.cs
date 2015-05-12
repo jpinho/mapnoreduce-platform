@@ -13,8 +13,9 @@ namespace PlatformCore {
         private readonly object jobTrackersQueueLock = new object();
         private readonly Dictionary<int, IWorker> workers = new Dictionary<int, IWorker>();
         private readonly Dictionary<int, IWorker> workersInUse = new Dictionary<int, IWorker>();
-        private readonly Dictionary<int, IWorker> jobTrackersMaster = new Dictionary<int, IWorker>();
-        private readonly Queue<Tuple<int, IWorker>> jobTrackersWaitingQueue = new Queue<Tuple<int, IWorker>>();
+        private readonly List<Uri> jobTrackersMaster = new List<Uri>();
+        private readonly Queue<Tuple<int, Uri>> jobTrackersWaitingQueue = new Queue<Tuple<int, Uri>>();
+
         public static readonly string ServiceName = "PM";
         public static readonly Uri ServiceUrl = Globals.LocalPuppetMasterUri;
 
@@ -43,21 +44,29 @@ namespace PlatformCore {
             }
         }
 
-        public Dictionary<int, IWorker> GetWorkersShare(int jobTrackerId) {
-            IWorker jobTracker = GetWorkers()[jobTrackerId];
-            EnsureRegistedWoker(jobTracker);
-            int fairShare = FairScheduler();
+        public Dictionary<int, IWorker> GetWorkersShare(Uri taskRunnerUri) {
             Dictionary<int, IWorker> share = new Dictionary<int, IWorker>();
-            Trace.WriteLine("Get workers request from : " + jobTracker.ServiceUrl);
+            var tr = RemotingHelper.GetRemoteObject<TaskRunner>(taskRunnerUri);
+            if (tr == null)
+                return share;
+            EnsureRegistedTaskRunner(taskRunnerUri);
+            int fairShare = FairScheduler();
+            Trace.WriteLine("Get workers request from taskTracker : " + taskRunnerUri);
             if (GetWorkers().Count >= fairShare) {
                 share = FairShareExecutor(fairShare);
             } else {
-                Trace.WriteLine("No workers available put JBTM in queue:{0}" + jobTracker.ServiceUrl);
+                Trace.WriteLine("No workers available put JBTM in queue:{0}" + taskRunnerUri);
                 lock (jobTrackersQueueLock) {
-                    GetJobTrackersWaitingQueue().Enqueue(new Tuple<int, IWorker>(fairShare, jobTracker));
+                    GetJobTrackersWaitingQueue().Enqueue(new Tuple<int, Uri>(fairShare, taskRunnerUri));
                 }
             }
             return share;
+        }
+
+        private void EnsureRegistedTaskRunner(Uri trUri) {
+            if (GetJobTrackersMaster().Contains(trUri))
+                return;
+            GetJobTrackersMaster().Add(trUri);
         }
 
         private Dictionary<int, IWorker> FairShareExecutor(int fairShare) {
@@ -79,21 +88,20 @@ namespace PlatformCore {
                 if (!(GetJobTrackersWaitingQueue().Count > 0))
                     return;
                 while (true) {
-                    Tuple<int, IWorker> workerTuple = GetJobTrackersWaitingQueue().Peek();
+                    Tuple<int, Uri> workerTuple = GetJobTrackersWaitingQueue().Peek();
                     lock (workersLock) {
                         if (!(GetWorkers().Count > workerTuple.Item1))
                             return;
                         GetJobTrackersWaitingQueue().Dequeue();
-                        workerTuple.Item2.ReceiveShare(FairShareExecutor(workerTuple.Item1));
+                        var tr = RemotingHelper.GetRemoteObject<TaskRunner>(workerTuple.Item2);
+                        if (tr == null) {
+                            GetJobTrackersWaitingQueue().Enqueue(workerTuple);
+                            continue;
+                        }
+                        tr.ReceiveShare(FairShareExecutor(workerTuple.Item1));
                     }
                 }
             }
-        }
-
-        private void EnsureRegistedWoker(IWorker jobTracker) {
-            if (GetJobTrackersMaster().ContainsKey(jobTracker.WorkerId))
-                return;
-            GetJobTrackersMaster().Add(jobTracker.WorkerId, jobTracker);
         }
 
         public void ReleaseWorkers(List<int> workersUsed) {
@@ -120,7 +128,7 @@ namespace PlatformCore {
             }
         }
 
-        public Queue<Tuple<int, IWorker>> GetJobTrackersWaitingQueue() {
+        public Queue<Tuple<int, Uri>> GetJobTrackersWaitingQueue() {
             return jobTrackersWaitingQueue;
         }
 
@@ -128,7 +136,7 @@ namespace PlatformCore {
             return workers;
         }
 
-        public Dictionary<int, IWorker> GetJobTrackersMaster() {
+        public List<Uri> GetJobTrackersMaster() {
             return jobTrackersMaster;
         }
 

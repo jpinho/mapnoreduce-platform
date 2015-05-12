@@ -18,7 +18,6 @@ namespace PlatformCore {
         private JobTracker taskTracker = null;
         private JobTracker masterTracker = null;
         private readonly List<ManualResetEvent> frozenRequests = new List<ManualResetEvent>();
-        public static AutoResetEvent WaitForShareEvent = new AutoResetEvent(false);
 
         /// <summary>
         /// List of all workers known by this worker.
@@ -171,31 +170,13 @@ namespace PlatformCore {
         public void ReceiveMapJob(IJobTask task) {
             StateCheck();
             lock (workerReceiveJobLock) {
-                PullAvailableWorkers();
                 EnsureMasterTracker();
-
                 Trace.WriteLine("New map job received by worker [ID: " + WorkerId + "].\n"
                     + "Master Job Tracker Uri: '" + masterTracker.ServiceUri + "'");
 
                 task.JobTrackerUri = masterTracker.ServiceUri;
                 masterTracker.ScheduleJob(task);
                 masterTracker.Wake();
-            }
-        }
-
-        private void PullAvailableWorkers() {
-            var pMaster = (IPuppetMasterService)Activator.GetObject(
-                typeof(IPuppetMasterService),
-                PuppetMasterService.ServiceUrl.ToString());
-            try {
-                UpdateAvailableWorkers(pMaster.GetWorkersShare(this.WorkerId));
-            } catch (Exception e) {
-                Trace.WriteLine(e.Message);
-            } finally {
-                if (!(GetWorkersList().Count > 0)) {
-                    SetStatus(WorkerStatus.Busy);
-                    WaitForShareEvent.WaitOne();
-                }
             }
         }
 
@@ -308,7 +289,6 @@ namespace PlatformCore {
 
             }
             UpdateAvailableWorkers(new Dictionary<int, IWorker>());
-
         }
 
         public void Slow(int secs) {
@@ -341,11 +321,6 @@ namespace PlatformCore {
                 Status = WorkerStatus.Available;
             }
             ProcessFrozenRequests();
-        }
-
-        public void ReceiveShare(Dictionary<int /*worker id*/, IWorker> share) {
-            UpdateAvailableWorkers(share);
-            WaitForShareEvent.Set();
         }
 
         public void FreezeCommunication() {

@@ -21,7 +21,7 @@ namespace SharedTypes {
 
         Dictionary<int, IWorker> GetWorkers();
 
-        Dictionary<int, IWorker> GetWorkersShare(int jobTrackerId);
+        Dictionary<int, IWorker> GetWorkersShare(Uri taskRunnerUri);
 
         void ReleaseWorkers(List<int> workersUsed);
 
