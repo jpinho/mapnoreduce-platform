@@ -8,22 +8,27 @@ namespace PlatformCore
 	[Serializable]
 	public class TaskRunner : JobTracker
 	{
-		private readonly CoordinationManager replicaManager;
+		private CoordinationManager replicaManager;
 
 		public TaskRunner(Worker worker)
 			: base(worker) {
-			replicaManager = new CoordinationManager(this);
 		}
 
 		public override void Run() {
 			base.Run();
 			Trace.WriteLine("TaskRunner starting CoordinationManager for fault tolerance.");
-			replicaManager.Start();
 
-			while (Enabled) {
-				Thread.Sleep(100);
-				TrackJobs();
-				MainResetEvent.WaitOne();
+			using (replicaManager = new CoordinationManager(this)) {
+				replicaManager.Start();
+				while (Enabled) {
+					Thread.Sleep(100);
+					TrackJobs();
+
+					lock (TrackerMutex) {
+						if (JobsQueue.Count == 0)
+							return;
+					}
+				}
 			}
 		}
 
@@ -33,11 +38,8 @@ namespace PlatformCore
 
 		private void TrackJobs() {
 			lock (TrackerMutex) {
-				// If job tracker busy or without jobs to process exit.
-				if (!(JobsQueue.Count > 0) || (!(JobsQueue.Count > 0) && Status != JobTrackerState.Available)) {
-					Status = JobTrackerState.Available;
+				if (JobsQueue.Count == 0)
 					return;
-				}
 				// Get next job and set state to busy.
 				CurrentJob = JobsQueue.Dequeue();
 				Status = JobTrackerState.Busy;
@@ -49,6 +51,7 @@ namespace PlatformCore
 
 			lock (TrackerMutex) {
 				CurrentJob = null;
+				Status = JobTrackerState.Available;
 			}
 		}
 	}

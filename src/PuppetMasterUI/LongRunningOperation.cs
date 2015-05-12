@@ -41,6 +41,7 @@ namespace PuppetMasterUI
 			if (incOperationNumber)
 				++currentOperation;
 
+			BringToFront();
 			lblOperationStatus.Visible = true;
 			lblOperationStatus.Text = string.Format(EXECUTING_OPERATION, currentOperation, OperationsCount, operation);
 
@@ -56,6 +57,7 @@ namespace PuppetMasterUI
 			if (currentOperation != OperationsCount)
 				return;
 
+			BringToFront();
 			pbOperationStatus.Value = 100;
 			btnAbort.Visible = false;
 			btnClose.Visible = true;
@@ -67,11 +69,11 @@ namespace PuppetMasterUI
 		}
 
 		private void btnClose_Click(object sender, EventArgs e) {
-            if (this.Modal)
-                DialogResult = System.Windows.Forms.DialogResult.OK;
-            else
-                Close();
-        }
+			if (this.Modal)
+				DialogResult = System.Windows.Forms.DialogResult.OK;
+			else
+				Close();
+		}
 
 		private void btnRunStep_Click(object sender, EventArgs e) {
 			OnExecuteNextCommand();

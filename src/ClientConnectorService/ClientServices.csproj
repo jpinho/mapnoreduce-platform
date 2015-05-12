@@ -48,6 +48,7 @@
     <Compile Include="ClientOutputReceiverService.cs" />
     <Compile Include="ClientSplitProviderService.cs" />
     <Compile Include="ClientService.cs" />
+    <Compile Include="OutputReadyListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

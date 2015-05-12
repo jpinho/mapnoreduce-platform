@@ -16,6 +16,11 @@ namespace PlatformCore
 			while (Enabled) {
 				Thread.Sleep(100);
 				TrackJob();
+
+				lock (TrackerMutex) {
+					if (JobsQueue.Count == 0)
+						return;
+				}
 			}
 		}
 
@@ -27,8 +32,7 @@ namespace PlatformCore
 				if (JobsQueue.Count > 0) {
 					Status = JobTrackerState.Busy;
 					currJob = CurrentJob = JobsQueue.Dequeue();
-				} else
-					Status = JobTrackerState.Available;
+				}
 			}
 
 			if (currJob == null)
@@ -38,6 +42,8 @@ namespace PlatformCore
 				var masterTracker = RemotingHelper.GetRemoteObject<IJobTracker>(currJob.JobTrackerUri);
 				masterTracker.Alive(Worker.WorkerId);
 			}
+
+			Status = JobTrackerState.Available;
 		}
 	}
 }

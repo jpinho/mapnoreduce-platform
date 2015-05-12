@@ -56,7 +56,7 @@ namespace PlatformCore.Tests
 			var jobOutputPath = string.Concat(jobFilePath, "." + DateTime.Now.ToString("ddMMyyHHmmssfff") + ".out");
 			var asmPath = Path.Combine(Environment.CurrentDirectory, "Resources", "UserMappersLib.dll");
 
-			new Thread(() => clientService.SubmitAsync(jobFilePath, 5, jobOutputPath, "MonkeyMapper", asmPath)).Start();
+			new Thread(() => clientService.Submit(jobFilePath, 5, jobOutputPath, "MonkeyMapper", asmPath)).Start();
 
 			Trace.WriteLine("Lets freeze");
 			/*My code works and I dont know why*/
@@ -97,7 +97,7 @@ namespace PlatformCore.Tests
 			var jobOutputPath = string.Concat(jobFilePath, "." + DateTime.Now.ToString("ddMMyyHHmmssfff") + ".out");
 			var asmPath = Path.Combine(Environment.CurrentDirectory, "Resources", "UserMappersLib.dll");
 
-			new Thread(() => clientService.SubmitAsync(jobFilePath, 5, jobOutputPath, "MonkeyMapper", asmPath)).Start();
+			new Thread(() => clientService.Submit(jobFilePath, 5, jobOutputPath, "MonkeyMapper", asmPath)).Start();
 
 			Trace.WriteLine("Lets freeze");
 

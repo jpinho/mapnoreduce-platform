@@ -31,7 +31,7 @@ namespace UserApplicationSample
 			var client = new ClientService();
 			client.Init(entryUrl);
 
-			client.SubmitAsync(filePath, splits, outputPath, mapClassName, assemblyFilePath);
+			client.Submit(filePath, splits, outputPath, mapClassName, assemblyFilePath);
 			Console.WriteLine(Resources.JOB_SUBMIT_WAIT);
 			Trace.WriteLine(Resources.JOB_SUBMIT_WAIT);
 		}

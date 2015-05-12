@@ -8,10 +8,11 @@ using SharedTypes;
 namespace PlatformCore
 {
 	[Serializable]
-	public class CoordinationManager
+	public class CoordinationManager : IDisposable
 	{
-		private const int STATUS_UPDATE_TIMEOUT = 10000;
-		public const int DEFAULT_NUMBER_OF_REPLICAS = 5;
+		private const int STATUS_UPDATE_TIMEOUT = 10 * 1000;
+		private const int REPLICA_RECOVER_ATTEMPT_DELAY = 10 * 1000;
+		public const int DEFAULT_NUMBER_OF_REPLICAS = 3;
 
 		private readonly Timer statusUpdatesTimer;
 		private volatile JobTracker tracker;
@@ -29,6 +30,7 @@ namespace PlatformCore
 			statusUpdatesTimer = new Timer(StatusUpdate, 0, Timeout.Infinite, STATUS_UPDATE_TIMEOUT);
 		}
 
+		//TODO: Nominate 30% of the share assigned to the JobTracker to be replica workers (slave trackers).
 		private List<IWorker> PickReplicas() {
 			Trace.WriteLine("CoordinatorManager picking replicas for fault tolerance.");
 			/* #begin# temporary algorithm - stoles some workers to set as replicas */
@@ -44,6 +46,10 @@ namespace PlatformCore
 				return;
 			isStarted = true;
 			replicas = PickReplicas();
+			replicas.AsParallel().ForAll((wk) => {
+				// ReSharper disable once InconsistentlySynchronizedField
+				replicasAliveSignals[wk.WorkerId] = DateTime.Now;
+			});
 			statusUpdatesTimer.Change(0, STATUS_UPDATE_TIMEOUT);
 		}
 
@@ -62,20 +68,46 @@ namespace PlatformCore
 					replica.ReceiveJobTrackerState(tracker.GetState());
 				} catch {
 					Trace.WriteLine("CoordinationManager received an error contacting replica.");
-					var lastReplicaUpdate = DateTime.Now.Subtract(replicasAliveSignals[replica.WorkerId]);
+					TimeSpan lastReplicaUpdate;
 
-					if (!(lastReplicaUpdate.TotalSeconds > SlaveTracker.PING_DELAY * 3))
+					lock (rmanagerMutex) {
+						lastReplicaUpdate = DateTime.Now.Subtract(replicasAliveSignals[replica.WorkerId]);
+					}
+
+					if (!(lastReplicaUpdate.TotalSeconds > SlaveReplica.PING_DELAY * 3))
 						continue;
 
 					Trace.WriteLine("CoordinatorManager detected that replica/worker ID:"
 						+ replica.WorkerId + " seems to be permanently crashed.");
-					RecoverCrashedReplica();
+
+					new Thread(() => {
+						while (!RecoverCrashedReplica())
+							Thread.Sleep(REPLICA_RECOVER_ATTEMPT_DELAY);
+					}).Start();
+
 				}
 			}
 		}
 
-		private void RecoverCrashedReplica() {
-			//TODO: Ask PuppetMaster for another replica.
+		private bool RecoverCrashedReplica() {
+			var puppetMaster = RemotingHelper.GetRemoteObject<PuppetMasterService>(PuppetMasterService.ServiceUrl);
+			var reps = (from wk in puppetMaster.GetWorkers().Take(1) select wk.Value).ToList();
+
+			if (reps.Count == 0) {
+				Trace.WriteLine("RecoverCrashedReplica failed to acquire a new replica.");
+				return false;
+			}
+			var replica = reps.First();
+			replica.ReceiveJobTrackerState(tracker.GetState());
+			replicas.Add(replica);
+			return true;
+		}
+
+		public void Dispose() {
+			statusUpdatesTimer.Dispose();
+			replicas.AsParallel().ForAll((worker) => {
+				worker.DestroyReplica();
+			});
 		}
 	}
 }

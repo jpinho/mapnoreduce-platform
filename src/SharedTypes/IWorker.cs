@@ -24,5 +24,6 @@ namespace SharedTypes
 			byte[] mapFunctionName, string outputReceiverUrl, string splitProviderUrl);
 
 		void ReceiveJobTrackerState(JobTrackerStateInfo getState);
+		void DestroyReplica();
 	}
 }

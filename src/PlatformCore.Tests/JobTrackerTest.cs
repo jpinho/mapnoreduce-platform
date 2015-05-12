@@ -34,7 +34,7 @@ namespace PlatformCore.Tests
 			var jobOutputPath = string.Concat(jobFilePath, "." + DateTime.Now.ToString("ddMMyyHHmmssfff") + ".out");
 			var asmPath = Path.Combine(Environment.CurrentDirectory, "Resources", "UserMappersLib.dll");
 
-			new Thread(() => clientService.SubmitAsync(jobFilePath, 5, jobOutputPath, "MonkeyMapper", asmPath)).Start();
+			new Thread(() => clientService.Submit(jobFilePath, 5, jobOutputPath, "MonkeyMapper", asmPath)).Start();
 
 			//giving time to initiate trackers
 			Thread.Sleep(2000);

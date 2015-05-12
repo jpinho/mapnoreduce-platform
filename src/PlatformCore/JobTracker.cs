@@ -8,7 +8,7 @@ using SharedTypes;
 namespace PlatformCore
 {
 	[Serializable]
-	public abstract class JobTracker : MarshalByRefObject, IJobTracker
+	public abstract class JobTracker : MarshalByRefObject, IJobTracker, IDisposable
 	{
 		protected const string PREF_MASTER_SVC_NAME = "MasterTracker";
 		protected const string PREF_TRACKER_SVC_NAME = "TaskTracker";
@@ -42,13 +42,15 @@ namespace PlatformCore
 		}
 
 		public virtual void Run() {
+			if (!Enabled)
+				return;
 			StateCheck();
 
 			if (ServiceUri == null)
 				ServiceUri = BuildUri();
 
 			// register object
-			RemotingServices.Marshal(this, GetServiceNamePrefix(), typeof(IJobTracker));
+			RemotingServices.Marshal(this, GetServiceNamePrefix(), GetType());
 		}
 
 		//wakes requests frozen during frozen state
@@ -144,6 +146,10 @@ namespace PlatformCore
 			var mre = new ManualResetEvent(false);
 			frozenRequests.Add(mre);
 			mre.WaitOne();
+		}
+
+		public void Dispose() {
+			RemotingServices.Disconnect(this);
 		}
 	}
 }

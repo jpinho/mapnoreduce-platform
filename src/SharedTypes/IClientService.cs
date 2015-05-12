@@ -4,6 +4,6 @@
 	{
 		void Init(string entryUrl);
 
-		void SubmitAsync(string filePath, int nSplits, string outputDir, string mapClassName, string assemblyFilePath);
+		void Submit(string filePath, int nSplits, string outputDir, string mapClassName, string assemblyFilePath);
 	}
 }

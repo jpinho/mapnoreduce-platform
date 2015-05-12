@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting;
 using System.Threading;
+using PlatformCore.Properties;
 using SharedTypes;
 
 namespace PlatformCore
@@ -23,6 +24,7 @@ namespace PlatformCore
 		/// List of all workers known by this worker.
 		/// </summary>
 		private Dictionary<int /*worker id*/, IWorker> workersList;
+		private SlaveReplica replicaTracker;
 
 		public enum State { Running, Failed, Frozen };
 		public delegate bool ExecuteMapJobDelegate(JobTask task);
@@ -113,14 +115,33 @@ namespace PlatformCore
 			if (masterTracker != null)
 				return;
 			masterTracker = new TaskRunner(this);
-			new Thread(() => { masterTracker.Run(); }).Start();
+			new Thread(TaskRunner_MainLoop).Start();
 		}
 
 		private void EnsureTaskTracker() {
 			if (taskTracker != null)
 				return;
 			taskTracker = new TaskTracker(this);
-			new Thread(() => { taskTracker.Run(); }).Start();
+			new Thread(TaskTracker_MainLoop).Start();
+		}
+
+		private void TaskRunner_MainLoop() {
+			masterTracker.Run();
+
+			lock (workerReceiveJobLock) {
+				masterTracker.Dispose();
+				masterTracker = null;
+			}
+		}
+
+		private void TaskTracker_MainLoop() {
+			taskTracker.Run();
+
+			// note there is no interlock here this code in executed on a different thread
+			lock (workerReceiveJobLock) {
+				taskTracker.Dispose();
+				taskTracker = null;
+			}
 		}
 
 		public Dictionary<int, IWorker> GetWorkersList() {
@@ -193,8 +214,25 @@ namespace PlatformCore
 			ExecuteMapJob(newTask);
 		}
 
-		public void ReceiveJobTrackerState(JobTrackerStateInfo getState) {
-			//TODO: create job tracker slave
+		public void ReceiveJobTrackerState(JobTrackerStateInfo state) {
+			if (replicaTracker == null) {
+				replicaTracker = new SlaveReplica(this);
+				Trace.WriteLine("Worker/Replica started SlaveTracker to handle state updates from Master Tracker.");
+			}
+			replicaTracker.SaveState(state);
+			Trace.WriteLine(string.Format(Resources.JobTrackerStateSummaryString
+				, replicaTracker.MasterJobTrackerState.Item1.CurrentJob.FileName
+				, replicaTracker.MasterJobTrackerState.Item1.Enabled
+				, replicaTracker.MasterJobTrackerState.Item1.JobsQueue.Count
+				, replicaTracker.MasterJobTrackerState.Item1.ServiceUri
+				, replicaTracker.MasterJobTrackerState.Item1.Status
+				, replicaTracker.MasterJobTrackerState.Item1.Worker.WorkerId
+				, replicaTracker.MasterJobTrackerState.Item1.WorkerAliveSignals.Count));
+		}
+
+		public void DestroyReplica() {
+			replicaTracker.Dispose();
+			Trace.WriteLine("Worker/Replica '" + WorkerId + "' received replica destroy signal. Replica Destroyed!");
 		}
 
 		public void ExecuteMapJob(IJobTask task) {

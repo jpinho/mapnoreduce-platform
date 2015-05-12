@@ -18,7 +18,7 @@ namespace ClientServices
 		private const int RESULT_WAIT_TIMEOUT = 5000;
 		public const string CLIENT_OUTPUTRECV_SVCNAME = "MNRP-ClientORS";
 		public const string CLIENT_SPLITPROV_SVCNAME = "MNRP-ClientSPS";
-		private Guid clientId = Guid.NewGuid();
+		private readonly Guid clientId = Guid.NewGuid();
 
 		public string EntryUrl { get; set; }
 
@@ -31,7 +31,7 @@ namespace ClientServices
 		}
 
 		/// <summary>
-		/// TODO: comment me.
+		/// Initializes client services via Remoting WellKnownServiceTypes to handle
 		/// </summary>
 		/// <param name="entryUrl"></param>
 		public void Init(string entryUrl) {
@@ -52,11 +52,9 @@ namespace ClientServices
 
 			RemotingConfiguration.RegisterWellKnownServiceType(typeof(ClientOutputReceiverService), CLIENT_OUTPUTRECV_SVCNAME, WellKnownObjectMode.Singleton);
 			RemotingConfiguration.RegisterWellKnownServiceType(typeof(ClientSplitProviderService), CLIENT_SPLITPROV_SVCNAME, WellKnownObjectMode.Singleton);
-			//RemotingServices.Marshal(new ClientOutputReceiverService(), CLIENT_OUTPUTRECV_SVCNAME, typeof(ClientOutputReceiverService));
-			//RemotingServices.Marshal(new ClientSplitProviderService(), CLIENT_SPLITPROV_SVCNAME, typeof(ClientSplitProviderService));
 
-			Trace.WriteLine(string.Format("Client Output Receiver Service, available at {0}.", ClientOutputServiceUri.ToString()));
-			Trace.WriteLine(string.Format("Client Split Provider Service, available at {0}.", ClientSplitProviderServiceUri.ToString()));
+			Trace.WriteLine(string.Format("Client Output Receiver Service, available at {0}.", ClientOutputServiceUri));
+			Trace.WriteLine(string.Format("Client Split Provider Service, available at {0}.", ClientSplitProviderServiceUri));
 		}
 
 		/// <summary>
@@ -69,8 +67,7 @@ namespace ClientServices
 		/// <param name="outputDir">The output directory where the result will be available.</param>
 		/// <param name="mapClassName">The name of the Map Class.</param>
 		/// <param name="assemblyFilePath">The file path to the assembly containning the map functions.</param>
-		public async void SubmitAsync(string filePath, int nSplits, string outputDir, string mapClassName, string assemblyFilePath) {
-			var corSvc = RemotingHelper.GetRemoteObject<ClientOutputReceiverService>(ClientOutputServiceUri);
+		public void Submit(string filePath, int nSplits, string outputDir, string mapClassName, string assemblyFilePath) {
 			var cspSvc = RemotingHelper.GetRemoteObject<ClientSplitProviderService>(ClientSplitProviderServiceUri);
 
 			// Calls the server reference of the Split Provider to split and save of the file splits
@@ -97,8 +94,10 @@ namespace ClientServices
 			Trace.WriteLine("Job '" + filePath + "' setup is ready, sending it to master.");
 			masterWorker.ReceiveMapJob(job);
 
+			List<string[]> result;
+			new OutputReadyListener(nSplits).WaitCompletion(out result);
+
 			// Saves the map job output to disk.
-			var result = await corSvc.GetMapResultAsync(filePath, nSplits);
 			Trace.WriteLine("Result received, rows returned: '" + (result != null ? result.Count : 0) + "'.");
 			Trace.WriteLine("Sending output to '" + outputDir + "'.");
 
