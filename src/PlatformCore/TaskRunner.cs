@@ -21,7 +21,7 @@ namespace PlatformCore {
                 while (Enabled) {
                     Thread.Sleep(100);
                     TrackJobs();
-
+                    Worker.ReleaseWorkers();
                     lock (TrackerMutex) {
                         if (JobsQueue.Count == 0)
                             return;

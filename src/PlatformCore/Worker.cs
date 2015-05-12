@@ -25,7 +25,6 @@ namespace PlatformCore {
         /// </summary>
         private Dictionary<int /*worker id*/, IWorker> workersList;
         private SlaveReplica replicaTracker;
-
         public enum State { Running, Failed, Frozen };
         public delegate bool ExecuteMapJobDelegate(JobTask task);
         /// <summary>
@@ -285,6 +284,7 @@ namespace PlatformCore {
 
                     return;
                 }
+                return;
             } finally {
                 Trace.WriteLine("Send alives thread finished on worker [ID: '" + WorkerId + "'].");
                 lock (workerMutex) {
@@ -297,6 +297,18 @@ namespace PlatformCore {
             var wrk = new Worker(workerId, serviceUrl, workers, puppetMasterServiceUri);
             RemotingHelper.CreateService(wrk, serviceUrl);
             return wrk;
+        }
+
+        public void ReleaseWorkers() {
+            UpdateAvailableWorkers(new Dictionary<int, IWorker>());
+            try {
+                var ppm = RemotingHelper.GetRemoteObject<PuppetMasterService>(PuppetMasterService.ServiceUrl);
+                ppm.ReleaseWorkers(GetWorkersList());
+            } catch (Exception e) {
+                Trace.WriteLine(e.Message);
+                throw;
+            }
+
         }
 
         public void Slow(int secs) {
