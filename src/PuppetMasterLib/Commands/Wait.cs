@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Threading;
 using SharedTypes;
 
 namespace PuppetMasterLib.Commands
@@ -7,16 +7,9 @@ namespace PuppetMasterLib.Commands
 	{
 		public const string NAME = "wait";
 		public int Secs { get; set; }
-		public Uri ServiceUri { get; set; }
 
 		public void Execute() {
-			if (ServiceUri == null)
-				ServiceUri = Globals.LocalPuppetMasterUri;
-
-			var pMaster = (IPuppetMasterService)Activator.GetObject(
-				typeof(IPuppetMasterService),
-				ServiceUri.ToString());
-			pMaster.Wait(Secs);
+			Thread.Sleep(Secs);
 		}
 
 		public override string ToString() {

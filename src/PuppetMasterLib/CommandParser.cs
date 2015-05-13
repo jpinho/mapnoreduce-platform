@@ -99,8 +99,7 @@ namespace PuppetMasterLib
 						}
 
 						parsedCommands.Add(new Commands.Wait() {
-							Secs = secs,
-							ServiceUri = Globals.LocalPuppetMasterUri
+							Secs = secs
 						});
 
 						break;

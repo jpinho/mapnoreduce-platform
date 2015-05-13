@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using PlatformCore.Exception;
 using SharedTypes;
 
@@ -43,7 +42,7 @@ namespace PlatformCore
 			}
 		}
 
-		public void AnnouncePM(Uri puppetMasterUrl) {
+		public void AnnouncePm(Uri puppetMasterUrl) {
 			if ((KnownPmsUris.Contains(puppetMasterUrl)))
 				return;
 			KnownPmsUris.Add(puppetMasterUrl);
@@ -61,7 +60,7 @@ namespace PlatformCore
 								  select RemotingHelper.GetRemoteObject<IPuppetMasterService>(uri);
 
 			foreach (var pMaster in knownPmsDiffNew) {
-				pMaster.AnnouncePM(newPm);
+				pMaster.AnnouncePm(newPm);
 			}
 		}
 
@@ -82,9 +81,9 @@ namespace PlatformCore
 			}
 		}
 
-		public Dictionary<int, IWorker> GetWorkersSharePM(Uri pmUri) {
+		public Dictionary<int, IWorker> GetWorkersSharePm(Uri pmUri) {
 			var share = new Dictionary<int, IWorker>();
-			AnnouncePM(pmUri);
+			AnnouncePm(pmUri);
 			Trace.WriteLine("Get workers request from PuppetMaster : " + pmUri);
 			var fairShare = FairScheduler();
 			if (GetAvailableWorkers().Count >= FairScheduler()) {
@@ -194,15 +193,11 @@ namespace PlatformCore
 			return workersInUse;
 		}
 
-		public void Wait(int seconds) {
-			Thread.Sleep(seconds * 1000);
-		}
-
 		public void SlowWorker(int workerId, int seconds) {
 			IWorker worker;
 
 			try {
-				worker = workersAvailable[workerId];
+				worker = WorkersRegistry[workerId];
 			} catch (System.Exception e) {
 				throw new InvalidWorkerIdException(workerId, e.Message);
 			}
@@ -215,7 +210,7 @@ namespace PlatformCore
 			IWorker worker;
 
 			try {
-				worker = workersAvailable[workerId];
+				worker = WorkersRegistry[workerId];
 			} catch (System.Exception e) {
 				throw new InvalidWorkerIdException(workerId, e.Message);
 			}
@@ -228,7 +223,7 @@ namespace PlatformCore
 			IWorker worker;
 
 			try {
-				worker = workersAvailable[workerId];
+				worker = WorkersRegistry[workerId];
 			} catch (System.Exception e) {
 				throw new InvalidWorkerIdException(workerId, e.Message);
 			}

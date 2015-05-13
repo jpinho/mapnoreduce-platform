@@ -31,7 +31,7 @@ namespace PlatformCore
 				Trace.WriteLine("JobTrackerSlave: Sending Ping to JobTrackerMaster - WorkerID:" + Worker.WorkerId + ".");
 				var masterTracker = RemotingHelper.GetRemoteObject<TaskRunner>(MasterJobTrackerState.Item1.ServiceUri);
 				masterTracker.AliveReplica(Worker.WorkerId);
-			} catch (RemotingException ex) {
+			} catch (RemotingException) {
 				Trace.WriteLine("SlaveReplica heartbeat failed, master tracker seems to be offline!");
 			} catch (System.Exception ex) {
 				Trace.WriteLine("SlaveReplica heartbeat failed, unknown error: '" + ex.Message + "'.");
