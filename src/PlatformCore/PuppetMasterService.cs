@@ -14,7 +14,7 @@ namespace PlatformCore
 		private readonly object globalLock = new object();
 		private readonly object workersLock = new object();
 		private readonly object jobTrackersQueueLock = new object();
-		private readonly Dictionary<int, IWorker> workers = new Dictionary<int, IWorker>();
+		private readonly Dictionary<int, IWorker> workersAvailable = new Dictionary<int, IWorker>();
 		private readonly Dictionary<int, IWorker> workersInUse = new Dictionary<int, IWorker>();
 		private readonly List<Uri> jobTrackersMaster = new List<Uri>();
 		private readonly List<Uri> knownPms = new List<Uri>();
@@ -34,6 +34,12 @@ namespace PlatformCore
 		public List<Uri> KnownPmsUris {
 			get {
 				return knownPms;
+			}
+		}
+
+		public Dictionary<int, IWorker> WorkersRegistry {
+			get {
+				return workersAvailable.Union(workersInUse).ToDictionary(p => p.Key, p => p.Value);
 			}
 		}
 
@@ -64,9 +70,9 @@ namespace PlatformCore
 				var serviceUri = new Uri(serviceUrl);
 				RemotingHelper.RegisterChannel(serviceUri);
 
-				var remoteWorker = Worker.Run(workerId, serviceUri, workers, GetServiceUri());
-				workers.Add(remoteWorker.WorkerId, remoteWorker);
-				remoteWorker.UpdateAvailableWorkers(workers);
+				var remoteWorker = Worker.Run(workerId, serviceUri, GetServiceUri());
+				workersAvailable.Add(remoteWorker.WorkerId, remoteWorker);
+				remoteWorker.UpdateAvailableWorkers(workersAvailable);
 
 				Trace.WriteLine(string.Format("New worker created: id '{0}', url '{1}'."
 					, workerId, serviceUri));
@@ -77,25 +83,25 @@ namespace PlatformCore
 		}
 
 		public Dictionary<int, IWorker> GetWorkersSharePM(Uri pmUri) {
-			Dictionary<int, IWorker> share = new Dictionary<int, IWorker>();
+			var share = new Dictionary<int, IWorker>();
 			AnnouncePM(pmUri);
 			Trace.WriteLine("Get workers request from PuppetMaster : " + pmUri);
-			int fairShare = FairScheduler();
-			if (GetWorkers().Count >= FairScheduler()) {
+			var fairShare = FairScheduler();
+			if (GetAvailableWorkers().Count >= FairScheduler()) {
 				share = FairShareExecutor(fairShare);
 			}
 			return share;
 		}
 
 		public Dictionary<int, IWorker> GetWorkersShare(Uri taskRunnerUri) {
-			Dictionary<int, IWorker> share = new Dictionary<int, IWorker>();
+			var share = new Dictionary<int, IWorker>();
 			var tr = RemotingHelper.GetRemoteObject<TaskRunner>(taskRunnerUri);
 			if (tr == null)
 				return share;
 			EnsureRegistedTaskRunner(taskRunnerUri);
-			int fairShare = FairScheduler();
+			var fairShare = FairScheduler();
 			Trace.WriteLine("Get workers request from taskTracker : " + taskRunnerUri);
-			if (GetWorkers().Count >= fairShare) {
+			if (GetAvailableWorkers().Count >= fairShare) {
 				share = FairShareExecutor(fairShare);
 			} else {
 				Trace.WriteLine("No workers available put JBTM in queue:{0}" + taskRunnerUri);
@@ -115,12 +121,12 @@ namespace PlatformCore
 		private Dictionary<int, IWorker> FairShareExecutor(int fairShare) {
 			var filledShare = new Dictionary<int, IWorker>();
 			lock (workersLock) {
-				for (int i = 0; i < fairShare; i++) {
-					IWorker worker = GetWorkers().Take(1).First().Value;
-					GetWorkers().Remove(worker.WorkerId);
+				for (var i = 0; i < fairShare; i++) {
+					var worker = GetAvailableWorkers().Take(1).First().Value;
+					GetAvailableWorkers().Remove(worker.WorkerId);
 					filledShare.Add(worker.WorkerId, worker);
 					GetWorkersInUse().Add(worker.WorkerId, worker);
-					GetWorkers().Remove(worker.WorkerId);
+					GetAvailableWorkers().Remove(worker.WorkerId);
 				}
 			}
 			return filledShare;
@@ -131,9 +137,9 @@ namespace PlatformCore
 				if (!(GetJobTrackersWaitingQueue().Count > 0))
 					return;
 				while (true) {
-					Tuple<int, Uri> workerTuple = GetJobTrackersWaitingQueue().Peek();
+					var workerTuple = GetJobTrackersWaitingQueue().Peek();
 					lock (workersLock) {
-						if (!(GetWorkers().Count > workerTuple.Item1))
+						if (!(GetAvailableWorkers().Count > workerTuple.Item1))
 							return;
 						GetJobTrackersWaitingQueue().Dequeue();
 						var tr = RemotingHelper.GetRemoteObject<TaskRunner>(workerTuple.Item2);
@@ -149,23 +155,23 @@ namespace PlatformCore
 
 		public void ReleaseWorkers(List<int> workersUsed) {
 			lock (workersLock)
-				foreach (int workerKey in workersUsed) {
+				foreach (var workerKey in workersUsed) {
 					var worker = GetWorkersInUse()[workerKey];
 					GetWorkersInUse().Remove(workerKey);
-					GetWorkers().Add(workerKey, worker);
+					GetAvailableWorkers().Add(workerKey, worker);
 				}
 			ProcessPendingShares();
 		}
 
 		public int FairScheduler() {
 			lock (workersLock) {
-				return GetWorkers().Count / (GetJobTrackersMaster().Count + KnownPmsUris.Count());
+				return GetAvailableWorkers().Count / (GetJobTrackersMaster().Count + KnownPmsUris.Count());
 			}
 		}
 
 		public void GetStatus() {
 			Trace.WriteLine("PuppetMaster [ID: " + ServiceName + "] - Running: '" + ServiceUrl + "'.");
-			foreach (var worker in workers.Values) {
+			foreach (var worker in workersAvailable.Values) {
 				var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
 				remoteWorker.GetStatus();
 			}
@@ -175,8 +181,8 @@ namespace PlatformCore
 			return jobTrackersWaitingQueue;
 		}
 
-		public Dictionary<int, IWorker> GetWorkers() {
-			return workers;
+		public Dictionary<int, IWorker> GetAvailableWorkers() {
+			return workersAvailable;
 		}
 
 		public List<Uri> GetJobTrackersMaster() {
@@ -195,7 +201,7 @@ namespace PlatformCore
 			IWorker worker;
 
 			try {
-				worker = workers[workerId];
+				worker = workersAvailable[workerId];
 			} catch (System.Exception e) {
 				throw new InvalidWorkerIdException(workerId, e.Message);
 			}
@@ -208,7 +214,7 @@ namespace PlatformCore
 			IWorker worker;
 
 			try {
-				worker = workers[workerId];
+				worker = workersAvailable[workerId];
 			} catch (System.Exception e) {
 				throw new InvalidWorkerIdException(workerId, e.Message);
 			}
@@ -221,7 +227,7 @@ namespace PlatformCore
 			IWorker worker;
 
 			try {
-				worker = workers[workerId];
+				worker = workersAvailable[workerId];
 			} catch (System.Exception e) {
 				throw new InvalidWorkerIdException(workerId, e.Message);
 			}
@@ -234,7 +240,7 @@ namespace PlatformCore
 			IWorker worker;
 
 			try {
-				worker = workers[workerId];
+				worker = WorkersRegistry[workerId];
 			} catch (System.Exception e) {
 				throw new InvalidWorkerIdException(workerId, e.Message);
 			}
@@ -247,7 +253,7 @@ namespace PlatformCore
 			IWorker worker;
 
 			try {
-				worker = workers[workerId];
+				worker = WorkersRegistry[workerId];
 			} catch (System.Exception e) {
 				throw new InvalidWorkerIdException(workerId, e.Message);
 			}

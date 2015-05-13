@@ -35,7 +35,7 @@ namespace PlatformCore
 			Trace.WriteLine("CoordinatorManager picking replicas for fault tolerance.");
 			/* #begin# temporary algorithm - stoles some workers to set as replicas */
 			var puppetMaster = RemotingHelper.GetRemoteObject<PuppetMasterService>(PuppetMasterService.ServiceUrl);
-			var reps = (from wk in puppetMaster.GetWorkers().Take(NumberOfReplicas) select wk.Value).ToList();
+			var reps = (from wk in puppetMaster.GetAvailableWorkers().Take(NumberOfReplicas) select wk.Value).ToList();
 			/* #end# */
 			Trace.WriteLine("CoordinatorManager just picked " + reps.Count + " replicas from PuppetMaster.");
 			return reps;
@@ -91,7 +91,7 @@ namespace PlatformCore
 
 		private bool RecoverCrashedReplica() {
 			var puppetMaster = RemotingHelper.GetRemoteObject<PuppetMasterService>(PuppetMasterService.ServiceUrl);
-			var reps = (from wk in puppetMaster.GetWorkers().Take(1) select wk.Value).ToList();
+			var reps = (from wk in puppetMaster.GetAvailableWorkers().Take(1) select wk.Value).ToList();
 
 			if (reps.Count == 0) {
 				Trace.WriteLine("RecoverCrashedReplica failed to acquire a new replica.");

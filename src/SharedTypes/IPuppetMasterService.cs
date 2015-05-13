@@ -19,7 +19,7 @@ namespace SharedTypes {
 
         void UnfreezeCommunication(int workerId);
 
-        Dictionary<int, IWorker> GetWorkers();
+        Dictionary<int, IWorker> GetAvailableWorkers();
 
         Dictionary<int, IWorker> GetWorkersShare(Uri taskRunnerUri);
 

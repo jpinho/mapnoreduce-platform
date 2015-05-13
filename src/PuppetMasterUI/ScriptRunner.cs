@@ -306,13 +306,13 @@ namespace PuppetMasterUI
                 return;
 
             gvRemoteObjects.Rows.Clear();
-            var workers = puppetMasterService.GetWorkers();
+            var workers = puppetMasterService.GetAvailableWorkers();
 
             gvRemoteObjects.Rows.Add(new object[] {
 					"Puppet Master Service (local)",
 					PuppetMasterService.ServiceUrl,
 					"Online",
-					"Workers #: " + puppetMasterService.GetWorkers().Count
+					"Workers #: " + puppetMasterService.GetAvailableWorkers().Count
 				});
             gvRemoteObjects.Rows[0].MinimumHeight = 25;
             gvRemoteObjects.Rows[0].DefaultCellStyle.BackColor = Color.SaddleBrown;
