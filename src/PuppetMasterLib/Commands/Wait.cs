@@ -9,7 +9,7 @@ namespace PuppetMasterLib.Commands
 		public int Secs { get; set; }
 
 		public void Execute() {
-			Thread.Sleep(Secs);
+			Thread.Sleep(Secs * 1000);
 		}
 
 		public override string ToString() {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Remoting;
 using System.Threading;
@@ -36,6 +37,10 @@ namespace PlatformCore
 			} catch (System.Exception ex) {
 				Trace.WriteLine("SlaveReplica heartbeat failed, unknown error: '" + ex.Message + "'.");
 			}
+		}
+
+		public void UpdateReplicas(List<>)
+		{
 		}
 
 		public void SaveState(JobTrackerStateInfo state) {

@@ -13,6 +13,7 @@ namespace PlatformCore
 		private const int STATUS_UPDATE_TIMEOUT = 10 * 1000;
 		private const int REPLICA_RECOVER_ATTEMPT_DELAY = 10 * 1000;
 		public const int DEFAULT_NUMBER_OF_REPLICAS = 3;
+		private const double REPLICATION_FACTOR = 2;
 
 		private readonly Timer statusUpdatesTimer;
 		private volatile JobTracker tracker;
@@ -30,15 +31,18 @@ namespace PlatformCore
 			statusUpdatesTimer = new Timer(StatusUpdate, 0, Timeout.Infinite, STATUS_UPDATE_TIMEOUT);
 		}
 
-		//TODO: Nominate 30% of the share assigned to the JobTracker to be replica workers (slave trackers).
 		private List<IWorker> PickReplicas() {
 			Trace.WriteLine("CoordinatorManager picking replicas for fault tolerance.");
-			/* #begin# temporary algorithm - stoles some workers to set as replicas */
-			var puppetMaster = RemotingHelper.GetRemoteObject<PuppetMasterService>(PuppetMasterService.ServiceUrl);
-			var reps = (from wk in puppetMaster.GetAvailableWorkers().Take(NumberOfReplicas) select wk.Value).ToList();
-			/* #end# */
-			Trace.WriteLine("CoordinatorManager just picked " + reps.Count + " replicas from PuppetMaster.");
+
+			var repsCount = GetWiseNumberForReplicas(tracker.Worker.GetWorkersList().Count);
+			var reps = (from wk in tracker.Worker.GetWorkersList().Take(repsCount) select wk.Value).ToList();
+
+			Trace.WriteLine("CoordinatorManager just picked " + repsCount + " replicas from PuppetMaster.");
 			return reps;
+		}
+
+		private static int GetWiseNumberForReplicas(int x) {
+			return Convert.ToInt32(Math.Round(Math.Ceiling(Math.Log(x, 2)) * REPLICATION_FACTOR, 0));
 		}
 
 		public void Start() {
@@ -101,6 +105,9 @@ namespace PlatformCore
 		}
 
 		private bool RecoverCrashedReplica() {
+			if (tracker.Worker.GetWorkersList().Count <= 1)
+				return false;
+
 			Trace.WriteLine("Recovering crashed replica.");
 			var puppetMaster = RemotingHelper.GetRemoteObject<PuppetMasterService>(PuppetMasterService.ServiceUrl);
 			var reps = (from wk in puppetMaster.GetAvailableWorkers().Take(1) select wk.Value).ToList();
