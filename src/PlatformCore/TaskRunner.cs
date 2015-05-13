@@ -1,12 +1,14 @@
-﻿using SharedTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
+using SharedTypes;
 
-namespace PlatformCore {
+namespace PlatformCore
+{
     [Serializable]
-    public class TaskRunner : JobTracker {
+    public class TaskRunner : JobTracker
+    {
         private CoordinationManager replicaManager;
 
         public TaskRunner(Worker worker)
@@ -65,7 +67,7 @@ namespace PlatformCore {
                 PuppetMasterService.ServiceUrl.ToString());
             try {
                 Worker.UpdateAvailableWorkers(pMaster.GetWorkersShare(this.ServiceUri));
-            } catch (Exception e) {
+            } catch (System.Exception e) {
                 Trace.WriteLine(e.Message);
             } finally {
                 if (!(Worker.GetWorkersList().Count > 0)) {

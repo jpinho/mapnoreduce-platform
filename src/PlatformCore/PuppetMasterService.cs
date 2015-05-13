@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using PlatformCore.Exception;
 using SharedTypes;
 
 namespace PlatformCore
@@ -197,8 +198,8 @@ namespace PlatformCore
 
             try {
                 worker = workers[workerId];
-            } catch (Exception e) {
-                throw new InvalidWorkerIdException(workerId, e);
+            } catch (System.Exception e) {
+                throw new InvalidWorkerIdException(workerId, e.Message);
             }
 
             var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
@@ -210,8 +211,8 @@ namespace PlatformCore
 
             try {
                 worker = workers[workerId];
-            } catch (Exception e) {
-                throw new InvalidWorkerIdException(workerId, e);
+            } catch (System.Exception e) {
+                throw new InvalidWorkerIdException(workerId, e.Message);
             }
 
             var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
@@ -223,8 +224,8 @@ namespace PlatformCore
 
             try {
                 worker = workers[workerId];
-            } catch (Exception e) {
-                throw new InvalidWorkerIdException(workerId, e);
+            } catch (System.Exception e) {
+                throw new InvalidWorkerIdException(workerId, e.Message);
             }
 
             var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
@@ -236,8 +237,8 @@ namespace PlatformCore
 
             try {
                 worker = workers[workerId];
-            } catch (Exception e) {
-                throw new InvalidWorkerIdException(workerId, e);
+            } catch (System.Exception e) {
+                throw new InvalidWorkerIdException(workerId, e.Message);
             }
 
             var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
@@ -249,15 +250,15 @@ namespace PlatformCore
 
             try {
                 worker = workers[workerId];
-            } catch (Exception e) {
-                throw new InvalidWorkerIdException(workerId, e);
+            } catch (System.Exception e) {
+                throw new InvalidWorkerIdException(workerId, e.Message);
             }
 
             var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
             remoteWorker.UnfreezeCommunication();
         }
 
-        private void NotifyWorkerCreation(Uri workerServiceUri, String entryUrl) {
+        private static void NotifyWorkerCreation(Uri workerServiceUri, String entryUrl) {
             Trace.WriteLine("Sends notification to worker at ENTRY_URL informing worker creation.");
 
             var masterWorker = RemotingHelper.GetRemoteObject<IWorker>(entryUrl);
