@@ -38,13 +38,17 @@ namespace PlatformCore {
             if ((KnownPMSUris.Contains(puppetMasterUrl)))
                 return;
             KnownPMSUris.Add(puppetMasterUrl);
+            Trace.WriteLine("New Puppet Master announced:" + puppetMasterUrl);
             BroadCastPMSList(puppetMasterUrl);
+            BroadCastPMSList(PuppetMasterService.ServiceUrl);
         }
 
         private void BroadCastPMSList(Uri newPM) {
             if (!(KnownPMSUris.Count > 0))
                 return;
             foreach (Uri uri in KnownPMSUris) {
+                if (uri == newPM)
+                    continue;
                 var pMaster = (IPuppetMasterService)Activator.GetObject(
                     typeof(IPuppetMasterService),
                     uri.ToString());
