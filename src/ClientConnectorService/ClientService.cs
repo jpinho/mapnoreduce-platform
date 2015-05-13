@@ -107,11 +107,10 @@ namespace ClientServices
 			}
 
 			for (var i = 0; i < result.Count; i++) {
-				var outFilePath = Path.Combine(outputDir, (i + 1) + ".out");
-
+				var filename = string.Format("{0}.{1}.out", Path.GetFileNameWithoutExtension(filePath), i + 1);
+				var outFilePath = Path.Combine(outputDir, Path.GetDirectoryName(filePath) ?? string.Empty, filename);
 				if (File.Exists(outFilePath))
 					File.Delete(outFilePath);
-
 				using (var outFile = File.CreateText(outFilePath)) {
 					outFile.WriteLine(result[i]);
 				}
