@@ -1,18 +1,16 @@
-﻿using System;
+﻿using PlatformCore.Properties;
+using SharedTypes;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting;
 using System.Threading;
-using PlatformCore.Properties;
-using SharedTypes;
 
-namespace PlatformCore
-{
+namespace PlatformCore {
     [Serializable]
-    public class Worker : MarshalByRefObject, IWorker
-    {
+    public class Worker : MarshalByRefObject, IWorker {
         public const int NOTIFY_TIMEOUT = 1000 * 5;
 
         private readonly object workerMutex = new object();

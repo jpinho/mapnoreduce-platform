@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using PlatformCore;
 
 namespace SharedTypes
 {
     public interface IWorker
     {
+
+namespace SharedTypes {
+    public interface IWorker {
         Uri ServiceUrl { get; set; }
         int WorkerId { get; set; }
         void ExecuteMapJob(IJobTask task);
@@ -26,6 +28,7 @@ namespace SharedTypes
 
         void ReceiveJobTrackerState(JobTrackerStateInfo getState);
         void DestroyReplica();
+
         void SendReplicaState(ISlaveReplica slaveReplica);
     }
 }
