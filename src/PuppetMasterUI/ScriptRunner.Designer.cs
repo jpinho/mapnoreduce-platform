@@ -65,6 +65,7 @@
             this.lblLogfile = new System.Windows.Forms.Label();
             this.txtLogFile = new System.Windows.Forms.TextBox();
             this.tmrMonitoring = new System.Windows.Forms.Timer(this.components);
+            this.tsmiAnnouncePM = new System.Windows.Forms.ToolStripMenuItem();
             this.tsTopNavigation.SuspendLayout();
             this.tcScriptContainer.SuspendLayout();
             this.tpNewScript.SuspendLayout();
@@ -164,7 +165,8 @@
             this.tsmiFreezeW,
             this.tsmiUnFreezeW,
             this.tsFreezeC,
-            this.tsUnFreezeC});
+            this.tsUnFreezeC,
+            this.tsmiAnnouncePM});
             this.tsDdbCommandHelper.Image = ((System.Drawing.Image)(resources.GetObject("tsDdbCommandHelper.Image")));
             this.tsDdbCommandHelper.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDdbCommandHelper.Name = "tsDdbCommandHelper";
@@ -174,63 +176,63 @@
             // tsmiWorker
             // 
             this.tsmiWorker.Name = "tsmiWorker";
-            this.tsmiWorker.Size = new System.Drawing.Size(140, 22);
+            this.tsmiWorker.Size = new System.Drawing.Size(158, 22);
             this.tsmiWorker.Text = "WORKER";
             this.tsmiWorker.Click += new System.EventHandler(this.tsmiWorker_Click);
             // 
             // tsmiSubmit
             // 
             this.tsmiSubmit.Name = "tsmiSubmit";
-            this.tsmiSubmit.Size = new System.Drawing.Size(140, 22);
+            this.tsmiSubmit.Size = new System.Drawing.Size(158, 22);
             this.tsmiSubmit.Text = "SUBMIT";
             this.tsmiSubmit.Click += new System.EventHandler(this.tsmiSubmit_Click);
             // 
             // tsmiWait
             // 
             this.tsmiWait.Name = "tsmiWait";
-            this.tsmiWait.Size = new System.Drawing.Size(140, 22);
+            this.tsmiWait.Size = new System.Drawing.Size(158, 22);
             this.tsmiWait.Text = "WAIT";
             this.tsmiWait.Click += new System.EventHandler(this.tsmiWait_Click);
             // 
             // tsmiStatus
             // 
             this.tsmiStatus.Name = "tsmiStatus";
-            this.tsmiStatus.Size = new System.Drawing.Size(140, 22);
+            this.tsmiStatus.Size = new System.Drawing.Size(158, 22);
             this.tsmiStatus.Text = "STATUS";
             this.tsmiStatus.Click += new System.EventHandler(this.tsmiStatus_Click);
             // 
             // tsmiSlowW
             // 
             this.tsmiSlowW.Name = "tsmiSlowW";
-            this.tsmiSlowW.Size = new System.Drawing.Size(140, 22);
+            this.tsmiSlowW.Size = new System.Drawing.Size(158, 22);
             this.tsmiSlowW.Text = "SLOWW";
             this.tsmiSlowW.Click += new System.EventHandler(this.tsmiSlowW_Click);
             // 
             // tsmiFreezeW
             // 
             this.tsmiFreezeW.Name = "tsmiFreezeW";
-            this.tsmiFreezeW.Size = new System.Drawing.Size(140, 22);
+            this.tsmiFreezeW.Size = new System.Drawing.Size(158, 22);
             this.tsmiFreezeW.Text = "FREEZEW";
             this.tsmiFreezeW.Click += new System.EventHandler(this.tsmiFreezeW_Click);
             // 
             // tsmiUnFreezeW
             // 
             this.tsmiUnFreezeW.Name = "tsmiUnFreezeW";
-            this.tsmiUnFreezeW.Size = new System.Drawing.Size(140, 22);
+            this.tsmiUnFreezeW.Size = new System.Drawing.Size(158, 22);
             this.tsmiUnFreezeW.Text = "UNFREEZEW";
             this.tsmiUnFreezeW.Click += new System.EventHandler(this.tsmiUnFreezeW_Click);
             // 
             // tsFreezeC
             // 
             this.tsFreezeC.Name = "tsFreezeC";
-            this.tsFreezeC.Size = new System.Drawing.Size(140, 22);
+            this.tsFreezeC.Size = new System.Drawing.Size(158, 22);
             this.tsFreezeC.Text = "FREEZEC";
             this.tsFreezeC.Click += new System.EventHandler(this.tsFreezeC_Click);
             // 
             // tsUnFreezeC
             // 
             this.tsUnFreezeC.Name = "tsUnFreezeC";
-            this.tsUnFreezeC.Size = new System.Drawing.Size(140, 22);
+            this.tsUnFreezeC.Size = new System.Drawing.Size(158, 22);
             this.tsUnFreezeC.Text = "UNFREEZEC";
             this.tsUnFreezeC.Click += new System.EventHandler(this.tsUnFreezeC_Click);
             // 
@@ -465,6 +467,13 @@
             this.tmrMonitoring.Interval = 5000;
             this.tmrMonitoring.Tick += new System.EventHandler(this.tmrMonitoring_Tick);
             // 
+            // tsmiAnnouncePM
+            // 
+            this.tsmiAnnouncePM.Name = "tsmiAnnouncePM";
+            this.tsmiAnnouncePM.Size = new System.Drawing.Size(158, 22);
+            this.tsmiAnnouncePM.Text = "ANNOUNCEPM";
+            this.tsmiAnnouncePM.Click += new System.EventHandler(this.tsmiAnnouncePM_Click);
+            // 
             // ScriptRunner
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -531,6 +540,7 @@
 		private System.Windows.Forms.CheckBox cbLiveUpdate;
 		private System.Windows.Forms.CheckBox cbMonitoring;
 		private System.Windows.Forms.CheckBox cbAutoScroll;
+        private System.Windows.Forms.ToolStripMenuItem tsmiAnnouncePM;
     }
 }
 

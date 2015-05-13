@@ -1,13 +1,13 @@
-﻿using System;
+﻿using PlatformCore;
+using PuppetMasterLib;
+using SharedTypes;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
-using PlatformCore;
-using PuppetMasterLib;
-using SharedTypes;
 
 namespace PuppetMasterUI {
     public partial class ScriptRunner : Form {
@@ -259,6 +259,10 @@ namespace PuppetMasterUI {
 
         private void tsUnFreezeC_Click(object sender, EventArgs e) {
             GetCurrentTextBox().Text += "UNFREEZEC <ID>";
+        }
+
+        private void tsmiAnnouncePM_Click(object sender, EventArgs e) {
+            GetCurrentTextBox().Text += Environment.NewLine + "ANNOUNCEPM <PUPPETMASTER-URI>";
         }
 
         private void tsDdbMonitoring_CheckedChanged(object sender, EventArgs e) {
