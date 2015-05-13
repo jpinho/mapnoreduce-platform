@@ -95,7 +95,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\svg.png" />
     <None Include="Resources\pentagon2.ico" />
     <Content Include="Resources\job1.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -107,6 +106,15 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\UserMappersLib.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Scripts\Script-CreateRemoteWorker.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Scripts\Script-CreateWorkers&amp;submit.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Scripts\Script-CreateWorkers-SubmitJob.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Scripts\Script-CreateWorkers.txt">
