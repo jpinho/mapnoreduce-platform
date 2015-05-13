@@ -205,17 +205,34 @@ namespace PlatformCore
 				Trace.WriteLine("Worker/Replica started SlaveTracker to handle state updates from Master Tracker.");
 			}
 			replicaTracker.SaveState(state);
+			LogTrackerState(state);
+		}
+
+		private static void LogTrackerState(JobTrackerStateInfo state) {
+			var filename = string.Empty;
+			var jobsCount = 0;
+			var workersAliveCount = 0;
+
+			if (state.CurrentJob != null)
+				filename = state.CurrentJob.FileName;
+			if (state.JobsQueue != null)
+				jobsCount = state.JobsQueue.Count;
+			if (state.WorkerAliveSignals != null)
+				workersAliveCount = state.WorkerAliveSignals.Count;
+
 			Trace.WriteLine(string.Format(Resources.JobTrackerStateSummaryString
-				, replicaTracker.MasterJobTrackerState.Item1.CurrentJob.FileName
-				, replicaTracker.MasterJobTrackerState.Item1.Enabled
-				, replicaTracker.MasterJobTrackerState.Item1.JobsQueue.Count
-				, replicaTracker.MasterJobTrackerState.Item1.ServiceUri
-				, replicaTracker.MasterJobTrackerState.Item1.Status
-				, replicaTracker.MasterJobTrackerState.Item1.Worker.WorkerId
-				, replicaTracker.MasterJobTrackerState.Item1.WorkerAliveSignals.Count));
+				, filename
+				, state.Enabled
+				, jobsCount
+				, state.ServiceUri
+				, state.Status
+				, state.WorkerId
+				, workersAliveCount));
 		}
 
 		public void DestroyReplica() {
+			if (replicaTracker == null)
+				return;
 			replicaTracker.Dispose();
 			Trace.WriteLine("Worker/Replica '" + WorkerId + "' received replica destroy signal. Replica Destroyed!");
 		}
@@ -325,15 +342,21 @@ namespace PlatformCore
 
 		public void FreezeCommunication() {
 			lock (workerMutex) {
-				if (masterTracker != null)
+				if (masterTracker != null) {
+					Trace.WriteLine("MasterTracker ## FREEZED");
 					masterTracker.FreezeCommunication();
+				} else
+					Trace.WriteLine("FreezeCommunication uneffective master tracker is NULL.");
 			}
 		}
 
 		public void UnfreezeCommunication() {
 			lock (workerMutex) {
-				if (masterTracker != null)
+				if (masterTracker != null) {
+					Trace.WriteLine("MasterTracker ## UN-FREEZED");
 					masterTracker.UnfreezeCommunication();
+				} else
+					Trace.WriteLine("UnfreezeCommunication uneffective master tracker is NULL.");
 			}
 		}
 	}

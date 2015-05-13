@@ -19,7 +19,7 @@ namespace PlatformCore
 		private List<IWorker> replicas;
 		private readonly Dictionary< /*workerid*/ int, /*lastping*/ DateTime> replicasAliveSignals;
 		private readonly object rmanagerMutex = new object();
-		private bool isStarted = false;
+		private bool isStarted;
 
 		public int NumberOfReplicas { get; set; }
 
@@ -46,7 +46,7 @@ namespace PlatformCore
 				return;
 			isStarted = true;
 			replicas = PickReplicas();
-			replicas.AsParallel().ForAll((wk) => {
+			replicas.ForEach(wk => {
 				// ReSharper disable once InconsistentlySynchronizedField
 				replicasAliveSignals[wk.WorkerId] = DateTime.Now;
 			});
@@ -61,11 +61,21 @@ namespace PlatformCore
 			}
 		}
 
+		public void PauseStateUpdates() {
+			statusUpdatesTimer.Change(Timeout.Infinite, STATUS_UPDATE_TIMEOUT);
+		}
+
+		public void ResumeStateUpdates() {
+			statusUpdatesTimer.Change(0, STATUS_UPDATE_TIMEOUT);
+		}
+
 		private void StatusUpdate(object state) {
 			foreach (var replica in replicas) {
 				try {
-					Trace.WriteLine("CoordinationManager sending JobTracker state to ReplicaWorker ID:" + replica.WorkerId + ".");
-					replica.ReceiveJobTrackerState(tracker.GetState());
+					Trace.WriteLine("CoordinationManager sending JobTracker state to ReplicaWorker ID:"
+						+ replica.WorkerId + ".");
+					RemotingHelper.GetRemoteObject<IWorker>(replica.ServiceUrl)
+						.ReceiveJobTrackerState(tracker.GetState());
 				} catch {
 					Trace.WriteLine("CoordinationManager received an error contacting replica.");
 					TimeSpan lastReplicaUpdate;
@@ -81,15 +91,17 @@ namespace PlatformCore
 						+ replica.WorkerId + " seems to be permanently crashed.");
 
 					new Thread(() => {
-						while (!RecoverCrashedReplica())
+						while (!RecoverCrashedReplica()) {
+							Trace.WriteLine("Replica crashed and not recovered, waiting...");
 							Thread.Sleep(REPLICA_RECOVER_ATTEMPT_DELAY);
+						}
 					}).Start();
-
 				}
 			}
 		}
 
 		private bool RecoverCrashedReplica() {
+			Trace.WriteLine("Recovering crashed replica.");
 			var puppetMaster = RemotingHelper.GetRemoteObject<PuppetMasterService>(PuppetMasterService.ServiceUrl);
 			var reps = (from wk in puppetMaster.GetAvailableWorkers().Take(1) select wk.Value).ToList();
 
@@ -97,16 +109,24 @@ namespace PlatformCore
 				Trace.WriteLine("RecoverCrashedReplica failed to acquire a new replica.");
 				return false;
 			}
+
+			Trace.WriteLine("Crashed replica recovered.");
 			var replica = reps.First();
-			replica.ReceiveJobTrackerState(tracker.GetState());
 			replicas.Add(replica);
+			lock (rmanagerMutex) {
+				replicasAliveSignals[replica.WorkerId] = DateTime.Now;
+			}
+			RemotingHelper.GetRemoteObject<IWorker>(replica.ServiceUrl)
+				.ReceiveJobTrackerState(tracker.GetState());
 			return true;
 		}
 
 		public void Dispose() {
+			Trace.WriteLine("CoordinationManager disposing.");
 			statusUpdatesTimer.Dispose();
-			replicas.AsParallel().ForAll((worker) => {
-				worker.DestroyReplica();
+			replicas.ForEach(worker => {
+				RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl)
+					.DestroyReplica();
 			});
 		}
 	}

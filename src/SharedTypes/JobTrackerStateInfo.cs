@@ -12,6 +12,9 @@ namespace SharedTypes
 		public JobTrackerState Status;
 		public IJobTask CurrentJob;
 		public bool Enabled;
-		public IWorker Worker;
+		public int WorkerId;
+
+		public JobTrackerStateInfo() {
+		}
 	}
 }

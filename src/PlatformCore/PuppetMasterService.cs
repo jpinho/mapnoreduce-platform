@@ -154,12 +154,13 @@ namespace PlatformCore
 		}
 
 		public void ReleaseWorkers(List<int> workersUsed) {
-			lock (workersLock)
+			lock (workersLock) {
 				foreach (var workerKey in workersUsed) {
 					var worker = GetWorkersInUse()[workerKey];
 					GetWorkersInUse().Remove(workerKey);
 					GetAvailableWorkers().Add(workerKey, worker);
 				}
+			}
 			ProcessPendingShares();
 		}
 

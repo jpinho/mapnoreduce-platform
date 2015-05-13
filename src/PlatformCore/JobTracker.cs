@@ -85,7 +85,7 @@ namespace PlatformCore
 			return new JobTrackerStateInfo() {
 				CurrentJob = CurrentJob,
 				ServiceUri = ServiceUri,
-				Worker = Worker,
+				WorkerId = Worker.WorkerId,
 				Status = Status,
 				Enabled = Enabled,
 				JobsQueue = jobsQueue,
@@ -104,18 +104,25 @@ namespace PlatformCore
 			}
 		}
 
-		public void FreezeCommunication() {
+		public virtual void FreezeCommunication() {
 			lock (TrackerMutex) {
+				Status = JobTrackerState.Frozen;
 				DisconnectProxy();
 				Trace.WriteLine("Communication Freezed for worker '" + Worker.WorkerId + "'.");
 			}
 		}
 
-		public void UnfreezeCommunication() {
+		public virtual void UnfreezeCommunication() {
 			lock (TrackerMutex) {
+				Status = CurrentJob != null ? JobTrackerState.Busy : JobTrackerState.Available;
 				ConnectProxy();
+				ProcessFrozenRequests();
 				Trace.WriteLine("Communication Unfreezed for worker '" + Worker.WorkerId + "'.");
 			}
+		}
+
+		private void ProcessFrozenRequests() {
+			frozenRequests.ForEach(r => r.Set());
 		}
 
 		//puts to sleep all incoming requests while worker is frozen

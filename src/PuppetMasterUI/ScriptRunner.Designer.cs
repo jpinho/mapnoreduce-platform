@@ -25,57 +25,57 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ScriptRunner));
-            this.tsTopNavigation = new System.Windows.Forms.ToolStrip();
-            this.tsOpenScript = new System.Windows.Forms.ToolStripButton();
-            this.tsSaveScript = new System.Windows.Forms.ToolStripButton();
-            this.tsSeparatorOne = new System.Windows.Forms.ToolStripSeparator();
-            this.tsRunScript = new System.Windows.Forms.ToolStripButton();
-            this.tsRunScriptStep = new System.Windows.Forms.ToolStripButton();
-            this.tsCleanScript = new System.Windows.Forms.ToolStripButton();
-            this.tsSeparatorTwo = new System.Windows.Forms.ToolStripSeparator();
-            this.tsDdbCommandHelper = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsmiWorker = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiSubmit = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiWait = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiStatus = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiSlowW = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiFreezeW = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiUnFreezeW = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsFreezeC = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsUnFreezeC = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsDdbMonitoring = new System.Windows.Forms.ToolStripButton();
-            this.ofdOpenFile = new System.Windows.Forms.OpenFileDialog();
-            this.sfdSaveFile = new System.Windows.Forms.SaveFileDialog();
-            this.tcScriptContainer = new System.Windows.Forms.TabControl();
-            this.tpNewScript = new System.Windows.Forms.TabPage();
-            this.txtScripts = new System.Windows.Forms.TextBox();
-            this.tpMonitoring = new System.Windows.Forms.TabPage();
-            this.cbAutoScroll = new System.Windows.Forms.CheckBox();
-            this.cbMonitoring = new System.Windows.Forms.CheckBox();
-            this.cbLiveUpdate = new System.Windows.Forms.CheckBox();
-            this.lblPltObjects = new System.Windows.Forms.Label();
-            this.gvRemoteObjects = new System.Windows.Forms.DataGridView();
-            this.ObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ObjectUri = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.AdditionalInfo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.lblLogfile = new System.Windows.Forms.Label();
-            this.txtLogFile = new System.Windows.Forms.TextBox();
-            this.tmrMonitoring = new System.Windows.Forms.Timer(this.components);
-            this.tsmiAnnouncePM = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsTopNavigation.SuspendLayout();
-            this.tcScriptContainer.SuspendLayout();
-            this.tpNewScript.SuspendLayout();
-            this.tpMonitoring.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gvRemoteObjects)).BeginInit();
-            this.SuspendLayout();
-            // 
-            // tsTopNavigation
-            // 
-            this.tsTopNavigation.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+			this.components = new System.ComponentModel.Container();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ScriptRunner));
+			this.tsTopNavigation = new System.Windows.Forms.ToolStrip();
+			this.tsOpenScript = new System.Windows.Forms.ToolStripButton();
+			this.tsSaveScript = new System.Windows.Forms.ToolStripButton();
+			this.tsSeparatorOne = new System.Windows.Forms.ToolStripSeparator();
+			this.tsRunScript = new System.Windows.Forms.ToolStripButton();
+			this.tsRunScriptStep = new System.Windows.Forms.ToolStripButton();
+			this.tsCleanScript = new System.Windows.Forms.ToolStripButton();
+			this.tsSeparatorTwo = new System.Windows.Forms.ToolStripSeparator();
+			this.tsDdbCommandHelper = new System.Windows.Forms.ToolStripDropDownButton();
+			this.tsmiWorker = new System.Windows.Forms.ToolStripMenuItem();
+			this.tsmiSubmit = new System.Windows.Forms.ToolStripMenuItem();
+			this.tsmiWait = new System.Windows.Forms.ToolStripMenuItem();
+			this.tsmiStatus = new System.Windows.Forms.ToolStripMenuItem();
+			this.tsmiSlowW = new System.Windows.Forms.ToolStripMenuItem();
+			this.tsmiFreezeW = new System.Windows.Forms.ToolStripMenuItem();
+			this.tsmiUnFreezeW = new System.Windows.Forms.ToolStripMenuItem();
+			this.tsFreezeC = new System.Windows.Forms.ToolStripMenuItem();
+			this.tsUnFreezeC = new System.Windows.Forms.ToolStripMenuItem();
+			this.tsmiAnnouncePM = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+			this.tsDdbMonitoring = new System.Windows.Forms.ToolStripButton();
+			this.ofdOpenFile = new System.Windows.Forms.OpenFileDialog();
+			this.sfdSaveFile = new System.Windows.Forms.SaveFileDialog();
+			this.tcScriptContainer = new System.Windows.Forms.TabControl();
+			this.tpNewScript = new System.Windows.Forms.TabPage();
+			this.txtScripts = new System.Windows.Forms.TextBox();
+			this.tpMonitoring = new System.Windows.Forms.TabPage();
+			this.cbAutoScroll = new System.Windows.Forms.CheckBox();
+			this.cbMonitoring = new System.Windows.Forms.CheckBox();
+			this.cbLiveUpdate = new System.Windows.Forms.CheckBox();
+			this.lblPltObjects = new System.Windows.Forms.Label();
+			this.gvRemoteObjects = new System.Windows.Forms.DataGridView();
+			this.ObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.ObjectUri = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.AdditionalInfo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+			this.lblLogfile = new System.Windows.Forms.Label();
+			this.txtLogFile = new System.Windows.Forms.TextBox();
+			this.tmrMonitoring = new System.Windows.Forms.Timer(this.components);
+			this.tsTopNavigation.SuspendLayout();
+			this.tcScriptContainer.SuspendLayout();
+			this.tpNewScript.SuspendLayout();
+			this.tpMonitoring.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.gvRemoteObjects)).BeginInit();
+			this.SuspendLayout();
+			// 
+			// tsTopNavigation
+			// 
+			this.tsTopNavigation.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsOpenScript,
             this.tsSaveScript,
             this.tsSeparatorOne,
@@ -167,102 +167,109 @@
             this.tsFreezeC,
             this.tsUnFreezeC,
             this.tsmiAnnouncePM});
-            this.tsDdbCommandHelper.Image = ((System.Drawing.Image)(resources.GetObject("tsDdbCommandHelper.Image")));
-            this.tsDdbCommandHelper.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDdbCommandHelper.Name = "tsDdbCommandHelper";
-            this.tsDdbCommandHelper.Size = new System.Drawing.Size(115, 22);
-            this.tsDdbCommandHelper.Text = "Command Helper";
-            // 
-            // tsmiWorker
-            // 
-            this.tsmiWorker.Name = "tsmiWorker";
-            this.tsmiWorker.Size = new System.Drawing.Size(158, 22);
-            this.tsmiWorker.Text = "WORKER";
-            this.tsmiWorker.Click += new System.EventHandler(this.tsmiWorker_Click);
-            // 
-            // tsmiSubmit
-            // 
-            this.tsmiSubmit.Name = "tsmiSubmit";
-            this.tsmiSubmit.Size = new System.Drawing.Size(158, 22);
-            this.tsmiSubmit.Text = "SUBMIT";
-            this.tsmiSubmit.Click += new System.EventHandler(this.tsmiSubmit_Click);
-            // 
-            // tsmiWait
-            // 
-            this.tsmiWait.Name = "tsmiWait";
-            this.tsmiWait.Size = new System.Drawing.Size(158, 22);
-            this.tsmiWait.Text = "WAIT";
-            this.tsmiWait.Click += new System.EventHandler(this.tsmiWait_Click);
-            // 
-            // tsmiStatus
-            // 
-            this.tsmiStatus.Name = "tsmiStatus";
-            this.tsmiStatus.Size = new System.Drawing.Size(158, 22);
-            this.tsmiStatus.Text = "STATUS";
-            this.tsmiStatus.Click += new System.EventHandler(this.tsmiStatus_Click);
-            // 
-            // tsmiSlowW
-            // 
-            this.tsmiSlowW.Name = "tsmiSlowW";
-            this.tsmiSlowW.Size = new System.Drawing.Size(158, 22);
-            this.tsmiSlowW.Text = "SLOWW";
-            this.tsmiSlowW.Click += new System.EventHandler(this.tsmiSlowW_Click);
-            // 
-            // tsmiFreezeW
-            // 
-            this.tsmiFreezeW.Name = "tsmiFreezeW";
-            this.tsmiFreezeW.Size = new System.Drawing.Size(158, 22);
-            this.tsmiFreezeW.Text = "FREEZEW";
-            this.tsmiFreezeW.Click += new System.EventHandler(this.tsmiFreezeW_Click);
-            // 
-            // tsmiUnFreezeW
-            // 
-            this.tsmiUnFreezeW.Name = "tsmiUnFreezeW";
-            this.tsmiUnFreezeW.Size = new System.Drawing.Size(158, 22);
-            this.tsmiUnFreezeW.Text = "UNFREEZEW";
-            this.tsmiUnFreezeW.Click += new System.EventHandler(this.tsmiUnFreezeW_Click);
-            // 
-            // tsFreezeC
-            // 
-            this.tsFreezeC.Name = "tsFreezeC";
-            this.tsFreezeC.Size = new System.Drawing.Size(158, 22);
-            this.tsFreezeC.Text = "FREEZEC";
-            this.tsFreezeC.Click += new System.EventHandler(this.tsFreezeC_Click);
-            // 
-            // tsUnFreezeC
-            // 
-            this.tsUnFreezeC.Name = "tsUnFreezeC";
-            this.tsUnFreezeC.Size = new System.Drawing.Size(158, 22);
-            this.tsUnFreezeC.Text = "UNFREEZEC";
-            this.tsUnFreezeC.Click += new System.EventHandler(this.tsUnFreezeC_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
-            // 
-            // tsDdbMonitoring
-            // 
-            this.tsDdbMonitoring.CheckOnClick = true;
-            this.tsDdbMonitoring.Image = ((System.Drawing.Image)(resources.GetObject("tsDdbMonitoring.Image")));
-            this.tsDdbMonitoring.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDdbMonitoring.Name = "tsDdbMonitoring";
-            this.tsDdbMonitoring.Size = new System.Drawing.Size(87, 22);
-            this.tsDdbMonitoring.Text = "Monitoring";
-            this.tsDdbMonitoring.CheckedChanged += new System.EventHandler(this.tsDdbMonitoring_CheckedChanged);
-            // 
-            // ofdOpenFile
-            // 
-            this.ofdOpenFile.FileName = "My MNR Script";
-            this.ofdOpenFile.Title = "Open Script";
-            // 
-            // sfdSaveFile
-            // 
-            this.sfdSaveFile.Title = "Save Script";
-            // 
-            // tcScriptContainer
-            // 
-            this.tcScriptContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			this.tsDdbCommandHelper.Image = ((System.Drawing.Image)(resources.GetObject("tsDdbCommandHelper.Image")));
+			this.tsDdbCommandHelper.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.tsDdbCommandHelper.Name = "tsDdbCommandHelper";
+			this.tsDdbCommandHelper.Size = new System.Drawing.Size(115, 22);
+			this.tsDdbCommandHelper.Text = "Command Helper";
+			// 
+			// tsmiWorker
+			// 
+			this.tsmiWorker.Name = "tsmiWorker";
+			this.tsmiWorker.Size = new System.Drawing.Size(158, 22);
+			this.tsmiWorker.Text = "WORKER";
+			this.tsmiWorker.Click += new System.EventHandler(this.tsmiWorker_Click);
+			// 
+			// tsmiSubmit
+			// 
+			this.tsmiSubmit.Name = "tsmiSubmit";
+			this.tsmiSubmit.Size = new System.Drawing.Size(158, 22);
+			this.tsmiSubmit.Text = "SUBMIT";
+			this.tsmiSubmit.Click += new System.EventHandler(this.tsmiSubmit_Click);
+			// 
+			// tsmiWait
+			// 
+			this.tsmiWait.Name = "tsmiWait";
+			this.tsmiWait.Size = new System.Drawing.Size(158, 22);
+			this.tsmiWait.Text = "WAIT";
+			this.tsmiWait.Click += new System.EventHandler(this.tsmiWait_Click);
+			// 
+			// tsmiStatus
+			// 
+			this.tsmiStatus.Name = "tsmiStatus";
+			this.tsmiStatus.Size = new System.Drawing.Size(158, 22);
+			this.tsmiStatus.Text = "STATUS";
+			this.tsmiStatus.Click += new System.EventHandler(this.tsmiStatus_Click);
+			// 
+			// tsmiSlowW
+			// 
+			this.tsmiSlowW.Name = "tsmiSlowW";
+			this.tsmiSlowW.Size = new System.Drawing.Size(158, 22);
+			this.tsmiSlowW.Text = "SLOWW";
+			this.tsmiSlowW.Click += new System.EventHandler(this.tsmiSlowW_Click);
+			// 
+			// tsmiFreezeW
+			// 
+			this.tsmiFreezeW.Name = "tsmiFreezeW";
+			this.tsmiFreezeW.Size = new System.Drawing.Size(158, 22);
+			this.tsmiFreezeW.Text = "FREEZEW";
+			this.tsmiFreezeW.Click += new System.EventHandler(this.tsmiFreezeW_Click);
+			// 
+			// tsmiUnFreezeW
+			// 
+			this.tsmiUnFreezeW.Name = "tsmiUnFreezeW";
+			this.tsmiUnFreezeW.Size = new System.Drawing.Size(158, 22);
+			this.tsmiUnFreezeW.Text = "UNFREEZEW";
+			this.tsmiUnFreezeW.Click += new System.EventHandler(this.tsmiUnFreezeW_Click);
+			// 
+			// tsFreezeC
+			// 
+			this.tsFreezeC.Name = "tsFreezeC";
+			this.tsFreezeC.Size = new System.Drawing.Size(158, 22);
+			this.tsFreezeC.Text = "FREEZEC";
+			this.tsFreezeC.Click += new System.EventHandler(this.tsFreezeC_Click);
+			// 
+			// tsUnFreezeC
+			// 
+			this.tsUnFreezeC.Name = "tsUnFreezeC";
+			this.tsUnFreezeC.Size = new System.Drawing.Size(158, 22);
+			this.tsUnFreezeC.Text = "UNFREEZEC";
+			this.tsUnFreezeC.Click += new System.EventHandler(this.tsUnFreezeC_Click);
+			// 
+			// tsmiAnnouncePM
+			// 
+			this.tsmiAnnouncePM.Name = "tsmiAnnouncePM";
+			this.tsmiAnnouncePM.Size = new System.Drawing.Size(158, 22);
+			this.tsmiAnnouncePM.Text = "ANNOUNCEPM";
+			this.tsmiAnnouncePM.Click += new System.EventHandler(this.tsmiAnnouncePM_Click);
+			// 
+			// toolStripSeparator1
+			// 
+			this.toolStripSeparator1.Name = "toolStripSeparator1";
+			this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+			// 
+			// tsDdbMonitoring
+			// 
+			this.tsDdbMonitoring.CheckOnClick = true;
+			this.tsDdbMonitoring.Image = ((System.Drawing.Image)(resources.GetObject("tsDdbMonitoring.Image")));
+			this.tsDdbMonitoring.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.tsDdbMonitoring.Name = "tsDdbMonitoring";
+			this.tsDdbMonitoring.Size = new System.Drawing.Size(87, 22);
+			this.tsDdbMonitoring.Text = "Monitoring";
+			this.tsDdbMonitoring.CheckedChanged += new System.EventHandler(this.tsDdbMonitoring_CheckedChanged);
+			// 
+			// ofdOpenFile
+			// 
+			this.ofdOpenFile.FileName = "My MNR Script";
+			this.ofdOpenFile.Title = "Open Script";
+			// 
+			// sfdSaveFile
+			// 
+			this.sfdSaveFile.Title = "Save Script";
+			// 
+			// tcScriptContainer
+			// 
+			this.tcScriptContainer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.tcScriptContainer.Controls.Add(this.tpNewScript);
@@ -305,12 +312,12 @@
             "UNFREEZEC"});
 			this.txtScripts.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
 			this.txtScripts.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
-			this.txtScripts.BackColor = System.Drawing.Color.Black;
+			this.txtScripts.BackColor = System.Drawing.Color.DimGray;
 			this.txtScripts.BorderStyle = System.Windows.Forms.BorderStyle.None;
 			this.txtScripts.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
 			this.txtScripts.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.txtScripts.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.txtScripts.ForeColor = System.Drawing.Color.Lavender;
+			this.txtScripts.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.txtScripts.ForeColor = System.Drawing.Color.WhiteSmoke;
 			this.txtScripts.HideSelection = false;
 			this.txtScripts.Location = new System.Drawing.Point(3, 3);
 			this.txtScripts.Multiline = true;
@@ -450,53 +457,47 @@
 			this.txtLogFile.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtLogFile.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.txtLogFile.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-            this.txtLogFile.ForeColor = System.Drawing.Color.YellowGreen;
-            this.txtLogFile.Location = new System.Drawing.Point(3, 268);
-            this.txtLogFile.MaxLength = 0;
-            this.txtLogFile.Multiline = true;
-            this.txtLogFile.Name = "txtLogFile";
-            this.txtLogFile.ReadOnly = true;
-            this.txtLogFile.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtLogFile.Size = new System.Drawing.Size(869, 229);
-            this.txtLogFile.TabIndex = 0;
-            // 
-            // tmrMonitoring
-            // 
-            this.tmrMonitoring.Interval = 5000;
-            this.tmrMonitoring.Tick += new System.EventHandler(this.tmrMonitoring_Tick);
-            // 
-            // tsmiAnnouncePM
-            // 
-            this.tsmiAnnouncePM.Name = "tsmiAnnouncePM";
-            this.tsmiAnnouncePM.Size = new System.Drawing.Size(158, 22);
-            this.tsmiAnnouncePM.Text = "ANNOUNCEPM";
-            this.tsmiAnnouncePM.Click += new System.EventHandler(this.tsmiAnnouncePM_Click);
-            // 
-            // ScriptRunner
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(883, 557);
-            this.Controls.Add(this.tsTopNavigation);
-            this.Controls.Add(this.tcScriptContainer);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.IsMdiContainer = true;
-            this.Name = "ScriptRunner";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "[ Puppet Master UI - Script Runner ]";
-            this.tsTopNavigation.ResumeLayout(false);
-            this.tsTopNavigation.PerformLayout();
-            this.tcScriptContainer.ResumeLayout(false);
-            this.tpNewScript.ResumeLayout(false);
-            this.tpNewScript.PerformLayout();
-            this.tpMonitoring.ResumeLayout(false);
-            this.tpMonitoring.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gvRemoteObjects)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+			this.txtLogFile.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+			this.txtLogFile.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+			this.txtLogFile.ForeColor = System.Drawing.Color.YellowGreen;
+			this.txtLogFile.Location = new System.Drawing.Point(3, 268);
+			this.txtLogFile.MaxLength = 0;
+			this.txtLogFile.Multiline = true;
+			this.txtLogFile.Name = "txtLogFile";
+			this.txtLogFile.ReadOnly = true;
+			this.txtLogFile.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+			this.txtLogFile.Size = new System.Drawing.Size(869, 229);
+			this.txtLogFile.TabIndex = 0;
+			// 
+			// tmrMonitoring
+			// 
+			this.tmrMonitoring.Interval = 5000;
+			this.tmrMonitoring.Tick += new System.EventHandler(this.tmrMonitoring_Tick);
+			// 
+			// ScriptRunner
+			// 
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.ClientSize = new System.Drawing.Size(883, 557);
+			this.Controls.Add(this.tsTopNavigation);
+			this.Controls.Add(this.tcScriptContainer);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+			this.IsMdiContainer = true;
+			this.Name = "ScriptRunner";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+			this.Text = "[ Puppet Master UI - Script Runner ]";
+			this.tsTopNavigation.ResumeLayout(false);
+			this.tsTopNavigation.PerformLayout();
+			this.tcScriptContainer.ResumeLayout(false);
+			this.tpNewScript.ResumeLayout(false);
+			this.tpNewScript.PerformLayout();
+			this.tpMonitoring.ResumeLayout(false);
+			this.tpMonitoring.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.gvRemoteObjects)).EndInit();
+			this.ResumeLayout(false);
+			this.PerformLayout();
+
         }
 
         #endregion
