@@ -120,6 +120,7 @@
     <Content Include="Scripts\Script-CreateWorkers.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Scripts\Script-SubmitJob.txt" />
     <Content Include="Scripts\Script003.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
