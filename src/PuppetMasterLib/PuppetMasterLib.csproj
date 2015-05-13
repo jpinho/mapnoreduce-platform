@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandParser.cs" />
+    <Compile Include="Commands\AnnouncePM.cs" />
     <Compile Include="Exceptions\CommandInvalidParameterException.cs" />
     <Compile Include="Commands\UnfreezeCommunication.cs" />
     <Compile Include="Commands\FreezeCommunication.cs" />

@@ -14,6 +14,7 @@ namespace PlatformCore {
         private readonly Dictionary<int, IWorker> workers = new Dictionary<int, IWorker>();
         private readonly Dictionary<int, IWorker> workersInUse = new Dictionary<int, IWorker>();
         private readonly List<Uri> jobTrackersMaster = new List<Uri>();
+        private readonly List<Uri> knownPMS = new List<Uri>();
         private readonly Queue<Tuple<int, Uri>> jobTrackersWaitingQueue = new Queue<Tuple<int, Uri>>();
 
         public static readonly string ServiceName = "PM";
@@ -25,6 +26,32 @@ namespace PlatformCore {
 
         public Uri GetServiceUri() {
             return ServiceUrl;
+        }
+
+        public List<Uri> KnownPMSUris {
+            get {
+                return knownPMS;
+            }
+        }
+
+        public void AnnouncePM(Uri puppetMasterUrl) {
+            if ((KnownPMSUris.Contains(puppetMasterUrl)))
+                return;
+            KnownPMSUris.Add(puppetMasterUrl);
+            BroadCastPMSList(puppetMasterUrl);
+        }
+
+        private void BroadCastPMSList(Uri newPM) {
+            if (!(KnownPMSUris.Count > 0))
+                return;
+            foreach (Uri uri in KnownPMSUris) {
+                var pMaster = (IPuppetMasterService)Activator.GetObject(
+                    typeof(IPuppetMasterService),
+                    uri.ToString());
+                if (pMaster == null)
+                    continue;
+                pMaster.AnnouncePM(newPM);
+            }
         }
 
         public void CreateWorker(int workerId, string serviceUrl, string entryUrl) {

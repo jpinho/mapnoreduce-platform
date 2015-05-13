@@ -26,5 +26,7 @@ namespace SharedTypes {
         void ReleaseWorkers(List<int> workersUsed);
 
         Uri GetServiceUri();
+
+        void AnnouncePM(Uri puppetMasterUri);
     }
 }
