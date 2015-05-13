@@ -10,8 +10,6 @@ namespace PuppetMasterLib.Commands
 		public Uri ServiceUri { get; set; }
 
 		public void Execute() {
-			if (ServiceUri == null)
-				ServiceUri = Globals.LocalPuppetMasterUri;
 			var pMaster = (IPuppetMasterService)Activator.GetObject(
 				typeof(IPuppetMasterService),
 				ServiceUri.ToString());

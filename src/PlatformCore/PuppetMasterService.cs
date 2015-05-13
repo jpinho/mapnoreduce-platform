@@ -1,232 +1,233 @@
-﻿using SharedTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using SharedTypes;
 
-namespace PlatformCore {
-    [Serializable]
-    public class PuppetMasterService : MarshalByRefObject, IPuppetMasterService {
-        private readonly object globalLock = new object();
-        private readonly object workersLock = new object();
-        private readonly object jobTrackersQueueLock = new object();
-        private readonly Dictionary<int, IWorker> workers = new Dictionary<int, IWorker>();
-        private readonly Dictionary<int, IWorker> workersInUse = new Dictionary<int, IWorker>();
-        private readonly List<Uri> jobTrackersMaster = new List<Uri>();
-        private readonly Queue<Tuple<int, Uri>> jobTrackersWaitingQueue = new Queue<Tuple<int, Uri>>();
+namespace PlatformCore
+{
+	[Serializable]
+	public class PuppetMasterService : MarshalByRefObject, IPuppetMasterService
+	{
+		private readonly object globalLock = new object();
+		private readonly object workersLock = new object();
+		private readonly object jobTrackersQueueLock = new object();
+		private readonly Dictionary<int, IWorker> workers = new Dictionary<int, IWorker>();
+		private readonly Dictionary<int, IWorker> workersInUse = new Dictionary<int, IWorker>();
+		private readonly List<Uri> jobTrackersMaster = new List<Uri>();
+		private readonly Queue<Tuple<int, Uri>> jobTrackersWaitingQueue = new Queue<Tuple<int, Uri>>();
 
-        public static readonly string ServiceName = "PM";
-        public static readonly Uri ServiceUrl = Globals.LocalPuppetMasterUri;
+		public static readonly string ServiceName = "PM";
+		public static readonly Uri ServiceUrl = Globals.LocalPuppetMasterUri;
 
-        public PuppetMasterService() {
-            // Required for .NET Remoting Proxy Classes.
-        }
+		public PuppetMasterService() {
+			// Required for .NET Remoting Proxy Classes.
+		}
 
-        public Uri GetServiceUri() {
-            return ServiceUrl;
-        }
+		public Uri GetServiceUri() {
+			return ServiceUrl;
+		}
 
-        public void CreateWorker(int workerId, string serviceUrl, string entryUrl) {
-            lock (globalLock) {
-                var serviceUri = new Uri(serviceUrl);
-                RemotingHelper.RegisterChannel(serviceUri);
+		public void CreateWorker(int workerId, string serviceUrl, string entryUrl) {
+			lock (globalLock) {
+				var serviceUri = new Uri(serviceUrl);
+				RemotingHelper.RegisterChannel(serviceUri);
 
-                var remoteWorker = Worker.Run(workerId, serviceUri, workers, GetServiceUri());
-                workers.Add(remoteWorker.WorkerId, remoteWorker);
-                remoteWorker.UpdateAvailableWorkers(workers);
+				var remoteWorker = Worker.Run(workerId, serviceUri, workers, GetServiceUri());
+				workers.Add(remoteWorker.WorkerId, remoteWorker);
+				remoteWorker.UpdateAvailableWorkers(workers);
 
-                Trace.WriteLine(string.Format("New worker created: id '{0}', url '{1}'."
-                    , workerId, serviceUri));
+				Trace.WriteLine(string.Format("New worker created: id '{0}', url '{1}'."
+					, workerId, serviceUri));
 
-                if (!string.IsNullOrWhiteSpace(entryUrl))
-                    NotifyWorkerCreation(remoteWorker.ServiceUrl, entryUrl);
-            }
-        }
+				if (!string.IsNullOrWhiteSpace(entryUrl))
+					NotifyWorkerCreation(remoteWorker.ServiceUrl, entryUrl);
+			}
+		}
 
-        public Dictionary<int, IWorker> GetWorkersShare(Uri taskRunnerUri) {
-            Dictionary<int, IWorker> share = new Dictionary<int, IWorker>();
-            var tr = RemotingHelper.GetRemoteObject<TaskRunner>(taskRunnerUri);
-            if (tr == null)
-                return share;
-            EnsureRegistedTaskRunner(taskRunnerUri);
-            int fairShare = FairScheduler();
-            Trace.WriteLine("Get workers request from taskTracker : " + taskRunnerUri);
-            if (GetWorkers().Count >= fairShare) {
-                share = FairShareExecutor(fairShare);
-            } else {
-                Trace.WriteLine("No workers available put JBTM in queue:{0}" + taskRunnerUri);
-                lock (jobTrackersQueueLock) {
-                    GetJobTrackersWaitingQueue().Enqueue(new Tuple<int, Uri>(fairShare, taskRunnerUri));
-                }
-            }
-            return share;
-        }
+		public Dictionary<int, IWorker> GetWorkersShare(Uri taskRunnerUri) {
+			Dictionary<int, IWorker> share = new Dictionary<int, IWorker>();
+			var tr = RemotingHelper.GetRemoteObject<TaskRunner>(taskRunnerUri);
+			if (tr == null)
+				return share;
+			EnsureRegistedTaskRunner(taskRunnerUri);
+			int fairShare = FairScheduler();
+			Trace.WriteLine("Get workers request from taskTracker : " + taskRunnerUri);
+			if (GetWorkers().Count >= fairShare) {
+				share = FairShareExecutor(fairShare);
+			} else {
+				Trace.WriteLine("No workers available put JBTM in queue:{0}" + taskRunnerUri);
+				lock (jobTrackersQueueLock) {
+					GetJobTrackersWaitingQueue().Enqueue(new Tuple<int, Uri>(fairShare, taskRunnerUri));
+				}
+			}
+			return share;
+		}
 
-        private void EnsureRegistedTaskRunner(Uri trUri) {
-            if (GetJobTrackersMaster().Contains(trUri))
-                return;
-            GetJobTrackersMaster().Add(trUri);
-        }
+		private void EnsureRegistedTaskRunner(Uri trUri) {
+			if (GetJobTrackersMaster().Contains(trUri))
+				return;
+			GetJobTrackersMaster().Add(trUri);
+		}
 
-        private Dictionary<int, IWorker> FairShareExecutor(int fairShare) {
-            var filledShare = new Dictionary<int, IWorker>();
-            lock (workersLock) {
-                for (int i = 0; i < fairShare; i++) {
-                    IWorker worker = GetWorkers().Take(1).First().Value;
-                    GetWorkers().Remove(worker.WorkerId);
-                    filledShare.Add(worker.WorkerId, worker);
-                    GetWorkersInUse().Add(worker.WorkerId, worker);
-                    GetWorkers().Remove(worker.WorkerId);
-                }
-            }
-            return filledShare;
-        }
+		private Dictionary<int, IWorker> FairShareExecutor(int fairShare) {
+			var filledShare = new Dictionary<int, IWorker>();
+			lock (workersLock) {
+				for (int i = 0; i < fairShare; i++) {
+					IWorker worker = GetWorkers().Take(1).First().Value;
+					GetWorkers().Remove(worker.WorkerId);
+					filledShare.Add(worker.WorkerId, worker);
+					GetWorkersInUse().Add(worker.WorkerId, worker);
+					GetWorkers().Remove(worker.WorkerId);
+				}
+			}
+			return filledShare;
+		}
 
-        private void ProcessPendingShares() {
-            lock (jobTrackersQueueLock) {
-                if (!(GetJobTrackersWaitingQueue().Count > 0))
-                    return;
-                while (true) {
-                    Tuple<int, Uri> workerTuple = GetJobTrackersWaitingQueue().Peek();
-                    lock (workersLock) {
-                        if (!(GetWorkers().Count > workerTuple.Item1))
-                            return;
-                        GetJobTrackersWaitingQueue().Dequeue();
-                        var tr = RemotingHelper.GetRemoteObject<TaskRunner>(workerTuple.Item2);
-                        if (tr == null) {
-                            GetJobTrackersWaitingQueue().Enqueue(workerTuple);
-                            continue;
-                        }
-                        tr.ReceiveShare(FairShareExecutor(workerTuple.Item1));
-                    }
-                }
-            }
-        }
+		private void ProcessPendingShares() {
+			lock (jobTrackersQueueLock) {
+				if (!(GetJobTrackersWaitingQueue().Count > 0))
+					return;
+				while (true) {
+					Tuple<int, Uri> workerTuple = GetJobTrackersWaitingQueue().Peek();
+					lock (workersLock) {
+						if (!(GetWorkers().Count > workerTuple.Item1))
+							return;
+						GetJobTrackersWaitingQueue().Dequeue();
+						var tr = RemotingHelper.GetRemoteObject<TaskRunner>(workerTuple.Item2);
+						if (tr == null) {
+							GetJobTrackersWaitingQueue().Enqueue(workerTuple);
+							continue;
+						}
+						tr.ReceiveShare(FairShareExecutor(workerTuple.Item1));
+					}
+				}
+			}
+		}
 
-        public void ReleaseWorkers(List<int> workersUsed) {
-            lock (workersLock)
-                foreach (int workerKey in workersUsed) {
-                    var worker = GetWorkersInUse()[workerKey];
-                    GetWorkersInUse().Remove(workerKey);
-                    GetWorkers().Add(workerKey, worker);
-                }
-            ProcessPendingShares();
-        }
+		public void ReleaseWorkers(List<int> workersUsed) {
+			lock (workersLock)
+				foreach (int workerKey in workersUsed) {
+					var worker = GetWorkersInUse()[workerKey];
+					GetWorkersInUse().Remove(workerKey);
+					GetWorkers().Add(workerKey, worker);
+				}
+			ProcessPendingShares();
+		}
 
-        public int FairScheduler() {
-            lock (workersLock) {
-                return GetWorkers().Count / GetJobTrackersMaster().Count;
-            }
-        }
+		public int FairScheduler() {
+			lock (workersLock) {
+				return GetWorkers().Count / GetJobTrackersMaster().Count;
+			}
+		}
 
-        public void GetStatus() {
-            Trace.WriteLine("PuppetMaster [ID: " + ServiceName + "] - Running: '" + ServiceUrl + "'.");
-            foreach (var worker in workers.Values) {
-                var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
-                remoteWorker.GetStatus();
-            }
-        }
+		public void GetStatus() {
+			Trace.WriteLine("PuppetMaster [ID: " + ServiceName + "] - Running: '" + ServiceUrl + "'.");
+			foreach (var worker in workers.Values) {
+				var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+				remoteWorker.GetStatus();
+			}
+		}
 
-        public Queue<Tuple<int, Uri>> GetJobTrackersWaitingQueue() {
-            return jobTrackersWaitingQueue;
-        }
+		public Queue<Tuple<int, Uri>> GetJobTrackersWaitingQueue() {
+			return jobTrackersWaitingQueue;
+		}
 
-        public Dictionary<int, IWorker> GetWorkers() {
-            return workers;
-        }
+		public Dictionary<int, IWorker> GetWorkers() {
+			return workers;
+		}
 
-        public List<Uri> GetJobTrackersMaster() {
-            return jobTrackersMaster;
-        }
+		public List<Uri> GetJobTrackersMaster() {
+			return jobTrackersMaster;
+		}
 
-        public Dictionary<int, IWorker> GetWorkersInUse() {
-            return workersInUse;
-        }
+		public Dictionary<int, IWorker> GetWorkersInUse() {
+			return workersInUse;
+		}
 
-        public void Wait(int seconds) {
-            Thread.Sleep(seconds * 1000);
-        }
+		public void Wait(int seconds) {
+			Thread.Sleep(seconds * 1000);
+		}
 
-        public void SlowWorker(int workerId, int seconds) {
-            IWorker worker;
+		public void SlowWorker(int workerId, int seconds) {
+			IWorker worker;
 
-            try {
-                worker = workers[workerId];
-            } catch (Exception e) {
-                throw new InvalidWorkerIdException(workerId, e);
-            }
+			try {
+				worker = workers[workerId];
+			} catch (Exception e) {
+				throw new InvalidWorkerIdException(workerId, e);
+			}
 
-            var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
-            remoteWorker.Slow(seconds);
-        }
+			var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+			remoteWorker.Slow(seconds);
+		}
 
-        public void FreezeWorker(int workerId) {
-            IWorker worker;
+		public void FreezeWorker(int workerId) {
+			IWorker worker;
 
-            try {
-                worker = workers[workerId];
-            } catch (Exception e) {
-                throw new InvalidWorkerIdException(workerId, e);
-            }
+			try {
+				worker = workers[workerId];
+			} catch (Exception e) {
+				throw new InvalidWorkerIdException(workerId, e);
+			}
 
-            var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
-            remoteWorker.Freeze();
-        }
+			var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+			remoteWorker.Freeze();
+		}
 
-        public void UnfreezeWorker(int workerId) {
-            IWorker worker;
+		public void UnfreezeWorker(int workerId) {
+			IWorker worker;
 
-            try {
-                worker = workers[workerId];
-            } catch (Exception e) {
-                throw new InvalidWorkerIdException(workerId, e);
-            }
+			try {
+				worker = workers[workerId];
+			} catch (Exception e) {
+				throw new InvalidWorkerIdException(workerId, e);
+			}
 
-            var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
-            remoteWorker.UnFreeze();
-        }
+			var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+			remoteWorker.UnFreeze();
+		}
 
-        public void FreezeCommunication(int workerId) {
-            IWorker worker;
+		public void FreezeCommunication(int workerId) {
+			IWorker worker;
 
-            try {
-                worker = workers[workerId];
-            } catch (Exception e) {
-                throw new InvalidWorkerIdException(workerId, e);
-            }
+			try {
+				worker = workers[workerId];
+			} catch (Exception e) {
+				throw new InvalidWorkerIdException(workerId, e);
+			}
 
-            var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
-            remoteWorker.FreezeCommunication();
-        }
+			var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+			remoteWorker.FreezeCommunication();
+		}
 
-        public void UnfreezeCommunication(int workerId) {
-            IWorker worker;
+		public void UnfreezeCommunication(int workerId) {
+			IWorker worker;
 
-            try {
-                worker = workers[workerId];
-            } catch (Exception e) {
-                throw new InvalidWorkerIdException(workerId, e);
-            }
+			try {
+				worker = workers[workerId];
+			} catch (Exception e) {
+				throw new InvalidWorkerIdException(workerId, e);
+			}
 
-            var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
-            remoteWorker.UnfreezeCommunication();
-        }
+			var remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl);
+			remoteWorker.UnfreezeCommunication();
+		}
 
-        private void NotifyWorkerCreation(Uri workerServiceUri, String entryUrl) {
-            Trace.WriteLine("Sends notification to worker at ENTRY_URL informing worker creation.");
+		private static void NotifyWorkerCreation(Uri workerServiceUri, String entryUrl) {
+			Trace.WriteLine("Sends notification to worker at ENTRY_URL informing worker creation.");
+			var masterWorker = RemotingHelper.GetRemoteObject<IWorker>(entryUrl);
+			masterWorker.NotifyWorkerJoin(workerServiceUri);
+		}
 
-            var masterWorker = RemotingHelper.GetRemoteObject<IWorker>(entryUrl);
-            masterWorker.NotifyWorkerJoin(workerServiceUri);
-        }
-
-        /// <summary>
-        /// Serves a Marshalled Puppet Master object at a specific IChannel under ChannelServices.
-        /// </summary>
-        public static void Run() {
-            RemotingHelper.RegisterChannel(ServiceUrl);
-            RemotingHelper.CreateWellKnownService(typeof(PuppetMasterService), ServiceName);
-            Trace.WriteLine("Puppet Master Service endpoint ready at '" + ServiceUrl + "'");
-        }
-    }
+		/// <summary>
+		/// Serves a Marshalled Puppet Master object at a specific IChannel under ChannelServices.
+		/// </summary>
+		public static void Run() {
+			RemotingHelper.RegisterChannel(ServiceUrl);
+			RemotingHelper.CreateWellKnownService(typeof(PuppetMasterService), ServiceName);
+			Trace.WriteLine("Puppet Master Service endpoint ready at '" + ServiceUrl + "'");
+		}
+	}
 }
