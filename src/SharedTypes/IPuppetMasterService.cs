@@ -28,5 +28,7 @@ namespace SharedTypes {
         Uri GetServiceUri();
 
         void AnnouncePM(Uri puppetMasterUri);
+
+        Dictionary<int, IWorker> GetWorkersSharePM(Uri pmUri);
     }
 }

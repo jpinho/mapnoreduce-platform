@@ -75,6 +75,17 @@ namespace PlatformCore {
             }
         }
 
+        public Dictionary<int, IWorker> GetWorkersSharePM(Uri pmUri) {
+            Dictionary<int, IWorker> share = new Dictionary<int, IWorker>();
+            AnnouncePM(pmUri);
+            Trace.WriteLine("Get workers request from PuppetMaster : " + pmUri);
+            int fairShare = FairScheduler();
+            if (GetWorkers().Count >= FairScheduler()) {
+                share = FairShareExecutor(fairShare);
+            }
+            return share;
+        }
+
         public Dictionary<int, IWorker> GetWorkersShare(Uri taskRunnerUri) {
             Dictionary<int, IWorker> share = new Dictionary<int, IWorker>();
             var tr = RemotingHelper.GetRemoteObject<TaskRunner>(taskRunnerUri);
@@ -147,7 +158,7 @@ namespace PlatformCore {
 
         public int FairScheduler() {
             lock (workersLock) {
-                return GetWorkers().Count / GetJobTrackersMaster().Count;
+                return GetWorkers().Count / (GetJobTrackersMaster().Count + KnownPMSUris.Count());
             }
         }
 
