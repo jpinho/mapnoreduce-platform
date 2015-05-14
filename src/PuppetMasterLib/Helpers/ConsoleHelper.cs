@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace PuppetMasterLib.Helpers
 {
@@ -10,6 +6,7 @@ namespace PuppetMasterLib.Helpers
     using System.IO;
     using System.Runtime.InteropServices;
 
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public static class ConsoleHelper
     {
         public static void CreateConsole() {

@@ -92,7 +92,7 @@ namespace PlatformCore
                 Enabled = Enabled,
                 JobsQueue = jobsQueue,
                 WorkerAliveSignals = workerAliveSignals,
-                Worker = this.Worker
+                Worker = Worker
             };
         }
 

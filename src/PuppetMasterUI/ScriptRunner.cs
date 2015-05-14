@@ -282,38 +282,53 @@ namespace PuppetMasterUI
             tcScriptContainer.SelectTab(tpMonitoring);
         }
 
-        private async void tmrMonitoring_Tick(object sender, EventArgs e) {
+        private void tmrMonitoring_Tick(object sender, EventArgs e) {
             if (!cbMonitoring.Checked) {
                 tmrMonitoring.Stop();
                 return;
             }
 
             if (cbLiveUpdate.Checked) {
-                using (var fs = new FileStream(Path.Combine(Environment.CurrentDirectory, "mnr-trace.log"),
-                    FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
-                    using (var reader = new StreamReader(fs)) {
-                        txtLogFile.Text = await reader.ReadToEndAsync();
+                new Thread(() => {
+                    using (var fs = new FileStream(Path.Combine(Environment.CurrentDirectory, "mnr-trace.log"),
+                        FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                        using (var reader = new StreamReader(fs)) {
+                            var logContent = reader.ReadToEnd();
 
-                        if (cbAutoScroll.Checked) {
-                            txtLogFile.Select(txtLogFile.Text.Length - 1, 1);
-                            txtLogFile.ScrollToCaret();
+                            txtLogFile.Invoke(new MethodInvoker(() => {
+                                txtLogFile.SuspendLayout();
+                                txtLogFile.Text = logContent;
+                                txtLogFile.ResumeLayout(true);
+
+                                if (!cbAutoScroll.Checked)
+                                    return;
+
+                                txtLogFile.SuspendLayout();
+                                txtLogFile.Select(txtLogFile.Text.Length - 1, 1);
+                                txtLogFile.ScrollToCaret();
+                                txtLogFile.ResumeLayout(true);
+                            }));
                         }
                     }
-                }
+                }).Start();
             }
 
             if (puppetMasterService == null)
                 return;
 
-            gvRemoteObjects.Rows.Clear();
-            var workers = puppetMasterService.GetAvailableWorkers();
+            var selectedIndex = -1;
+            if (gvRemoteObjects.SelectedRows.Count > 0)
+                selectedIndex = gvRemoteObjects.SelectedRows[0].Index;
 
-            gvRemoteObjects.Rows.Add(new object[] {
-					"Puppet Master Service (local)",
-					PuppetMasterService.ServiceUrl,
-					"Online",
-					"Workers #: " + puppetMasterService.GetAvailableWorkers().Count
-				});
+            gvRemoteObjects.SuspendLayout();
+            gvRemoteObjects.Rows.Clear();
+            var workers = puppetMasterService.WorkersRegistry;
+
+            gvRemoteObjects.Rows.Add(
+                "Puppet Master Service (local)",
+                PuppetMasterService.ServiceUrl,
+                "Online", "Workers #: " + puppetMasterService.GetAvailableWorkers().Count);
+
             gvRemoteObjects.Rows[0].MinimumHeight = 25;
             gvRemoteObjects.Rows[0].DefaultCellStyle.BackColor = Color.SaddleBrown;
             gvRemoteObjects.Rows[0].DefaultCellStyle.ForeColor = Color.White;
@@ -321,13 +336,14 @@ namespace PuppetMasterUI
             foreach (var worker in workers) {
                 var wk = RemotingHelper.GetRemoteObject<IWorker>(worker.Value.ServiceUrl);
                 var status = wk.GetStatus();
-                gvRemoteObjects.Rows.Add(new object[] {
-					"Worker Service [ID: " + worker.Value.WorkerId + "]",
-					worker.Value.ServiceUrl,
-					status,
-					"N/A"
-				});
+                gvRemoteObjects.Rows.Add(
+                    "Worker Service [ID: " + worker.Value.WorkerId + "]",
+                    worker.Value.ServiceUrl, status, "N/A");
             }
+            gvRemoteObjects.ResumeLayout(true);
+
+            if (selectedIndex >= 0 && selectedIndex < gvRemoteObjects.Rows.Count)
+                gvRemoteObjects.Rows[selectedIndex].Selected = true;
         }
 
         private void cbMonitoring_CheckedChanged(object sender, EventArgs e) {

@@ -132,7 +132,7 @@ namespace PlatformCore
             }
 
             // starts recovery of replicas
-            replicaRecoveryThreads.ForEach((thr) => thr.Start());
+            replicaRecoveryThreads.ForEach(thr => thr.Start());
         }
 
         private bool RecoverCrashedReplica() {

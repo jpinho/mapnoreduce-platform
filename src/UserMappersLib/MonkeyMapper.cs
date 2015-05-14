@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace UserMappersLib
 {
@@ -7,13 +8,11 @@ namespace UserMappersLib
         #region IMap Members
 
         public IList<KeyValuePair<string, string>> Map(string fileLine) {
-            IList<KeyValuePair<string, string>> result = new List<KeyValuePair<string, string>>();
-            string[] values = fileLine.Split(' ');
-            foreach (string val in values)
-                result.Add(new KeyValuePair<string, string>(
+            var values = fileLine.Split(' ');
+            return values.Select(
+                val => new KeyValuePair<string, string>(
                     val.GetHashCode().ToString("X"),
-                    "dº.ºb # " + val.ToUpperInvariant()));
-            return result;
+                    "dº.ºb # " + val.ToUpperInvariant())).ToList();
         }
 
         #endregion IMap Members

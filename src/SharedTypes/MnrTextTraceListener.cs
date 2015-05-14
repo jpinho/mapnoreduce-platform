@@ -12,7 +12,7 @@ namespace SharedTypes
         }
 
         public override void WriteLine(string message) {
-            this.Write(string.Format(MASK, DateTime.Now.ToString(TFORMAT)));
+            Write(string.Format(MASK, DateTime.Now.ToString(TFORMAT)));
             base.WriteLine(message);
         }
     }

@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SharedTypes;
-using System.Diagnostics;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PlatformCore.Tests
 {
@@ -9,11 +6,10 @@ namespace PlatformCore.Tests
     public class CreateWorkerTest
     {
         [TestMethod]
-        public void TestCreateWorker()
-        {
-            PuppetMasterService PM = new PuppetMasterService();
-            PM.CreateWorker(1, @"tcp://localhost:30001/W", null);
-            PM.GetStatus();
+        public void TestCreateWorker() {
+            var pm = new PuppetMasterService();
+            pm.CreateWorker(1, @"tcp://localhost:30001/W", null);
+            pm.GetStatus();
         }
     }
 }

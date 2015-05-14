@@ -1,13 +1,15 @@
-﻿using PlatformCore.Exception;
-using SharedTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using PlatformCore.Exception;
+using SharedTypes;
 
-namespace PlatformCore {
+namespace PlatformCore
+{
     [Serializable]
-    public class PuppetMasterService : MarshalByRefObject, IPuppetMasterService {
+    public class PuppetMasterService : MarshalByRefObject, IPuppetMasterService
+    {
         private readonly object globalLock = new object();
         private readonly object workersLock = new object();
         private readonly object workerShareLock = new object();
@@ -127,7 +129,7 @@ namespace PlatformCore {
                     var pMaster = (IPuppetMasterService)Activator.GetObject(
                         typeof(IPuppetMasterService),
                         pmUri.ToString());
-                    var workers = pMaster.GetWorkersSharePm(PuppetMasterService.ServiceUrl);
+                    var workers = pMaster.GetWorkersSharePm(ServiceUrl);
                     if (workers == null)
                         continue;
                     remoteShare = remoteShare.Concat(workers).ToList();
@@ -206,7 +208,9 @@ namespace PlatformCore {
 
         public int FairScheduler() {
             lock (workersLock) {
+                // ReSharper disable RedundantCast
                 return Convert.ToInt32(Math.Ceiling((double)(GetAvailableWorkers().Count / (GetJobTrackersMaster().Count + KnownPmsUris.Count() * 1.0))));
+                // ReSharper restore RedundantCast
             }
         }
 

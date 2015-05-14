@@ -67,7 +67,7 @@ namespace PlatformCore
                 if (isMasterRecovered)
                     return;
 
-                var siblingsStates = 0;
+                int siblingsStates;
                 var replicaStatesWaitCycles = 0;
 
                 lock (replicasRecoveryStates) {

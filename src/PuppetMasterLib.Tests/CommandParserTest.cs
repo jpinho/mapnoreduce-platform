@@ -1,12 +1,8 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PuppetMasterLib;
-using System.Diagnostics;
-using System.Threading;
-using System.Collections.Generic;
+using PlatformCore;
 using PuppetMasterLib.Exceptions;
 using SharedTypes;
-using PlatformCore;
 
 namespace PuppetMasterLib.Tests
 {
@@ -34,7 +30,7 @@ WAIT 5";
             }
             //Assert.Fail("Invalid parameter type exception wasnt caught :(");
 
-            // assert 
+            // assert
             Assert.IsNotNull(commands);
             Assert.IsTrue(commands.Count == 3);
         }

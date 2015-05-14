@@ -7,7 +7,6 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Tcp;
 using System.Runtime.Serialization.Formatters;
-using PlatformCore;
 using SharedTypes;
 
 namespace ClientServices
@@ -15,7 +14,6 @@ namespace ClientServices
     public class ClientService : MarshalByRefObject, IClientService
     {
         public const int CLIENT_CHANNEL_PORT = 10001;
-        private const int RESULT_WAIT_TIMEOUT = 5000;
         public const string CLIENT_OUTPUTRECV_SVCNAME = "MNRP-ClientORS";
         public const string CLIENT_SPLITPROV_SVCNAME = "MNRP-ClientSPS";
         private readonly Guid clientId = Guid.NewGuid();

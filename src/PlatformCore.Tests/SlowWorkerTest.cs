@@ -1,6 +1,5 @@
-﻿using System;
+﻿using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Diagnostics;
 
 namespace PlatformCore.Tests
 {
@@ -8,8 +7,7 @@ namespace PlatformCore.Tests
     public class SlowWorkerTest
     {
         [TestMethod]
-        public void TestSlowWorker()
-        {
+        public void TestSlowWorker() {
             PuppetMasterService puppetMaster = new PuppetMasterService();
             puppetMaster.CreateWorker(1, "tcp://localhost:9010/MNRP-worker1", "tcp://localhost:9010/MNRP-worker1");
             int timeToWaitInSecs = 5;

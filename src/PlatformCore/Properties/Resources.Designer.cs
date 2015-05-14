@@ -77,5 +77,26 @@ namespace PlatformCore.Properties {
                 return ResourceManager.GetString("JobTrackerStateSummaryString", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Puppet Master Service started!
+        ///Press any key to exit.
+        ///.
+        /// </summary>
+        internal static string ProgramWelcome {
+            get {
+                return ResourceManager.GetString("ProgramWelcome", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ## Application Trace ##
+        ///.
+        /// </summary>
+        internal static string ProgramWelcomeSubtitle {
+            get {
+                return ResourceManager.GetString("ProgramWelcomeSubtitle", resourceCulture);
+            }
+        }
     }
 }

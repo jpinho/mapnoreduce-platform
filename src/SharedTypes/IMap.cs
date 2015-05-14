@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace SharedTypes
 {
     public interface IMap
     {
-        IList<KeyValuePair<String, String>> Map(string fileLine);
+        IList<KeyValuePair<string, string>> Map(string fileLine);
     }
 }

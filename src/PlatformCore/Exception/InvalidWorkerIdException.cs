@@ -7,7 +7,7 @@ namespace PlatformCore.Exception
     [Serializable]
     public class InvalidWorkerIdException : RemotingException
     {
-        private string _internalMessage;
+        private readonly string internalMessage;
 
         public InvalidWorkerIdException() {
         }
@@ -15,20 +15,20 @@ namespace PlatformCore.Exception
         public InvalidWorkerIdException(int workerId, string innerException)
             : base(string.Format("The worker id '{0}' is invalid - '{1}'.",
                 workerId, innerException)) {
-            _internalMessage = base.Message;
+            internalMessage = base.Message;
         }
 
         public InvalidWorkerIdException(SerializationInfo info, StreamingContext context) {
-            _internalMessage = (string)info.GetValue("_internalMessage", typeof(string));
+            internalMessage = (string)info.GetValue("internalMessage", typeof(string));
         }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context) {
-            info.AddValue("_internalMessage", _internalMessage);
+            info.AddValue("internalMessage", internalMessage);
         }
 
         // Returns the exception information.
         public override string Message {
-            get { return _internalMessage; }
+            get { return internalMessage; }
         }
     }
 }

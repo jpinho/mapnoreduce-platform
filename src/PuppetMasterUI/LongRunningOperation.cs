@@ -7,7 +7,7 @@ namespace PuppetMasterUI
     public partial class LongRunningOperation : Form
     {
         private const string EXECUTING_OPERATION = "Operation {0} of {1}: '{2}'";
-        private int currentOperation = 0;
+        private int currentOperation;
         public event EventHandler ExecuteNextCommand;
 
         public int OperationsCount { get; set; }
@@ -19,7 +19,7 @@ namespace PuppetMasterUI
 
         public LongRunningOperation(bool steppedOperation)
             : this() {
-            this.SteppedOperation = steppedOperation;
+            SteppedOperation = steppedOperation;
             if (!steppedOperation)
                 return;
             pbOperationStatus.Width = 406;
@@ -44,8 +44,11 @@ namespace PuppetMasterUI
             lblOperationStatus.Visible = true;
             lblOperationStatus.Text = string.Format(EXECUTING_OPERATION, currentOperation, OperationsCount, operation);
 
-            if (OperationsCount > 0)
+            if (OperationsCount > 0) {
+                // ReSharper disable RedundantCast
                 pbOperationStatus.Value = ((int)Math.Round(((double)currentOperation / (double)OperationsCount) * 100.0, 0) % 101);
+                // ReSharper restore RedundantCast
+            }
 
             txtLog.Text += "[" + DateTime.Now.ToString("dd/MM/yy HH:mm:ss") + "] " + lblOperationStatus.Text + Environment.NewLine;
             Trace.WriteLine(txtLog.Text);
@@ -63,12 +66,12 @@ namespace PuppetMasterUI
         }
 
         private void btnAbort_Click(object sender, EventArgs e) {
-            this.DialogResult = DialogResult.Abort;
+            DialogResult = DialogResult.Abort;
         }
 
         private void btnClose_Click(object sender, EventArgs e) {
-            if (this.Modal)
-                DialogResult = System.Windows.Forms.DialogResult.OK;
+            if (Modal)
+                DialogResult = DialogResult.OK;
             else
                 Close();
         }

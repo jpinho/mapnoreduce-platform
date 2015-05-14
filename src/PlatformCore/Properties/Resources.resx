@@ -129,4 +129,13 @@
 - #WorkersAliveSignals: {6}
 </value>
   </data>
+	<data name="ProgramWelcome" xml:space="preserve">
+    <value>Puppet Master Service started!
+Press any key to exit.
+</value>
+  </data>
+	<data name="ProgramWelcomeSubtitle" xml:space="preserve">
+    <value>## Application Trace ##
+</value>
+  </data>
 </root>

@@ -70,14 +70,10 @@ namespace PlatformCore
         }
 
         public Dictionary<int, IWorker> GetIWorkerObjects(List<Uri> workersList) {
-            Dictionary<int, IWorker> remoteWorkers = new Dictionary<int, IWorker>();
-            foreach (Uri workerUri in workersList) {
-                var wrk = RemotingHelper.GetRemoteObject<IWorker>(workerUri);
-                if (wrk == null)
-                    continue;
-                remoteWorkers.Add(wrk.WorkerId, wrk);
-            }
-            return remoteWorkers;
+            return workersList
+                .Select(RemotingHelper.GetRemoteObject<IWorker>)
+                .Where(wrk => wrk != null)
+                .ToDictionary(wrk => wrk.WorkerId);
         }
 
         public void NotifyWorkerJoin(Uri serviceUri) {
