@@ -1,18 +1,16 @@
-﻿using System;
+﻿using PlatformCore.Properties;
+using SharedTypes;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting;
 using System.Threading;
-using PlatformCore.Properties;
-using SharedTypes;
 
-namespace PlatformCore
-{
+namespace PlatformCore {
     [Serializable]
-    public class Worker : MarshalByRefObject, IWorker
-    {
+    public class Worker : MarshalByRefObject, IWorker {
         public const int NOTIFY_TIMEOUT = 1000 * 5;
 
         private readonly object workerMutex = new object();
@@ -28,6 +26,7 @@ namespace PlatformCore
         private SlaveReplica replicaTracker;
         public enum State { Running, Failed, Frozen };
         public delegate bool ExecuteMapJobDelegate(JobTask task);
+
         /// <summary>
         /// This worker id.
         /// </summary>
@@ -65,6 +64,17 @@ namespace PlatformCore
             lock (workerMutex) {
                 workersList = new Dictionary<int, IWorker>(availableWorkers);
             }
+        }
+
+        public Dictionary<int, IWorker> GetIWorkerObjects(List<Uri> workersList) {
+            Dictionary<int, IWorker> remoteWorkers = new Dictionary<int, IWorker>();
+            foreach (Uri workerUri in workersList) {
+                var wrk = RemotingHelper.GetRemoteObject<IWorker>(workerUri);
+                if (wrk == null)
+                    continue;
+                remoteWorkers.Add(wrk.WorkerId, wrk);
+            }
+            return remoteWorkers;
         }
 
         public void NotifyWorkerJoin(Uri serviceUri) {

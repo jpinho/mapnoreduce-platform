@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using PlatformCore;
 
-namespace SharedTypes
-{
-    public interface IWorker
-    {
+namespace SharedTypes {
+    public interface IWorker {
         Uri ServiceUrl { get; set; }
+        Uri PuppetMasterUri { get; set; }
         int WorkerId { get; set; }
         void ExecuteMapJob(IJobTask task);
         void ReceiveMapJob(IJobTask job);
@@ -26,6 +24,7 @@ namespace SharedTypes
 
         void ReceiveJobTrackerState(JobTrackerStateInfo getState);
         void DestroyReplica();
+
         void SendReplicaState(ISlaveReplica slaveReplica);
     }
 }
