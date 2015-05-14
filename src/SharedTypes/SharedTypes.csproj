@@ -44,6 +44,7 @@
     <Compile Include="Globals.cs" />
     <Compile Include="IJobTask.cs" />
     <Compile Include="IJobTracker.cs" />
+    <Compile Include="ISlaveReplica.cs" />
     <Compile Include="JobTask.cs" />
     <Compile Include="JobTrackerStateInfo.cs" />
     <Compile Include="MnrTextTraceListener.cs" />
@@ -56,7 +57,6 @@
     <Compile Include="IMap.cs" />
     <Compile Include="IWorker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReplicaInfo.cs" />
     <Compile Include="Util.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
