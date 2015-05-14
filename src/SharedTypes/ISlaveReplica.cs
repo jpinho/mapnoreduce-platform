@@ -1,6 +1,4 @@
-﻿namespace PlatformCore
-{
-    public interface ISlaveReplica
-    {
+﻿namespace SharedTypes {
+    public interface ISlaveReplica {
     }
 }

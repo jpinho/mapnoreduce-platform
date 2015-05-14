@@ -26,6 +26,7 @@ namespace PlatformCore {
         private SlaveReplica replicaTracker;
         public enum State { Running, Failed, Frozen };
         public delegate bool ExecuteMapJobDelegate(JobTask task);
+
         /// <summary>
         /// This worker id.
         /// </summary>
