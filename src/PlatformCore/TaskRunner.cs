@@ -1,16 +1,42 @@
-﻿using SharedTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
+using SharedTypes;
 
-namespace PlatformCore {
+namespace PlatformCore
+{
     [Serializable]
-    public class TaskRunner : JobTracker {
+    public class TaskRunner : JobTracker
+    {
         private CoordinationManager replicaManager;
+        private bool isFistReplicationRun;
 
         public TaskRunner(Worker worker)
             : base(worker) {
+        }
+
+        public TaskRunner(Worker worker, JobTrackerStateInfo state)
+            : base(worker) {
+
+            if (state.CurrentJob != null)
+                JobsQueue.Enqueue(state.CurrentJob);
+
+            JobsQueue = new Queue<IJobTask>(JobsQueue.Union(state.JobsQueue));
+            Enabled = state.Enabled;
+            ServiceUri = state.ServiceUri;
+            WorkerAliveSignals = state.WorkerAliveSignals;
+            Status = state.Status;
+
+            Worker.UpdateAvailableWorkers(
+                Worker.GetIWorkerObjects(
+                    state.Worker.WorkersList.ToList().ConvertAll(input => input.Value.ServiceUrl)
+                ));
+
+            InReplicaState = true;
+            ReplicatedWorkerId = state.WorkerId;
+            isFistReplicationRun = true;
         }
 
         public override void Run() {
@@ -40,7 +66,13 @@ namespace PlatformCore {
                     return;
                 // Get next job and set state to busy.
                 CurrentJob = JobsQueue.Dequeue();
-                PullAvailableWorkers();
+
+                if (!(InReplicaState && isFistReplicationRun))
+                    PullAvailableWorkers();
+
+                if (InReplicaState && isFistReplicationRun)
+                    isFistReplicationRun = false;
+
                 Status = JobTrackerState.Busy;
             }
 

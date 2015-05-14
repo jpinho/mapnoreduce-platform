@@ -1,16 +1,18 @@
-﻿using PlatformCore.Properties;
-using SharedTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting;
 using System.Threading;
+using PlatformCore.Properties;
+using SharedTypes;
 
-namespace PlatformCore {
+namespace PlatformCore
+{
     [Serializable]
-    public class Worker : MarshalByRefObject, IWorker {
+    public class Worker : MarshalByRefObject, IWorker
+    {
         public const int NOTIFY_TIMEOUT = 1000 * 5;
 
         private readonly object workerMutex = new object();
@@ -19,10 +21,6 @@ namespace PlatformCore {
         private JobTracker masterTracker;
         private readonly List<ManualResetEvent> frozenRequests = new List<ManualResetEvent>();
 
-        /// <summary>
-        /// List of all workers known by this worker.
-        /// </summary>
-        private Dictionary<int /*worker id*/, IWorker> workersList;
         private SlaveReplica replicaTracker;
         public enum State { Running, Failed, Frozen };
         public delegate bool ExecuteMapJobDelegate(JobTask task);
@@ -38,6 +36,11 @@ namespace PlatformCore {
         public Uri PuppetMasterUri { get; set; }
         public WorkerStatus Status { get; set; }
 
+        /// <summary>
+        /// List of all workers known by this worker.
+        /// </summary>
+        public Dictionary<int, IWorker> WorkersList { get; set; }
+
         public Worker() {
             Status = WorkerStatus.Available;
         }
@@ -46,7 +49,7 @@ namespace PlatformCore {
             : this() {
             WorkerId = workerId;
             ServiceUrl = serviceUrl;
-            workersList = new Dictionary<int, IWorker>();
+            WorkersList = new Dictionary<int, IWorker>();
             PuppetMasterUri = puppetMasterServiceUri;
         }
 
@@ -62,7 +65,7 @@ namespace PlatformCore {
         public void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers) {
             StateCheck();
             lock (workerMutex) {
-                workersList = new Dictionary<int, IWorker>(availableWorkers);
+                WorkersList = new Dictionary<int, IWorker>(availableWorkers);
             }
         }
 
@@ -82,7 +85,7 @@ namespace PlatformCore {
             var workerToAdd = RemotingHelper.GetRemoteObject<IWorker>(serviceUri);
             lock (workerMutex) {
                 try {
-                    workersList.Add(workerToAdd.WorkerId, workerToAdd);
+                    WorkersList.Add(workerToAdd.WorkerId, workerToAdd);
 
                 } catch (System.Exception e) {
                     Trace.WriteLine(e.Message);
@@ -127,6 +130,11 @@ namespace PlatformCore {
             new Thread(TaskRunner_MainLoop).Start();
         }
 
+        private void EnsureMasterTracker(JobTrackerStateInfo crashedTrackerState) {
+            masterTracker = new TaskRunner(this, crashedTrackerState);
+            new Thread(TaskRunner_MainLoop).Start();
+        }
+
         private void EnsureTaskTracker() {
             if (taskTracker != null)
                 return;
@@ -154,7 +162,7 @@ namespace PlatformCore {
 
         public Dictionary<int, IWorker> GetWorkersList() {
             lock (workerMutex) {
-                return workersList;
+                return WorkersList;
             }
         }
 
@@ -210,10 +218,7 @@ namespace PlatformCore {
         }
 
         public void ReceiveJobTrackerState(JobTrackerStateInfo state) {
-            if (replicaTracker == null) {
-                replicaTracker = new SlaveReplica(this);
-                Trace.WriteLine("Worker/Replica started SlaveTracker to handle state updates from Master Tracker.");
-            }
+            EnsureReplicaTracker();
             replicaTracker.SaveState(state);
             LogTrackerState(state);
         }
@@ -241,14 +246,34 @@ namespace PlatformCore {
         }
 
         public void DestroyReplica() {
-            if (replicaTracker == null)
-                return;
+            EnsureReplicaTracker();
             replicaTracker.Dispose();
             Trace.WriteLine("Worker/Replica '" + WorkerId + "' received replica destroy signal. Replica Destroyed!");
         }
 
         public void SendReplicaState(ISlaveReplica slaveReplica) {
-            throw new NotImplementedException();
+            EnsureReplicaTracker();
+            replicaTracker.ReceiveRecoveryState(slaveReplica);
+            Trace.WriteLine("Worker/Replica '" + WorkerId + "' received replica '" + slaveReplica.Worker.WorkerId + "' state.");
+        }
+
+        public void PromoteToMaster(JobTrackerStateInfo masterJobTrackerState) {
+            lock (workerReceiveJobLock) {
+                EnsureMasterTracker(masterJobTrackerState);
+            }
+        }
+
+        public void UpdateReplicas(List<ISlaveReplica> replicasGroup) {
+            EnsureReplicaTracker();
+            replicaTracker.UpdateReplicas(replicasGroup);
+        }
+
+        public ISlaveReplica EnsureReplicaTracker() {
+            if (replicaTracker != null)
+                return replicaTracker;
+            replicaTracker = new SlaveReplica(this);
+            Trace.WriteLine("Worker/Replica started SlaveTracker to handle state updates from Master Tracker.");
+            return replicaTracker;
         }
 
         public void ExecuteMapJob(IJobTask task) {

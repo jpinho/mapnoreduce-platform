@@ -7,134 +7,164 @@ using SharedTypes;
 
 namespace PlatformCore
 {
-	[Serializable]
-	public class CoordinationManager : IDisposable
-	{
-		private const int STATUS_UPDATE_TIMEOUT = 10 * 1000;
-		private const int REPLICA_RECOVER_ATTEMPT_DELAY = 10 * 1000;
-		public const int DEFAULT_NUMBER_OF_REPLICAS = 3;
-		private const double REPLICATION_FACTOR = 2;
+    [Serializable]
+    public class CoordinationManager : IDisposable
+    {
+        private const int STATUS_UPDATE_TIMEOUT = 10 * 1000;
+        private const int REPLICA_RECOVER_ATTEMPT_DELAY = 10 * 1000;
+        public const int DEFAULT_NUMBER_OF_REPLICAS = 3;
+        private const double REPLICATION_FACTOR = 2;
 
-		private readonly Timer statusUpdatesTimer;
-		private volatile JobTracker tracker;
-		private List<IWorker> replicas;
-		private readonly Dictionary< /*workerid*/ int, /*lastping*/ DateTime> replicasAliveSignals;
-		private readonly object rmanagerMutex = new object();
-		private bool isStarted;
+        private readonly Timer statusUpdatesTimer;
+        private volatile JobTracker tracker;
+        private List<IWorker> replicas;
+        private List<ISlaveReplica> replicasObjects = new List<ISlaveReplica>();
+        private readonly Dictionary< /*workerid*/ int, /*lastping*/ DateTime> replicasAliveSignals;
+        private readonly object rmanagerMutex = new object();
+        private bool isStarted;
 
-		public int NumberOfReplicas { get; set; }
+        public int NumberOfReplicas { get; set; }
 
-		public CoordinationManager(JobTracker tracker) {
-			NumberOfReplicas = DEFAULT_NUMBER_OF_REPLICAS;
-			this.tracker = tracker;
-			replicasAliveSignals = new Dictionary<int, DateTime>();
-			statusUpdatesTimer = new Timer(StatusUpdate, 0, Timeout.Infinite, STATUS_UPDATE_TIMEOUT);
-		}
+        public CoordinationManager(JobTracker tracker) {
+            NumberOfReplicas = DEFAULT_NUMBER_OF_REPLICAS;
+            this.tracker = tracker;
+            replicasAliveSignals = new Dictionary<int, DateTime>();
+            statusUpdatesTimer = new Timer(StatusUpdate, 0, Timeout.Infinite, STATUS_UPDATE_TIMEOUT);
+        }
 
-		private List<IWorker> PickReplicas() {
-			Trace.WriteLine("CoordinatorManager picking replicas for fault tolerance.");
+        private List<IWorker> PickReplicas() {
+            Trace.WriteLine("CoordinatorManager picking replicas for fault tolerance.");
 
-			var repsCount = GetWiseNumberForReplicas(tracker.Worker.GetWorkersList().Count);
-			var reps = (from wk in tracker.Worker.GetWorkersList().Take(repsCount) select wk.Value).ToList();
+            var repsCount = GetWiseNumberForReplicas(tracker.Worker.GetWorkersList().Count);
+            var reps = (from wk in tracker.Worker.GetWorkersList().Take(repsCount) select wk.Value).ToList();
 
-			Trace.WriteLine("CoordinatorManager just picked " + repsCount + " replicas from PuppetMaster.");
-			return reps;
-		}
+            Trace.WriteLine("CoordinatorManager just picked " + repsCount + " replicas from PuppetMaster.");
+            return reps;
+        }
 
-		private static int GetWiseNumberForReplicas(int x) {
-			return Convert.ToInt32(Math.Round(Math.Ceiling(Math.Log(x, 2)) * REPLICATION_FACTOR, 0));
-		}
+        private static int GetWiseNumberForReplicas(int x) {
+            return Convert.ToInt32(Math.Round(Math.Ceiling(Math.Log(x, 2)) * REPLICATION_FACTOR, 0));
+        }
 
-		public void Start() {
-			if (isStarted)
-				return;
-			isStarted = true;
-			replicas = PickReplicas();
-			replicas.ForEach(wk => {
-				// ReSharper disable once InconsistentlySynchronizedField
-				replicasAliveSignals[wk.WorkerId] = DateTime.Now;
-			});
-			statusUpdatesTimer.Change(0, STATUS_UPDATE_TIMEOUT);
-		}
+        public void Start() {
+            if (isStarted)
+                return;
+            isStarted = true;
+            replicas = PickReplicas();
 
-		public void ReplicaAliveSignal(int workerId) {
-			lock (rmanagerMutex) {
-				replicasAliveSignals[workerId] = DateTime.Now;
-				Trace.WriteLine("CoordinationManager received ping signal from replica/worker ID:" + workerId
-					+ " at '" + DateTime.Now.ToString("ddMMyyyyTHH:mm:ss:fff") + "'.");
-			}
-		}
+            var i = 1;
+            replicas.ForEach(wk => {
+                // ReSharper disable once InconsistentlySynchronizedField
+                replicasAliveSignals[wk.WorkerId] = DateTime.Now;
+                var replicaTracker = RemotingHelper.GetRemoteObject<IWorker>(wk.ServiceUrl)
+                    .EnsureReplicaTracker();
+                replicaTracker.Priority = i++;
+                Trace.WriteLine("Creating replica at worker '" + replicaTracker.Worker.WorkerId
+                    + "' with priority '" + replicaTracker.Priority + "'.");
+                replicasObjects.Add(replicaTracker);
+            });
 
-		public void PauseStateUpdates() {
-			statusUpdatesTimer.Change(Timeout.Infinite, STATUS_UPDATE_TIMEOUT);
-		}
+            statusUpdatesTimer.Change(0, STATUS_UPDATE_TIMEOUT);
+        }
 
-		public void ResumeStateUpdates() {
-			statusUpdatesTimer.Change(0, STATUS_UPDATE_TIMEOUT);
-		}
+        public void ReplicaAliveSignal(int workerId) {
+            lock (rmanagerMutex) {
+                replicasAliveSignals[workerId] = DateTime.Now;
+                Trace.WriteLine("CoordinationManager received ping signal from replica/worker ID:" + workerId
+                    + " at '" + DateTime.Now.ToString("ddMMyyyyTHH:mm:ss:fff") + "'.");
+            }
+        }
 
-		private void StatusUpdate(object state) {
-			foreach (var replica in replicas) {
-				try {
-					Trace.WriteLine("CoordinationManager sending JobTracker state to ReplicaWorker ID:"
-						+ replica.WorkerId + ".");
-					RemotingHelper.GetRemoteObject<IWorker>(replica.ServiceUrl)
-						.ReceiveJobTrackerState(tracker.GetState());
-				} catch {
-					Trace.WriteLine("CoordinationManager received an error contacting replica.");
-					TimeSpan lastReplicaUpdate;
+        public void PauseStateUpdates() {
+            statusUpdatesTimer.Change(Timeout.Infinite, STATUS_UPDATE_TIMEOUT);
+        }
 
-					lock (rmanagerMutex) {
-						lastReplicaUpdate = DateTime.Now.Subtract(replicasAliveSignals[replica.WorkerId]);
-					}
+        public void ResumeStateUpdates() {
+            statusUpdatesTimer.Change(0, STATUS_UPDATE_TIMEOUT);
+        }
 
-					if (!(lastReplicaUpdate.TotalSeconds > SlaveReplica.PING_DELAY * 3))
-						continue;
+        private void StatusUpdate(object state) {
+            var replicaRecoveryThreads = new List<Thread>();
 
-					Trace.WriteLine("CoordinatorManager detected that replica/worker ID:"
-						+ replica.WorkerId + " seems to be permanently crashed.");
+            foreach (var replica in replicas) {
+                try {
+                    Trace.WriteLine("CoordinationManager sending JobTracker state to ReplicaWorker ID:"
+                        + replica.WorkerId + ".");
+                    var remoteReplica = RemotingHelper.GetRemoteObject<IWorker>(replica.ServiceUrl);
+                    remoteReplica.UpdateReplicas(replicasObjects);
+                    remoteReplica.ReceiveJobTrackerState(tracker.GetState());
+                } catch {
+                    Trace.WriteLine("CoordinationManager received an error contacting replica.");
+                    TimeSpan lastReplicaUpdate;
 
-					new Thread(() => {
-						while (!RecoverCrashedReplica()) {
-							Trace.WriteLine("Replica crashed and not recovered, waiting...");
-							Thread.Sleep(REPLICA_RECOVER_ATTEMPT_DELAY);
-						}
-					}).Start();
-				}
-			}
-		}
+                    lock (rmanagerMutex) {
+                        lastReplicaUpdate = DateTime.Now.Subtract(replicasAliveSignals[replica.WorkerId]);
+                    }
 
-		private bool RecoverCrashedReplica() {
-			if (tracker.Worker.GetWorkersList().Count <= 1)
-				return false;
+                    if (!(lastReplicaUpdate.TotalSeconds > SlaveReplica.PING_DELAY * 3))
+                        continue;
 
-			Trace.WriteLine("Recovering crashed replica.");
-			var puppetMaster = RemotingHelper.GetRemoteObject<PuppetMasterService>(PuppetMasterService.ServiceUrl);
-			var reps = (from wk in puppetMaster.GetAvailableWorkers().Take(1) select wk.Value).ToList();
+                    Trace.WriteLine("CoordinatorManager detected that replica/worker ID:"
+                        + replica.WorkerId + " seems to be permanently crashed.");
 
-			if (reps.Count == 0) {
-				Trace.WriteLine("RecoverCrashedReplica failed to acquire a new replica.");
-				return false;
-			}
+                    replicaRecoveryThreads.Add(new Thread(() => {
+                        replicas.RemoveAll(r => r.ServiceUrl.Equals(replica.ServiceUrl));
+                        replicasObjects.RemoveAll(r => r.Worker.ServiceUrl.Equals(replica.ServiceUrl));
+                        var attempts = 0;
+                        while (!RecoverCrashedReplica() && attempts++ <= 3) {
+                            Trace.WriteLine("Replica crashed and not recovered, waiting...");
+                            Thread.Sleep(REPLICA_RECOVER_ATTEMPT_DELAY);
+                        }
+                    }));
+                }
+            }
 
-			Trace.WriteLine("Crashed replica recovered.");
-			var replica = reps.First();
-			replicas.Add(replica);
-			lock (rmanagerMutex) {
-				replicasAliveSignals[replica.WorkerId] = DateTime.Now;
-			}
-			RemotingHelper.GetRemoteObject<IWorker>(replica.ServiceUrl)
-				.ReceiveJobTrackerState(tracker.GetState());
-			return true;
-		}
+            // starts recovery of replicas
+            replicaRecoveryThreads.ForEach((thr) => thr.Start());
+        }
 
-		public void Dispose() {
-			Trace.WriteLine("CoordinationManager disposing.");
-			statusUpdatesTimer.Dispose();
-			replicas.ForEach(worker => {
-				RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl)
-					.DestroyReplica();
-			});
-		}
-	}
+        private bool RecoverCrashedReplica() {
+            if (tracker.Worker.GetWorkersList().Count <= 1)
+                return false;
+
+            Trace.WriteLine("Recovering crashed replica.");
+            var availableForReplication = tracker.Worker.GetWorkersList()
+                .Except(
+                    replicas.ConvertAll(input => new KeyValuePair<int, IWorker>(input.WorkerId, input))
+                ).Except(new List<KeyValuePair<int, IWorker>> {
+                    new KeyValuePair<int, IWorker>(tracker.Worker.WorkerId, tracker.Worker)
+                }).ToList();
+
+            if (availableForReplication.Count == 0) {
+                Trace.WriteLine("RecoverCrashedReplica failed to acquire a new replica.");
+                return false;
+            }
+
+            var reps = (from wk in availableForReplication.Take(1) select wk.Value).ToList();
+            Trace.WriteLine("Crashed replica recovered.");
+
+            var replica = reps.First();
+            replicas.Add(replica);
+
+            lock (rmanagerMutex) {
+                replicasAliveSignals[replica.WorkerId] = DateTime.Now;
+            }
+
+            var replicaTracker = RemotingHelper.GetRemoteObject<IWorker>(replica.ServiceUrl)
+                .EnsureReplicaTracker();
+            RemotingHelper.GetRemoteObject<IWorker>(replica.ServiceUrl)
+                .ReceiveJobTrackerState(tracker.GetState());
+            replicasObjects.Add(replicaTracker);
+            return true;
+        }
+
+        public void Dispose() {
+            Trace.WriteLine("CoordinationManager disposing.");
+            statusUpdatesTimer.Dispose();
+            replicas.ForEach(worker => {
+                RemotingHelper.GetRemoteObject<IWorker>(worker.ServiceUrl)
+                    .DestroyReplica();
+            });
+        }
+    }
 }

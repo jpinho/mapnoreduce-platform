@@ -12,8 +12,9 @@ namespace PlatformCore
     public class SlaveReplica : IDisposable, ISlaveReplica
     {
         public const int PING_DELAY = 5000;
-        private const int RECOVERY_ATTEMPT_DELAY = PING_DELAY * 3;
-        private const int MAX_FAILED_HEARTBEATS_BEF_RECOVER = 3;
+        public const int RECOVERY_ATTEMPT_DELAY = PING_DELAY * 3;
+        public const int MAX_FAILED_HEARTBEATS_BEF_RECOVER = 3;
+        private const int MAX_RECOVERY_WAIT_CYCLES = 3;
 
         private readonly Timer heartbeat;
         private readonly Timer masterRecovery;
@@ -21,35 +22,58 @@ namespace PlatformCore
         private int failedHeartbeatAttempts;
         private bool inRecovery;
 
-        public readonly Worker Worker;
-        public Tuple<JobTrackerStateInfo, DateTime> MasterJobTrackerState { get; private set; }
+        private Dictionary<string, ISlaveReplica> replicasRecoveryStates = new Dictionary<string, ISlaveReplica>();
+        private readonly ManualResetEvent recoverJobTrackerEvent = new ManualResetEvent(false);
+
+        public IWorker Worker { get; set; }
+        public Tuple<JobTrackerStateInfo, DateTime> MasterJobTrackerState { get; set; }
         public bool Enabled { get; set; }
         public int Priority { get; set; }
-        public List<SlaveReplica> Siblings { get; set; }
+        public List<ISlaveReplica> Siblings { get; set; }
 
-        private Dictionary< /*worker/replica uri*/ string, SlaveReplica> replicasRecoveryStates;
-
-        public SlaveReplica(Worker worker) {
+        public SlaveReplica(IWorker worker) {
             Worker = worker;
             heartbeat = new Timer(SendHeartbeat, null, Timeout.Infinite, PING_DELAY);
             masterRecovery = new Timer(MasterRecoveryProcedure, null, Timeout.Infinite, RECOVERY_ATTEMPT_DELAY);
         }
 
         private void MasterRecoveryProcedure(object state) {
-            Siblings.Sort((r1, r2) => r1.Priority.CompareTo(r2.Priority));
+            var isSingleReplica = Siblings == null || Siblings.Count == 0;
 
-            if (Siblings == null || Siblings.Count == 0 || Priority < Siblings.First().Priority) {
+            if (!isSingleReplica)
+                Siblings.Sort((r1, r2) => r1.Priority.CompareTo(r2.Priority));
+
+            // if only replica or the one with highest priority
+            if (isSingleReplica || Priority < Siblings.First().Priority) {
                 Trace.WriteLine("MasterRecoveryProcedure on replica '" + Worker.WorkerId + "' flowing to RecoverJobTracker routine.");
+                replicasRecoveryStates = new Dictionary<string, ISlaveReplica>();
+
+                // replica will handle the process of recovery there is no need to keep checking if
+                // job tracker master is up
+                masterRecovery.Change(Timeout.Infinite, RECOVERY_ATTEMPT_DELAY);
                 RecoverJobTracker();
                 return;
             }
 
+            // send this replica state to master replica
             var proxyRepMaster = RemotingHelper.GetRemoteObject<IWorker>(Siblings.First().Worker.ServiceUrl);
             proxyRepMaster.SendReplicaState(this);
         }
 
         private void RecoverJobTracker() {
-            throw new NotImplementedException();
+            var siblingsStates = 0;
+            var replicaStatesWaitCycles = 0;
+
+            lock (replicasRecoveryStates) {
+                siblingsStates = replicasRecoveryStates.Count;
+            }
+
+            while (siblingsStates != Siblings.Count && replicaStatesWaitCycles <= MAX_RECOVERY_WAIT_CYCLES) {
+                replicaStatesWaitCycles++;
+                recoverJobTrackerEvent.WaitOne(RECOVERY_ATTEMPT_DELAY);
+            }
+
+            Worker.PromoteToMaster(MasterJobTrackerState.Item1);
         }
 
         private void Init() {
@@ -87,7 +111,14 @@ namespace PlatformCore
             }
         }
 
-        public void UpdateReplicas(List<SlaveReplica> replicasGroup) {
+        public void ReceiveRecoveryState(ISlaveReplica replica) {
+            lock (replicasRecoveryStates) {
+                replicasRecoveryStates[replica.Worker.ServiceUrl.ToString()] = replica;
+            }
+            recoverJobTrackerEvent.Set();
+        }
+
+        public void UpdateReplicas(List<ISlaveReplica> replicasGroup) {
             Siblings = replicasGroup.FindAll(r => r.Worker.ServiceUrl != Worker.ServiceUrl);
         }
 

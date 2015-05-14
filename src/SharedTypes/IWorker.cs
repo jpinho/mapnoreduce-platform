@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SharedTypes {
-    public interface IWorker {
+namespace SharedTypes
+{
+    public interface IWorker
+    {
         Uri ServiceUrl { get; set; }
         Uri PuppetMasterUri { get; set; }
         int WorkerId { get; set; }
+        Dictionary<int, IWorker> WorkersList { get; set; }
+
         void ExecuteMapJob(IJobTask task);
         void ReceiveMapJob(IJobTask job);
         WorkerStatus GetStatus();
@@ -16,6 +20,7 @@ namespace SharedTypes {
         void FreezeCommunication();
         void UnfreezeCommunication();
         void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers);
+        Dictionary<int, IWorker> GetIWorkerObjects(List<Uri> workersList);
         void NotifyWorkerJoin(Uri uri);
 
         void ExecuteMapJob(int split,
@@ -26,5 +31,8 @@ namespace SharedTypes {
         void DestroyReplica();
 
         void SendReplicaState(ISlaveReplica slaveReplica);
+        void PromoteToMaster(JobTrackerStateInfo masterJobTrackerState);
+        void UpdateReplicas(List<ISlaveReplica> replicasGroup);
+        ISlaveReplica EnsureReplicaTracker();
     }
 }
