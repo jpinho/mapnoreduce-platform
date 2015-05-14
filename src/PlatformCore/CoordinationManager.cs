@@ -54,13 +54,13 @@ namespace PlatformCore
 
             var i = 1;
             replicas.ForEach(wk => {
-                // ReSharper disable once InconsistentlySynchronizedField
                 replicasAliveSignals[wk.WorkerId] = DateTime.Now;
                 var replicaTracker = RemotingHelper.GetRemoteObject<IWorker>(wk.ServiceUrl)
-                    .EnsureReplicaTracker();
-                replicaTracker.Priority = i++;
+                    .StartReplicaTracker(i++);
+
                 Trace.WriteLine("Creating replica at worker '" + replicaTracker.Worker.WorkerId
                     + "' with priority '" + replicaTracker.Priority + "'.");
+
                 replicasObjects.Add(replicaTracker);
             });
 

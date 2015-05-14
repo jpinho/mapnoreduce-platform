@@ -218,8 +218,7 @@ namespace PlatformCore
         }
 
         public void ReceiveJobTrackerState(JobTrackerStateInfo state) {
-            EnsureReplicaTracker();
-            replicaTracker.SaveState(state);
+            EnsureReplicaTracker().SaveState(state);
             LogTrackerState(state);
         }
 
@@ -246,13 +245,16 @@ namespace PlatformCore
         }
 
         public void DestroyReplica() {
-            EnsureReplicaTracker();
+            if (replicaTracker == null)
+                return;
             replicaTracker.Dispose();
+            replicaTracker = null;
             Trace.WriteLine("Worker/Replica '" + WorkerId + "' received replica destroy signal. Replica Destroyed!");
         }
 
         public void SendReplicaState(ISlaveReplica slaveReplica) {
-            EnsureReplicaTracker();
+            if (replicaTracker == null)
+                return;
             replicaTracker.ReceiveRecoveryState(slaveReplica);
             Trace.WriteLine("Worker/Replica '" + WorkerId + "' received replica '" + slaveReplica.Worker.WorkerId + "' state.");
         }
@@ -261,11 +263,18 @@ namespace PlatformCore
             lock (workerReceiveJobLock) {
                 EnsureMasterTracker(masterJobTrackerState);
             }
+            DestroyReplica();
         }
 
         public void UpdateReplicas(List<ISlaveReplica> replicasGroup) {
-            EnsureReplicaTracker();
+            if (replicaTracker == null)
+                return;
             replicaTracker.UpdateReplicas(replicasGroup);
+        }
+
+        public ISlaveReplica StartReplicaTracker(int priority) {
+            EnsureReplicaTracker().Priority = priority;
+            return replicaTracker;
         }
 
         public ISlaveReplica EnsureReplicaTracker() {

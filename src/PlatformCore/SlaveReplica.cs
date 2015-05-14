@@ -24,6 +24,8 @@ namespace PlatformCore
 
         private Dictionary<string, ISlaveReplica> replicasRecoveryStates = new Dictionary<string, ISlaveReplica>();
         private readonly ManualResetEvent recoverJobTrackerEvent = new ManualResetEvent(false);
+        private readonly object masterRecoveryLock = new object();
+        private bool isMasterRecovered;
 
         public IWorker Worker { get; set; }
         public Tuple<JobTrackerStateInfo, DateTime> MasterJobTrackerState { get; set; }
@@ -51,7 +53,7 @@ namespace PlatformCore
                 // replica will handle the process of recovery there is no need to keep checking if
                 // job tracker master is up
                 masterRecovery.Change(Timeout.Infinite, RECOVERY_ATTEMPT_DELAY);
-                RecoverJobTracker();
+                new Thread(RecoverJobTracker).Start();
                 return;
             }
 
@@ -61,19 +63,25 @@ namespace PlatformCore
         }
 
         private void RecoverJobTracker() {
-            var siblingsStates = 0;
-            var replicaStatesWaitCycles = 0;
+            lock (masterRecoveryLock) {
+                if (isMasterRecovered)
+                    return;
 
-            lock (replicasRecoveryStates) {
-                siblingsStates = replicasRecoveryStates.Count;
+                var siblingsStates = 0;
+                var replicaStatesWaitCycles = 0;
+
+                lock (replicasRecoveryStates) {
+                    siblingsStates = replicasRecoveryStates.Count;
+                }
+
+                while (siblingsStates != Siblings.Count && replicaStatesWaitCycles <= MAX_RECOVERY_WAIT_CYCLES) {
+                    replicaStatesWaitCycles++;
+                    recoverJobTrackerEvent.WaitOne(RECOVERY_ATTEMPT_DELAY);
+                }
+
+                Worker.PromoteToMaster(MasterJobTrackerState.Item1);
+                isMasterRecovered = true;
             }
-
-            while (siblingsStates != Siblings.Count && replicaStatesWaitCycles <= MAX_RECOVERY_WAIT_CYCLES) {
-                replicaStatesWaitCycles++;
-                recoverJobTrackerEvent.WaitOne(RECOVERY_ATTEMPT_DELAY);
-            }
-
-            Worker.PromoteToMaster(MasterJobTrackerState.Item1);
         }
 
         private void Init() {

@@ -10,5 +10,8 @@ namespace SharedTypes
         bool Enabled { get; set; }
         int Priority { get; set; }
         List<ISlaveReplica> Siblings { get; set; }
+        void SaveState(JobTrackerStateInfo state);
+        void UpdateReplicas(List<ISlaveReplica> replicasGroup);
+        void ReceiveRecoveryState(ISlaveReplica replica);
     }
 }

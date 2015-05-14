@@ -30,6 +30,7 @@ namespace SharedTypes
         void ReceiveJobTrackerState(JobTrackerStateInfo getState);
         void DestroyReplica();
 
+        ISlaveReplica StartReplicaTracker(int priority);
         void SendReplicaState(ISlaveReplica slaveReplica);
         void PromoteToMaster(JobTrackerStateInfo masterJobTrackerState);
         void UpdateReplicas(List<ISlaveReplica> replicasGroup);
