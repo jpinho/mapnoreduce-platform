@@ -8,6 +8,7 @@ namespace ClientServices
 	public class OutputReadyListener : MarshalByRefObject
 	{
 		private readonly ManualResetEvent waitHandle = new ManualResetEvent(false);
+
 		private bool isStarted = false;
 
 		public int NumberOfSplits { get; private set; }
