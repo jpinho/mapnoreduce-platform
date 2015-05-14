@@ -18,7 +18,7 @@ namespace PlatformCore
         private readonly Timer statusUpdatesTimer;
         private volatile JobTracker tracker;
         private List<IWorker> replicas;
-        private List<ISlaveReplica> replicasObjects = new List<ISlaveReplica>();
+        private readonly List<ISlaveReplica> replicasObjects = new List<ISlaveReplica>();
         private readonly Dictionary< /*workerid*/ int, /*lastping*/ DateTime> replicasAliveSignals;
         private readonly object rmanagerMutex = new object();
         private bool isStarted;
@@ -42,28 +42,37 @@ namespace PlatformCore
             return reps;
         }
 
-        private static int GetWiseNumberForReplicas(int x) {
-            return Convert.ToInt32(Math.Round(Math.Ceiling(Math.Log(x, 2)) * REPLICATION_FACTOR, 0));
+        private static int GetWiseNumberForReplicas(int workersCount) {
+            return Math.Min(
+                workersCount, Convert.ToInt32(Math.Round(Math.Ceiling(Math.Log(workersCount, 2)) * REPLICATION_FACTOR, 0)));
         }
 
         public void Start() {
             if (isStarted)
                 return;
             isStarted = true;
+
+            // grab replicas to backup master tracker
             replicas = PickReplicas();
 
             var i = 1;
             replicas.ForEach(wk => {
-                replicasAliveSignals[wk.WorkerId] = DateTime.Now;
+                lock (rmanagerMutex) {
+                    replicasAliveSignals[wk.WorkerId] = DateTime.Now;
+                }
+
+                // start replica trackers on target workers
                 var replicaTracker = RemotingHelper.GetRemoteObject<IWorker>(wk.ServiceUrl)
                     .StartReplicaTracker(i++);
 
                 Trace.WriteLine("Creating replica at worker '" + replicaTracker.Worker.WorkerId
                     + "' with priority '" + replicaTracker.Priority + "'.");
 
+                // save replica objects (SlaveReplica)
                 replicasObjects.Add(replicaTracker);
             });
 
+            // starts the update timer
             statusUpdatesTimer.Change(0, STATUS_UPDATE_TIMEOUT);
         }
 
@@ -101,15 +110,18 @@ namespace PlatformCore
                         lastReplicaUpdate = DateTime.Now.Subtract(replicasAliveSignals[replica.WorkerId]);
                     }
 
+                    // if false we need to recover that lost replica if possible
                     if (!(lastReplicaUpdate.TotalSeconds > SlaveReplica.PING_DELAY * 3))
                         continue;
 
                     Trace.WriteLine("CoordinatorManager detected that replica/worker ID:"
                         + replica.WorkerId + " seems to be permanently crashed.");
 
+                    // enqueue job to be done regarding, recovering lost replicas
                     replicaRecoveryThreads.Add(new Thread(() => {
                         replicas.RemoveAll(r => r.ServiceUrl.Equals(replica.ServiceUrl));
                         replicasObjects.RemoveAll(r => r.Worker.ServiceUrl.Equals(replica.ServiceUrl));
+
                         var attempts = 0;
                         while (!RecoverCrashedReplica() && attempts++ <= 3) {
                             Trace.WriteLine("Replica crashed and not recovered, waiting...");

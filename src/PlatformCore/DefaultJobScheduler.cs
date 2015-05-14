@@ -9,144 +9,148 @@ using SharedTypes;
 
 namespace PlatformCore
 {
-	/// <summary>
-	/// Default Job Scheduler - Schedules job splits to workers using a FIFO data structure.
-	/// </summary>
-	[Serializable]
-	public class DefaultJobScheduler
-	{
-		public readonly JobTracker Tracker;
-		public readonly IJobTask CurrentJob;
+    /// <summary>
+    /// Default Job Scheduler - Schedules job splits to workers using a FIFO data structure.
+    /// </summary>
+    [Serializable]
+    public class DefaultJobScheduler
+    {
+        public readonly JobTracker Tracker;
+        public readonly IJobTask CurrentJob;
 
-		/// <summary>
-		/// The job splits priority queue.
-		/// </summary>
-		private readonly Queue<int> splitsQueue;
-		private volatile Dictionary</*splitnumber*/ int, /*workerid*/ int> splitsBeingProcessed = new Dictionary<int, int>();
-		private readonly object schedulerMutex = new object();
+        /// <summary>
+        /// The job splits priority queue.
+        /// </summary>
+        private readonly Queue<int> splitsQueue;
+        private volatile Dictionary</*splitnumber*/ int, /*workerid*/ int> splitsBeingProcessed = new Dictionary<int, int>();
+        private readonly object schedulerMutex = new object();
 
-		public DefaultJobScheduler(JobTracker tracker, IJobTask currentJob) {
-			Tracker = tracker;
-			CurrentJob = currentJob;
-			splitsQueue = new Queue<int>(currentJob.FileSplits);
-		}
+        public DefaultJobScheduler(JobTracker tracker, IJobTask currentJob) {
+            Tracker = tracker;
+            CurrentJob = currentJob;
+            splitsQueue = new Queue<int>(currentJob.FileSplits);
+        }
 
-		public void Run() {
-			while (true) {
-				if (!Tracker.IsProxyConnected)
-					Trace.WriteLine("TaskRunner seems to be offline. Job Scheduler got freezed too.");
-				Tracker.StateCheck();
-				Trace.WriteLine("TaskRunner is offline again. Job Scheduler unfreezed.");
+        public void Run() {
+            while (true) {
+                var online = Tracker.IsProxyConnected;
+                if (!online)
+                    Trace.WriteLine("TaskRunner seems to be offline. Job Scheduler got freezed too.");
 
-				lock (schedulerMutex) {
-					if (CurrentJob == null)
-						break;
-				}
+                Tracker.StateCheck();
 
-				if (splitsQueue.Count > 0 || splitsBeingProcessed.Count != 0) {
-					// Selects from all online workers, those that are not busy.
-					var availableWorkers = new Queue<IWorker>((
-							from w in Tracker.Worker.GetWorkersList()
-							where w.Value.GetStatus() == WorkerStatus.Available
-							select w.Value
-						).ToList());
-					SplitsDelivery(availableWorkers, CurrentJob);
-				} else
-					break;
+                if (!online && Tracker.IsProxyConnected)
+                    Trace.WriteLine("TaskRunner is online again. Job Scheduler unfreezed.");
 
-				CheckWorkersState();
-				Thread.Sleep(Worker.NOTIFY_TIMEOUT);
-			}
+                lock (schedulerMutex) {
+                    if (CurrentJob == null)
+                        break;
+                }
 
-			lock (schedulerMutex) {
-				splitsBeingProcessed.Clear();
-				splitsQueue.Clear();
-			}
-		}
+                if (splitsQueue.Count > 0 || splitsBeingProcessed.Count != 0) {
+                    // Selects from all online workers, those that are not busy.
+                    var availableWorkers = new Queue<IWorker>((
+                            from w in Tracker.Worker.GetWorkersList()
+                            where w.Value.GetStatus() == WorkerStatus.Available
+                            select w.Value
+                        ).ToList());
+                    SplitsDelivery(availableWorkers, CurrentJob);
+                } else
+                    break;
 
-		private void CheckWorkersState() {
-			lock (schedulerMutex) {
-				var splitsInProcess = splitsBeingProcessed.ToArray();
+                CheckWorkersState();
+                Thread.Sleep(Worker.NOTIFY_TIMEOUT);
+            }
 
-				foreach (var keyValue in splitsInProcess) {
-					var workerId = keyValue.Value;
-					var split = keyValue.Key;
-					TimeSpan tspan;
+            lock (schedulerMutex) {
+                splitsBeingProcessed.Clear();
+                splitsQueue.Clear();
+            }
+        }
 
-					lock (schedulerMutex) {
-						tspan = DateTime.Now.Subtract(Tracker.WorkerAliveSignals[workerId]);
-					}
+        private void CheckWorkersState() {
+            lock (schedulerMutex) {
+                var splitsInProcess = splitsBeingProcessed.ToArray();
 
-					if (!(tspan.TotalSeconds > 60.0))
-						continue;
+                foreach (var keyValue in splitsInProcess) {
+                    var workerId = keyValue.Value;
+                    var split = keyValue.Key;
+                    TimeSpan tspan;
 
-					// Worker not responding.
-					Trace.WriteLine("Worker '" + workerId + "' not responding (split '" + split + "').");
-					var worker = Tracker.Worker.GetWorkersList()[workerId];
-					if (worker != null) {
-						worker.SetStatus(WorkerStatus.Offline);
-					}
-					splitsQueue.Enqueue(split);
-					splitsBeingProcessed.Remove(split);
-				}
-			}
-		}
+                    lock (schedulerMutex) {
+                        tspan = DateTime.Now.Subtract(Tracker.WorkerAliveSignals[workerId]);
+                    }
 
-		private void SplitsDelivery(Queue<IWorker> availableWorkers, IJobTask job) {
-			Tracker.StateCheck();
+                    if (!(tspan.TotalSeconds > 60.0))
+                        continue;
 
-			int splitsCount;
-			lock (schedulerMutex) {
-				splitsCount = splitsQueue.Count;
-				if (splitsCount == 0) {
-					return;
-				}
-			}
+                    // Worker not responding.
+                    Trace.WriteLine("Worker '" + workerId + "' not responding (split '" + split + "').");
+                    var worker = Tracker.Worker.GetWorkersList()[workerId];
+                    if (worker != null) {
+                        worker.SetStatus(WorkerStatus.Offline);
+                    }
+                    splitsQueue.Enqueue(split);
+                    splitsBeingProcessed.Remove(split);
+                }
+            }
+        }
 
-			// Delivers as many splits as it cans, considering the number of available workers.
-			for (var i = 0; i < Math.Min(availableWorkers.Count, splitsCount); i++) {
-				IWorker remoteWorker;
-				int split;
+        private void SplitsDelivery(Queue<IWorker> availableWorkers, IJobTask job) {
+            Tracker.StateCheck();
 
-				lock (schedulerMutex) {
-					var wrk = availableWorkers.Dequeue();
-					remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(wrk.ServiceUrl);
-					split = splitsQueue.Peek();
-				}
+            int splitsCount;
+            lock (schedulerMutex) {
+                splitsCount = splitsQueue.Count;
+                if (splitsCount == 0) {
+                    return;
+                }
+            }
 
-				try {
-					// Async call to ExecuteMapJob.
-					Trace.WriteLine(string.Format("Job split {0} sent to worker at '{1}'.", split, remoteWorker.ServiceUrl));
-					remoteWorker.SetStatus(WorkerStatus.Busy);
+            // Delivers as many splits as it cans, considering the number of available workers.
+            for (var i = 0; i < Math.Min(availableWorkers.Count, splitsCount); i++) {
+                IWorker remoteWorker;
+                int split;
 
-					var asyncTask = new Task(() => {
-						remoteWorker.ExecuteMapJob(split, job.FileName, job.FileSplits, job.JobTrackerUri,
-							job.MapClassName, job.MapFunctionAssembly, job.OutputReceiverUrl, job.SplitProviderUrl);
-					});
+                lock (schedulerMutex) {
+                    var wrk = availableWorkers.Dequeue();
+                    remoteWorker = RemotingHelper.GetRemoteObject<IWorker>(wrk.ServiceUrl);
+                    split = splitsQueue.Peek();
+                }
 
-					asyncTask.GetAwaiter().OnCompleted(() => {
-						lock (schedulerMutex) {
-							splitsBeingProcessed.Remove(split);
-						}
+                try {
+                    // Async call to ExecuteMapJob.
+                    Trace.WriteLine(string.Format("Job split {0} sent to worker at '{1}'.", split, remoteWorker.ServiceUrl));
+                    remoteWorker.SetStatus(WorkerStatus.Busy);
 
-						remoteWorker.SetStatus(WorkerStatus.Available);
-						Trace.WriteLine(string.Format("Worker '{0}' finished processing split number '{1}'."
-							, remoteWorker.ServiceUrl, split));
-					});
-					asyncTask.Start();
+                    var asyncTask = new Task(() => {
+                        remoteWorker.ExecuteMapJob(split, job.FileName, job.FileSplits, job.JobTrackerUri,
+                            job.MapClassName, job.MapFunctionAssembly, job.OutputReceiverUrl, job.SplitProviderUrl);
+                    });
 
-					lock (schedulerMutex) {
-						splitsQueue.Dequeue();
-						Trace.WriteLine("Split " + split + " removed from splits queue.");
+                    asyncTask.GetAwaiter().OnCompleted(() => {
+                        lock (schedulerMutex) {
+                            splitsBeingProcessed.Remove(split);
+                        }
 
-						Tracker.WorkerAliveSignals[remoteWorker.WorkerId] = DateTime.Now;
-						splitsBeingProcessed.Add(split, remoteWorker.WorkerId);
-					}
-				} catch (RemotingException ex) {
-					Trace.WriteLine(ex.GetType().FullName + " - " + ex.Message
-						+ " -->> " + ex.StackTrace);
-				}
-			}
-		}
-	}
+                        remoteWorker.SetStatus(WorkerStatus.Available);
+                        Trace.WriteLine(string.Format("Worker '{0}' finished processing split number '{1}'."
+                            , remoteWorker.ServiceUrl, split));
+                    });
+                    asyncTask.Start();
+
+                    lock (schedulerMutex) {
+                        splitsQueue.Dequeue();
+                        Trace.WriteLine("Split " + split + " removed from splits queue.");
+
+                        Tracker.WorkerAliveSignals[remoteWorker.WorkerId] = DateTime.Now;
+                        splitsBeingProcessed.Add(split, remoteWorker.WorkerId);
+                    }
+                } catch (RemotingException ex) {
+                    Trace.WriteLine(ex.GetType().FullName + " - " + ex.Message
+                        + " -->> " + ex.StackTrace);
+                }
+            }
+        }
+    }
 }
