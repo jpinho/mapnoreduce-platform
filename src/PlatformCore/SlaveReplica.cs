@@ -27,6 +27,8 @@ namespace PlatformCore
         public int Priority { get; set; }
         public List<SlaveReplica> Siblings { get; set; }
 
+        private Dictionary< /*worker/replica uri*/ string, SlaveReplica> replicasRecoveryStates;
+
         public SlaveReplica(Worker worker) {
             Worker = worker;
             heartbeat = new Timer(SendHeartbeat, null, Timeout.Infinite, PING_DELAY);
