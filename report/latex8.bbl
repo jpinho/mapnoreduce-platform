@@ -1,0 +1,13 @@
+\begin{thebibliography}{1}\setlength{\itemsep}{-1ex}\small
+
+\bibitem{ex2}
+J.~Dean and S.~Ghemawat.
+\newblock Mapreduce: Simplified data processing on large clusters.
+\newblock 2008.
+
+\bibitem{ex1}
+TODO.
+\newblock Some related article {I} wrote.
+\newblock {\em Some Fine Journal}, 99(7):1--100, January 1999.
+
+\end{thebibliography}

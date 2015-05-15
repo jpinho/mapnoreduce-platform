@@ -1,0 +1,122 @@
+%
+%  $Description: Author guidelines and sample document in LaTeX 2.09$ 
+%
+%  $Author: ienne $
+%  $Date: 1995/09/15 15:20:59 $
+%  $Revision: 1.4 $
+%
+
+\documentclass[times, 10pt,twocolumn]{article} 
+\usepackage{latex8}
+\usepackage{times}
+\usepackage[utf8]{inputenc}
+
+
+%\documentstyle[times,art10,twocolumn,latex8]{article}
+
+%------------------------------------------------------------------------- 
+% take the % away on next line to produce the final camera-ready version 
+\pagestyle{empty}
+
+%------------------------------------------------------------------------- 
+\begin{document}
+	
+	\title{PADIMapNoReduce Platform}
+	
+	\author{João Pinho\\jpepinho@gmail.com
+		\and Diogo Rosa\\diogomcrosa@hotmail.com
+		\and Cláudia Filipe\\claudiapbfilipe@gmail.com\\\\		 
+		Instituto Superior Técnico\\ Middleware for Distributed Internet Applications \\ Lisbon, Portugal}
+	\maketitle
+	\thispagestyle{empty}
+	
+	\begin{abstract}
+		This project consists in the design and implementation of PADIMapNoReduce Platform, a simplified implementation of the MapReduce middleware and programming model. This platform extracts the input key/value pairs from input files and distributes the Map calls, henceforth called Jobs, across multiple machines, the Workers. Also, the platform ensures a good performance by monitoring jobs’ progress, detecting faulty or slow machines and rescheduling their tasks on idle machines. That is assured by JobTrackers, which are distributed in this platform, in contrast to the original implementation of MapReduce, where they are centralised. This mechanism was implemented inspired by Facebook's solution Corona~\cite{ex1}. Additionally, in order to test the platform it was developed a PuppetMaster component which allows to control the platform, and also allows to induce some delays and faults to the system.
+		
+	\end{abstract}
+	%------------------------------------------------------------------------- 
+	\Section{Introduction}
+	MapReduce was introduced by Google in 2004~\cite{ex2} and is currently one of the most popular approaches for
+	large scale data analytics - also thanks to the availability of high quality open-source implementations. When using the MapReduce paradigm, the computation takes a set of input key/value
+	pairs, and produces a set of output key/value pairs. MapReduce users express the computation as two functions: Map and Reduce. 
+	This project focuses only the Map part of MapReduce, which uses a Map function given by the user and takes an input set of key/value pairs and produces a set of key/value pairs. In PADIMapNoReduce Platform the keys are the numbers of the line of the file being read and the values are the content of those lines.
+	
+	The Map invocations are distributed across multiple machines by automatically partitioning the input data into a set of splits of size S. The input splits can be processed in parallel by those machines, named Workers. The system ensures that for each job submitted, all the input data is processed with a good performance through the monitoring of job’s progress, fault or slow machines detection and reschedule of idle machines' tasks.
+	In the original MapReduce implementation these tasks are performed by the JobTracker which is a centralised component. If the JobTracker fails the system can't receive new jobs nor processing pending ones, which can be critical in systems that need high availability.
+	
+	%------------------------------------------------------------------------- 
+	\Section{Related work}
+	
+	
+	%------------------------------------------------------------------------- 
+	\Section{Puppet Master}
+	
+	%------------------------------------------------------------------------- 
+	\SubSection{Status}
+	
+	
+	%------------------------------------------------------------------------- 
+	\SubSection{Create worker}
+	
+	%------------------------------------------------------------------------- 
+	\SubSection{Wait}
+	
+	%------------------------------------------------------------------------- 
+	\SubSection{Slow worker}
+	
+	%------------------------------------------------------------------------- 
+	\SubSection{Freeze/unfreeze worker}
+	
+	%------------------------------------------------------------------------- 
+	\SubSection{Freeze/unfreeze communication}
+	
+	%------------------------------------------------------------------------- 
+	\Section{Worker}
+	
+	%------------------------------------------------------------------------- 
+	\Section{JobTracker}
+	
+	%------------------------------------------------------------------------- 
+	\Section{CoordinationManager}
+	
+	%------------------------------------------------------------------------- 
+	\Section{DefaultJobScheduler}
+	
+	%------------------------------------------------------------------------- 
+	\Section{TaskTracker}
+	
+	%------------------------------------------------------------------------- 
+	\Section{TaskRunner}
+	
+	%------------------------------------------------------------------------- 
+	\Section{SlaveReplica}
+	
+	
+	%------------------------------------------------------------------------ 
+	\Section{Distribution manner}
+	
+	
+	%------------------------------------------------------------------------- 
+	\Section{Stuff and stuffy}
+	
+	\begin{figure}[h]
+		\caption{Example of caption.}
+	\end{figure}
+	
+	
+	\begin{figure}[h] 
+		\caption{Example of long caption requiring more than one line. It is 
+			not typed centered but aligned on both sides and indented with an 
+			additional margin on both sides of 1~pica.}
+	\end{figure}
+	
+	
+	%------------------------------------------------------------------------- 
+	\Section{Conclusions}
+	
+	%------------------------------------------------------------------------- 
+	\nocite{ex1,ex2}
+	\bibliographystyle{latex8}
+	\bibliography{latex8}
+	
+\end{document}
