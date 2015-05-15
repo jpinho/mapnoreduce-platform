@@ -43,7 +43,7 @@ namespace PlatformCore
         }
 
         public void BroadcastAnnouncePm(Uri newPuppetMasterUri) {
-            if (newPuppetMasterUri.Host == Util.GetHostIpAddress()) {
+            if (newPuppetMasterUri.Host == Util.GetHostIpAddress() || newPuppetMasterUri == ServiceUrl) {
                 Trace.WriteLine("You are announcing yourself to yourself, please specify the "
                     + "target to be informed of your existence.");
                 return;
@@ -80,7 +80,7 @@ namespace PlatformCore
 
         public List<Uri> UpdatePmsList(List<Uri> puppetMasterUrls) {
             var newPuppetMasters = (from pm in puppetMasterUrls
-                                    where !KnownPmsUris.Contains(pm)
+                                    where !KnownPmsUris.Contains(pm) && pm != ServiceUrl && pm.Host != ServiceUrl.Host
                                     select pm).ToList();
 
             if (newPuppetMasters.Count == 0)
@@ -131,7 +131,6 @@ namespace PlatformCore
 		/// <param name="taskRunnerUri">Uri of the taskRunner</param>
 		/// <returns></returns>
         public List<Uri> GetWorkersShare(Uri taskRunnerUri) {
-
             var share = new List<Uri>();
             lock (workerShareLock) {
                 var tr = RemotingHelper.GetRemoteObject<TaskRunner>(taskRunnerUri);
@@ -140,6 +139,7 @@ namespace PlatformCore
                 EnsureRegistedTaskRunner(taskRunnerUri);
                 var fairShare = FairScheduler();
                 Trace.WriteLine("Get workers request from taskTracker : " + taskRunnerUri);
+
                 if (GetAvailableWorkers().Count >= fairShare) {
                     share = FairShareExecutor(fairShare);
                 } else {
@@ -158,8 +158,8 @@ namespace PlatformCore
         private List<Uri> GetRemoteWorkers(int workersNeeded) {
             var remoteShare = new List<Uri>();
             lock (workersLock) {
-                remoteShare = remoteShare.Concat(FairShareExecutor(GetAvailableWorkers().Count())).ToList();
-                foreach (Uri pmUri in knownPms) {
+                remoteShare = remoteShare.Concat(FairShareExecutor(GetAvailableWorkers().Count)).ToList();
+                foreach (Uri pmUri in KnownPmsUris) {
                     var pMaster = (IPuppetMasterService)Activator.GetObject(
                         typeof(IPuppetMasterService),
                         pmUri.ToString());
@@ -202,7 +202,6 @@ namespace PlatformCore
                     GetAvailableWorkers().Remove(worker.WorkerId);
                     filledShare.Add(worker.ServiceUrl);
                     GetWorkersInUse().Add(worker.WorkerId, worker);
-                    GetAvailableWorkers().Remove(worker.WorkerId);
                 }
             }
             return filledShare;
@@ -242,9 +241,20 @@ namespace PlatformCore
 
         public int FairScheduler() {
             lock (workersLock) {
-                // ReSharper disable RedundantCast
-                return Convert.ToInt32(Math.Ceiling((double)(GetAvailableWorkers().Count / (GetJobTrackersMaster().Count + KnownPmsUris.Count() * 1.0))));
-                // ReSharper restore RedundantCast
+                double availableWorkers = GetAvailableWorkers().Count;
+                double numOfJobTrackers = GetJobTrackersMaster().Count;
+
+                // divide job by clusters
+                //foreach (var pmUri in knownPms) {
+                //    var pm = RemotingHelper.GetRemoteObject<IPuppetMasterService>(pmUri);
+                //    availableWorkers += pm.GetAvailableWorkers().Count;
+                //    numOfJobTrackers += pm.GetJobTrackersMasterCount();
+                //}
+
+                //return Convert.ToInt32(Math.Ceiling(availableWorkers / numOfJobTrackers));
+
+                return
+                    Convert.ToInt32(Math.Ceiling((availableWorkers * 1.0) / ((numOfJobTrackers + KnownPmsUris.Count) * 1.0)));
             }
         }
 
@@ -266,6 +276,12 @@ namespace PlatformCore
 
         public List<Uri> GetJobTrackersMaster() {
             return jobTrackersMaster;
+        }
+
+        public int GetJobTrackersMasterCount() {
+            if (jobTrackersMaster == null)
+                return 0;
+            return jobTrackersMaster.Count;
         }
 
         public Dictionary<int, IWorker> GetWorkersInUse() {

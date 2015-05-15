@@ -29,6 +29,10 @@ namespace SharedTypes
 
         void BroadcastAnnouncePm(Uri newPuppetMasterUri);
 
+        List<Uri> GetJobTrackersMaster();
+
+        int GetJobTrackersMasterCount();
+
         List<Uri> UpdatePmsList(List<Uri> puppetMasterUrls);
 
         List<Uri> GetWorkersSharePm(Uri pmUri);

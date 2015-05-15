@@ -289,12 +289,6 @@ namespace PlatformCore
                 Status = WorkerStatus.Busy;
             }
 
-#if DEBUG
-            /*work delay simulation*/
-            // Thread.Sleep(15000);
-            StateCheck();
-#endif
-
             try {
                 var splitProvider = (IClientSplitProviderService)Activator.GetObject(
                     typeof(IClientSplitProviderService),
