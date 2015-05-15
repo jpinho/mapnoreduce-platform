@@ -43,6 +43,12 @@ namespace PlatformCore
         }
 
         public void BroadcastAnnouncePm(Uri newPuppetMasterUri) {
+            if (newPuppetMasterUri.Host == Util.GetHostIpAddress()) {
+                Trace.WriteLine("You are announcing yourself to yourself, please specify the "
+                    + "target to be informed of your existence.");
+                return;
+            }
+
             // if not known add it to known list
             if (!KnownPmsUris.Contains(newPuppetMasterUri))
                 KnownPmsUris.Add(newPuppetMasterUri);
