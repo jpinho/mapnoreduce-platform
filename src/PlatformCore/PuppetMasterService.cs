@@ -155,6 +155,12 @@ namespace PlatformCore
             return share;
         }
 
+		/// <summary>
+		/// Gets needed workers from the PuppetMasters.
+		/// If they aren't enough release workers from PuppetMasters.
+		/// </summary>
+		/// <param name="workersNeeded"></param>
+		/// <returns></returns>
         private List<Uri> GetRemoteWorkers(int workersNeeded) {
             var remoteShare = new List<Uri>();
             lock (workersLock) {
@@ -194,6 +200,11 @@ namespace PlatformCore
             GetJobTrackersMaster().Add(trUri);
         }
 
+		/// <summary>
+		/// Gets a fair number of workers received.
+		/// </summary>
+		/// <param name="fairShare"></param>
+		/// <returns></returns>
         private List<Uri> FairShareExecutor(int fairShare) {
             var filledShare = new List<Uri>();
             lock (workersLock) {
@@ -228,6 +239,10 @@ namespace PlatformCore
             }
         }
 
+		/// <summary>
+		/// Adds the received workers to the available list and removes them from workersInUse
+		/// </summary>
+		/// <param name="workersUsed"></param>
         public void ReleaseWorkers(List<int> workersUsed) {
             lock (workersLock) {
                 foreach (var workerKey in workersUsed) {
