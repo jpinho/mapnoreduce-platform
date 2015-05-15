@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Sockets;
 using System.Runtime.Remoting;
 using System.Threading;
 using SharedTypes;
@@ -57,9 +58,13 @@ namespace PlatformCore
                 return;
             }
 
-            // send this replica state to master replica
-            var proxyRepMaster = RemotingHelper.GetRemoteObject<IWorker>(Siblings.First().Worker.ServiceUrl);
-            proxyRepMaster.SendReplicaState(this);
+            try {
+                // send this replica state to master replica
+                var proxyRepMaster = RemotingHelper.GetRemoteObject<IWorker>(Siblings.First().Worker.ServiceUrl);
+                proxyRepMaster.SendReplicaState(this);
+            } catch (SocketException ex) {
+                Trace.WriteLine("Master Replica failed... awaiting for recovery. " + ex.Message + " - " + ex.StackTrace);
+            }
         }
 
         private void RecoverJobTracker() {
