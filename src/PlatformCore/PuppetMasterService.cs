@@ -49,22 +49,32 @@ namespace PlatformCore
                 return;
             }
 
-            // if not known add it to known list
-            if (!KnownPmsUris.Contains(newPuppetMasterUri))
-                KnownPmsUris.Add(newPuppetMasterUri);
+            lock (KnownPmsUris) {
+                // if not known add it to known list
+                if (!KnownPmsUris.Contains(newPuppetMasterUri))
+                    KnownPmsUris.Add(newPuppetMasterUri);
 
-            var stateUpdate = true;
-            while (stateUpdate) {
-                stateUpdate = false;
-                var knownCount = KnownPmsUris.Count;
+                var stateUpdate = true;
+                while (stateUpdate) {
+                    stateUpdate = false;
+                    var knownCount = KnownPmsUris.Count;
+                    Trace.WriteLine("Known PMs Count: " + knownCount);
+                    Trace.WriteLine("Broadcasting known PMs list to known PMs.");
 
-                KnownPmsUris.ForEach(uri => {
-                    var remotePM = RemotingHelper.GetRemoteObject<IPuppetMasterService>(uri);
-                    UpdatePmsList(remotePM.UpdatePmsList(KnownPmsUris));
+                    KnownPmsUris.ForEach(uri => {
+                        var remotePM = RemotingHelper.GetRemoteObject<IPuppetMasterService>(uri);
+                        UpdatePmsList(remotePM.UpdatePmsList(KnownPmsUris));
+                        Trace.WriteLine("Updating PM at '" + uri + "' of my known PMs.");
 
-                    if (knownCount < KnownPmsUris.Count)
-                        stateUpdate = true;
-                });
+                        if (knownCount < KnownPmsUris.Count) {
+                            Trace.WriteLine("My known PMs list got updated when contacting PM at '" + uri + "'.");
+                            stateUpdate = true;
+                        }
+                    });
+
+                    if (stateUpdate)
+                        Trace.WriteLine("Comunicating changes back again to all known PMs");
+                }
             }
         }
 
