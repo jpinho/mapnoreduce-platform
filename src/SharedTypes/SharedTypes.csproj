@@ -54,7 +54,7 @@
     <Compile Include="IClientService.cs" />
     <Compile Include="IClientSplitProviderService.cs" />
     <Compile Include="ICommand.cs" />
-    <Compile Include="IMap.cs" />
+    <Compile Include="IMapper.cs" />
     <Compile Include="IWorker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util.cs" />

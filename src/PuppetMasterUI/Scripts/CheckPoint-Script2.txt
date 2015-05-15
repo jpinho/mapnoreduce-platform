@@ -1,0 +1,10 @@
+WORKER 2 tcp://localhost:20002/PM tcp://localhost:30002/W tcp://localhost:30001/W
+WORKER 3 tcp://localhost:20002/PM tcp://localhost:30003/W tcp://localhost:30002/W
+STATUS
+SUBMIT tcp://localhost:30003/W pl2000.txt result 2 ParadiseCountMapper ./LibMapperParadiseCount.dll
+WAIT 1
+STATUS
+SLOWW 2 30
+WAIT 5
+STATUS
+

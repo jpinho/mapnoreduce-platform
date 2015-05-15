@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using SharedTypes;
 
 namespace UserMappersLib
 {
-    public class MonkeyMapper : IMap
+    public class MonkeyMapper : IMapper
     {
         #region IMap Members
 
