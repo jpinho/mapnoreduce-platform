@@ -157,12 +157,11 @@ namespace PlatformCore
             return share;
         }
 
-		/// <summary>
-		/// Gets needed workers from the PuppetMasters.
-		/// If they aren't enough release workers from PuppetMasters.
-		/// </summary>
-		/// <param name="workersNeeded"></param>
-		/// <returns></returns>
+        /// <summary>
+        /// Gets needed workers from the PuppetMasters. If they aren't enough release workers from PuppetMasters.
+        /// </summary>
+        /// <param name="workersNeeded"></param>
+        /// <returns></returns>
         private List<Uri> GetRemoteWorkers(int workersNeeded) {
             var remoteShare = new List<Uri>();
             lock (workersLock) {
@@ -202,11 +201,11 @@ namespace PlatformCore
             GetJobTrackersMaster().Add(trUri);
         }
 
-		/// <summary>
-		/// Gets a fair number of workers received.
-		/// </summary>
-		/// <param name="fairShare"></param>
-		/// <returns></returns>
+        /// <summary>
+        /// Gets a fair number of workers received.
+        /// </summary>
+        /// <param name="fairShare"></param>
+        /// <returns></returns>
         private List<Uri> FairShareExecutor(int fairShare) {
             var filledShare = new List<Uri>();
             lock (workersLock) {
@@ -241,10 +240,10 @@ namespace PlatformCore
             }
         }
 
-		/// <summary>
-		/// Adds the received workers to the available list and removes them from workersInUse
-		/// </summary>
-		/// <param name="workersUsed"></param>
+        /// <summary>
+        /// Adds the received workers to the available list and removes them from workersInUse
+        /// </summary>
+        /// <param name="workersUsed"></param>
         public void ReleaseWorkers(List<int> workersUsed) {
             lock (workersLock) {
                 foreach (var workerKey in workersUsed) {
@@ -258,13 +257,15 @@ namespace PlatformCore
 
         public int FairScheduler() {
             lock (workersLock) {
-                double availableWorkers = GetAvailableWorkers().Count;
-                double numOfJobTrackers = GetJobTrackersMaster().Count;
+                var availableWorkers = GetAvailableWorkers().Count;
+                var numOfJobTrackers = GetJobTrackersMaster().Count;
 
+#if DEBUG
                 // use this for testing purposes, this will force the system to fetch workers from
                 // other puppet masters
                 if (SYSTEMPARAM_SHARE > 0)
                     return SYSTEMPARAM_SHARE;
+#endif
 
                 return
                     Convert.ToInt32(Math.Ceiling((availableWorkers * 1.0) / ((numOfJobTrackers + KnownPmsUris.Count) * 1.0)));
