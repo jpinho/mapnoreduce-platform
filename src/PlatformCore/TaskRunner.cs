@@ -53,8 +53,8 @@ namespace PlatformCore
             }
         }
 
-        public void AliveReplica(int workerId) {
-            replicaManager.ReplicaAliveSignal(workerId);
+        public void AliveReplica(Uri workerUrl) {
+            replicaManager.ReplicaAliveSignal(workerUrl);
         }
 
         private void TrackJobs() {

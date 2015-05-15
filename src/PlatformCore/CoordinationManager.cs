@@ -13,13 +13,13 @@ namespace PlatformCore
         private const int STATUS_UPDATE_TIMEOUT = 10 * 1000;
         private const int REPLICA_RECOVER_ATTEMPT_DELAY = 10 * 1000;
         public const int DEFAULT_NUMBER_OF_REPLICAS = 3;
-        private const double REPLICATION_FACTOR = 2;
+        private const double REPLICATION_FACTOR = 1;
 
         private readonly Timer statusUpdatesTimer;
         private volatile JobTracker tracker;
         private List<IWorker> replicas;
         private readonly List<ISlaveReplica> replicasObjects = new List<ISlaveReplica>();
-        private readonly Dictionary< /*workerid*/ int, /*lastping*/ DateTime> replicasAliveSignals;
+        private readonly Dictionary< /*worker url*/ Uri, /*lastping*/ DateTime> replicasAliveSignals;
         private readonly object rmanagerMutex = new object();
         private bool isStarted;
 
@@ -28,10 +28,9 @@ namespace PlatformCore
         public CoordinationManager(JobTracker tracker) {
             NumberOfReplicas = DEFAULT_NUMBER_OF_REPLICAS;
             this.tracker = tracker;
-            replicasAliveSignals = new Dictionary<int, DateTime>();
+            replicasAliveSignals = new Dictionary<Uri, DateTime>();
             statusUpdatesTimer = new Timer(StatusUpdate, 0, Timeout.Infinite, STATUS_UPDATE_TIMEOUT);
         }
-
 
         private List<IWorker> PickReplicas() {
             Trace.WriteLine("CoordinatorManager picking replicas for fault tolerance.");
@@ -43,10 +42,10 @@ namespace PlatformCore
             return reps;
         }
 
-		/// <summary>
-		/// Calculates how many replicas would be nice to have based on the logarithm of number of workers.
-		/// </summary>
-		/// <param name="workersCount"> number of workers</param>
+        /// <summary>
+        /// Calculates how many replicas would be nice to have based on the logarithm of number of workers.
+        /// </summary>
+        /// <param name="workersCount">number of workers</param>
         private static int GetWiseNumberForReplicas(int workersCount) {
             if (workersCount < 1)
                 return 0;
@@ -69,7 +68,7 @@ namespace PlatformCore
             var i = 1;
             replicas.ForEach(wk => {
                 lock (rmanagerMutex) {
-                    replicasAliveSignals[wk.WorkerId] = DateTime.Now;
+                    replicasAliveSignals[wk.ServiceUrl] = DateTime.Now;
                 }
 
                 // start replica trackers on target workers
@@ -87,11 +86,11 @@ namespace PlatformCore
             statusUpdatesTimer.Change(0, STATUS_UPDATE_TIMEOUT);
         }
 
-        public void ReplicaAliveSignal(int workerId) {
+        public void ReplicaAliveSignal(Uri workerUrl) {
             lock (rmanagerMutex) {
-                replicasAliveSignals[workerId] = DateTime.Now;
-                Trace.WriteLine("CoordinationManager received ping signal from replica/worker ID:" + workerId
-                    + " at '" + DateTime.Now.ToString("ddMMyyyyTHH:mm:ss:fff") + "'.");
+                replicasAliveSignals[workerUrl] = DateTime.Now;
+                Trace.WriteLine("CoordinationManager received ping signal from replica/worker URL:'" + workerUrl
+                    + "' at '" + DateTime.Now.ToString("ddMMyyyyTHH:mm:ss:fff") + "'.");
             }
         }
 
@@ -118,7 +117,7 @@ namespace PlatformCore
                     TimeSpan lastReplicaUpdate;
 
                     lock (rmanagerMutex) {
-                        lastReplicaUpdate = DateTime.Now.Subtract(replicasAliveSignals[replica.WorkerId]);
+                        lastReplicaUpdate = DateTime.Now.Subtract(replicasAliveSignals[replica.ServiceUrl]);
                     }
 
                     // if false we need to recover that lost replica if possible
@@ -173,7 +172,7 @@ namespace PlatformCore
             replicas.Add(replica);
 
             lock (rmanagerMutex) {
-                replicasAliveSignals[replica.WorkerId] = DateTime.Now;
+                replicasAliveSignals[replica.ServiceUrl] = DateTime.Now;
             }
 
             var replicaTracker = RemotingHelper.GetRemoteObject<IWorker>(replica.ServiceUrl)

@@ -94,7 +94,7 @@ namespace PlatformCore
             try {
                 Trace.WriteLine("JobTrackerSlave: Sending Ping to JobTrackerMaster - WorkerID:" + Worker.WorkerId + ".");
                 var masterTracker = RemotingHelper.GetRemoteObject<TaskRunner>(MasterJobTrackerState.Item1.ServiceUri);
-                masterTracker.AliveReplica(Worker.WorkerId);
+                masterTracker.AliveReplica(Worker.ServiceUrl);
 
                 if (inRecovery) {
                     Trace.WriteLine("Job Tracker Master recovery completed!");
