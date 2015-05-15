@@ -43,7 +43,7 @@ namespace PlatformCore
         }
 
         public void BroadcastAnnouncePm(Uri newPuppetMasterUri) {
-            if (newPuppetMasterUri.Host == Util.GetHostIpAddress()) {
+            if (newPuppetMasterUri.Host == Util.GetHostIpAddress() || newPuppetMasterUri == ServiceUrl) {
                 Trace.WriteLine("You are announcing yourself to yourself, please specify the "
                     + "target to be informed of your existence.");
                 return;
@@ -80,7 +80,7 @@ namespace PlatformCore
 
         public List<Uri> UpdatePmsList(List<Uri> puppetMasterUrls) {
             var newPuppetMasters = (from pm in puppetMasterUrls
-                                    where !KnownPmsUris.Contains(pm)
+                                    where !KnownPmsUris.Contains(pm) && pm != ServiceUrl
                                     select pm).ToList();
 
             if (newPuppetMasters.Count == 0)
@@ -125,7 +125,6 @@ namespace PlatformCore
         }
 
         public List<Uri> GetWorkersShare(Uri taskRunnerUri) {
-
             var share = new List<Uri>();
             lock (workerShareLock) {
                 var tr = RemotingHelper.GetRemoteObject<TaskRunner>(taskRunnerUri);
@@ -134,6 +133,7 @@ namespace PlatformCore
                 EnsureRegistedTaskRunner(taskRunnerUri);
                 var fairShare = FairScheduler();
                 Trace.WriteLine("Get workers request from taskTracker : " + taskRunnerUri);
+
                 if (GetAvailableWorkers().Count >= fairShare) {
                     share = FairShareExecutor(fairShare);
                 } else {
@@ -152,8 +152,8 @@ namespace PlatformCore
         private List<Uri> GetRemoteWorkers(int workersNeeded) {
             var remoteShare = new List<Uri>();
             lock (workersLock) {
-                remoteShare = remoteShare.Concat(FairShareExecutor(GetAvailableWorkers().Count())).ToList();
-                foreach (Uri pmUri in knownPms) {
+                remoteShare = remoteShare.Concat(FairShareExecutor(GetAvailableWorkers().Count)).ToList();
+                foreach (Uri pmUri in KnownPmsUris) {
                     var pMaster = (IPuppetMasterService)Activator.GetObject(
                         typeof(IPuppetMasterService),
                         pmUri.ToString());
@@ -238,13 +238,17 @@ namespace PlatformCore
                 double availableWorkers = GetAvailableWorkers().Count;
                 double numOfJobTrackers = GetJobTrackersMaster().Count;
 
-                foreach (var pmUri in knownPms) {
-                    var pm = RemotingHelper.GetRemoteObject<IPuppetMasterService>(pmUri);
-                    availableWorkers += pm.GetAvailableWorkers().Count;
-                    numOfJobTrackers += pm.GetJobTrackersMasterCount();
-                }
+                // divide job by clusters
+                //foreach (var pmUri in knownPms) {
+                //    var pm = RemotingHelper.GetRemoteObject<IPuppetMasterService>(pmUri);
+                //    availableWorkers += pm.GetAvailableWorkers().Count;
+                //    numOfJobTrackers += pm.GetJobTrackersMasterCount();
+                //}
 
-                return Convert.ToInt32(Math.Ceiling(availableWorkers / numOfJobTrackers));
+                //return Convert.ToInt32(Math.Ceiling(availableWorkers / numOfJobTrackers));
+
+                return
+                    Convert.ToInt32(Math.Ceiling((availableWorkers * 1.0) / ((numOfJobTrackers + KnownPmsUris.Count) * 1.0)));
             }
         }
 
