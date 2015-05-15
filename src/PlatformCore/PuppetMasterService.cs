@@ -196,7 +196,6 @@ namespace PlatformCore
                     GetAvailableWorkers().Remove(worker.WorkerId);
                     filledShare.Add(worker.ServiceUrl);
                     GetWorkersInUse().Add(worker.WorkerId, worker);
-                    GetAvailableWorkers().Remove(worker.WorkerId);
                 }
             }
             return filledShare;
@@ -236,9 +235,16 @@ namespace PlatformCore
 
         public int FairScheduler() {
             lock (workersLock) {
-                // ReSharper disable RedundantCast
-                return Convert.ToInt32(Math.Ceiling((double)(GetAvailableWorkers().Count / (GetJobTrackersMaster().Count + KnownPmsUris.Count() * 1.0))));
-                // ReSharper restore RedundantCast
+                double availableWorkers = GetAvailableWorkers().Count;
+                double numOfJobTrackers = GetJobTrackersMaster().Count;
+
+                foreach (var pmUri in knownPms) {
+                    var pm = RemotingHelper.GetRemoteObject<IPuppetMasterService>(pmUri);
+                    availableWorkers += pm.GetAvailableWorkers().Count;
+                    numOfJobTrackers += pm.GetJobTrackersMasterCount();
+                }
+
+                return Convert.ToInt32(Math.Ceiling(availableWorkers / numOfJobTrackers));
             }
         }
 
@@ -260,6 +266,12 @@ namespace PlatformCore
 
         public List<Uri> GetJobTrackersMaster() {
             return jobTrackersMaster;
+        }
+
+        public int GetJobTrackersMasterCount() {
+            if (jobTrackersMaster == null)
+                return 0;
+            return jobTrackersMaster.Count;
         }
 
         public Dictionary<int, IWorker> GetWorkersInUse() {
