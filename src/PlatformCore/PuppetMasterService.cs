@@ -80,7 +80,7 @@ namespace PlatformCore
 
         public List<Uri> UpdatePmsList(List<Uri> puppetMasterUrls) {
             var newPuppetMasters = (from pm in puppetMasterUrls
-                                    where !KnownPmsUris.Contains(pm) && pm != ServiceUrl
+                                    where !KnownPmsUris.Contains(pm) && pm != ServiceUrl && pm.Host != ServiceUrl.Host
                                     select pm).ToList();
 
             if (newPuppetMasters.Count == 0)
