@@ -24,7 +24,6 @@ namespace PlatformCore
         public static readonly Uri ServiceUrl = Globals.LocalPuppetMasterUri;
 
         public PuppetMasterService() {
-            // Required for .NET Remoting Proxy Classes.
         }
 
         public Uri GetServiceUri() {
@@ -43,25 +42,38 @@ namespace PlatformCore
             }
         }
 
-        public void AnnouncePm(Uri puppetMasterUrl) {
-            if ((KnownPmsUris.Contains(puppetMasterUrl)))
-                return;
-            KnownPmsUris.Add(puppetMasterUrl);
-            Trace.WriteLine("New Puppet Master announced:" + puppetMasterUrl);
-            BroadCastPmsList(puppetMasterUrl);
-            BroadCastPmsList(ServiceUrl);
+        public void AnnouncePm(Uri newPuppetMasterUri, bool broadcast = false) {
+            AnnouncePm(new List<Uri> { newPuppetMasterUri }, broadcast);
         }
 
-        private void BroadCastPmsList(Uri newPm) {
-            if (!(KnownPmsUris.Count > 0))
+        public void AnnouncePm(List<Uri> puppetMasterUrls, bool broadcast = false) {
+            var newPuppetMasters = (from pm in puppetMasterUrls
+                                    where !KnownPmsUris.Contains(pm)
+                                    select pm).ToList();
+
+            if (newPuppetMasters.Count != 0) {
+                KnownPmsUris.AddRange(newPuppetMasters);
+                newPuppetMasters.ForEach(uri => {
+                    Trace.WriteLine("New Puppet Master announced:" + uri);
+                });
+            }
+
+            if (!broadcast)
                 return;
 
-            var knownPmsDiffNew = from uri in KnownPmsUris
-                                  where uri != newPm
-                                  select RemotingHelper.GetRemoteObject<IPuppetMasterService>(uri);
+            Trace.WriteLine("Broadcasting to known puppet masters.");
+            BroadCastPmsList();
+        }
 
-            foreach (var pMaster in knownPmsDiffNew) {
-                pMaster.AnnouncePm(newPm);
+        private void BroadCastPmsList() {
+            if (KnownPmsUris.Count == 0)
+                return;
+
+            var remotePmObjs = from uri in KnownPmsUris
+                               select RemotingHelper.GetRemoteObject<IPuppetMasterService>(uri);
+
+            foreach (var pMaster in remotePmObjs) {
+                pMaster.AnnouncePm(KnownPmsUris);
             }
         }
 
@@ -97,32 +109,31 @@ namespace PlatformCore
 
         public List<Uri> GetWorkersShare(Uri taskRunnerUri) {
 
-            List<Uri> share = new List<Uri>();
+            var share = new List<Uri>();
             lock (workerShareLock) {
                 var tr = RemotingHelper.GetRemoteObject<TaskRunner>(taskRunnerUri);
                 if (tr == null)
                     return share;
                 EnsureRegistedTaskRunner(taskRunnerUri);
-                int fairShare = FairScheduler();
+                var fairShare = FairScheduler();
                 Trace.WriteLine("Get workers request from taskTracker : " + taskRunnerUri);
                 if (GetAvailableWorkers().Count >= fairShare) {
                     share = FairShareExecutor(fairShare);
                 } else {
                     share = GetRemoteWorkers(fairShare);
                     Trace.WriteLine("No workers available put JBTM in queue:{0}" + taskRunnerUri);
-                    if (!(share.Count > 0)) {
-                        lock (jobTrackersQueueLock) {
-                            GetJobTrackersWaitingQueue().Enqueue(new Tuple<int, Uri>(fairShare, taskRunnerUri));
-                        }
+                    if (share.Count > 0)
+                        return share;
+                    lock (jobTrackersQueueLock) {
+                        GetJobTrackersWaitingQueue().Enqueue(new Tuple<int, Uri>(fairShare, taskRunnerUri));
                     }
-
                 }
             }
             return share;
         }
 
         private List<Uri> GetRemoteWorkers(int workersNeeded) {
-            List<Uri> remoteShare = new List<Uri>();
+            var remoteShare = new List<Uri>();
             lock (workersLock) {
                 remoteShare = remoteShare.Concat(FairShareExecutor(GetAvailableWorkers().Count())).ToList();
                 foreach (Uri pmUri in knownPms) {

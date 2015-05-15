@@ -43,6 +43,8 @@ namespace PlatformCore
         }
 
         private static int GetWiseNumberForReplicas(int workersCount) {
+            if (workersCount < 1)
+                return 0;
             return Math.Min(
                 workersCount, Convert.ToInt32(Math.Round(Math.Ceiling(Math.Log(workersCount, 2)) * REPLICATION_FACTOR, 0)));
         }
@@ -54,6 +56,10 @@ namespace PlatformCore
 
             // grab replicas to backup master tracker
             replicas = PickReplicas();
+            if (replicas.Count < 1) {
+                Trace.WriteLine("CoordinationManager not replicating anything since there are not enough workers to support replication.");
+                return;
+            }
 
             var i = 1;
             replicas.ForEach(wk => {

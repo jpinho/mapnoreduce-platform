@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SharedTypes {
-    public interface IPuppetMasterService {
+namespace SharedTypes
+{
+    public interface IPuppetMasterService
+    {
         void CreateWorker(int workerId, string serviceUrl, string entryUrl);
 
         void GetStatus();
@@ -25,7 +27,9 @@ namespace SharedTypes {
 
         Uri GetServiceUri();
 
-        void AnnouncePm(Uri puppetMasterUri);
+        void AnnouncePm(Uri newPuppetMasterUri, bool broadcast = false);
+
+        void AnnouncePm(List<Uri> puppetMasterUrls, bool broadcast = false);
 
         List<Uri> GetWorkersSharePm(Uri pmUri);
     }
