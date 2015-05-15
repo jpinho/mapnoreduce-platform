@@ -10,6 +10,8 @@ namespace PlatformCore
     [Serializable]
     public class PuppetMasterService : MarshalByRefObject, IPuppetMasterService
     {
+        private const int SYSTEMPARAM_SHARE = 3;
+
         private readonly object globalLock = new object();
         private readonly object workersLock = new object();
         private readonly object workerShareLock = new object();
@@ -124,12 +126,12 @@ namespace PlatformCore
             return share;
         }
 
-		/// <summary>
-		/// Gets the workers share, that corresponds to the number of workers that a given worker should receive in order to 
-		/// preserve cluster availability.
-		/// </summary>
-		/// <param name="taskRunnerUri">Uri of the taskRunner</param>
-		/// <returns></returns>
+        /// <summary>
+        /// Gets the workers share, that corresponds to the number of workers that a given worker
+        /// should receive in order to preserve cluster availability.
+        /// </summary>
+        /// <param name="taskRunnerUri">Uri of the taskRunner</param>
+        /// <returns></returns>
         public List<Uri> GetWorkersShare(Uri taskRunnerUri) {
             var share = new List<Uri>();
             lock (workerShareLock) {
@@ -144,9 +146,9 @@ namespace PlatformCore
                     share = FairShareExecutor(fairShare);
                 } else {
                     share = GetRemoteWorkers(fairShare);
-                    Trace.WriteLine("No workers available put JBTM in queue:{0}" + taskRunnerUri);
                     if (share.Count > 0)
                         return share;
+                    Trace.WriteLine("No workers available put JBTM in queue: " + taskRunnerUri);
                     lock (jobTrackersQueueLock) {
                         GetJobTrackersWaitingQueue().Enqueue(new Tuple<int, Uri>(fairShare, taskRunnerUri));
                     }
@@ -259,14 +261,10 @@ namespace PlatformCore
                 double availableWorkers = GetAvailableWorkers().Count;
                 double numOfJobTrackers = GetJobTrackersMaster().Count;
 
-                // divide job by clusters
-                //foreach (var pmUri in knownPms) {
-                //    var pm = RemotingHelper.GetRemoteObject<IPuppetMasterService>(pmUri);
-                //    availableWorkers += pm.GetAvailableWorkers().Count;
-                //    numOfJobTrackers += pm.GetJobTrackersMasterCount();
-                //}
-
-                //return Convert.ToInt32(Math.Ceiling(availableWorkers / numOfJobTrackers));
+                // use this for testing purposes, this will force the system to fetch workers from
+                // other puppet masters
+                if (SYSTEMPARAM_SHARE > 0)
+                    return SYSTEMPARAM_SHARE;
 
                 return
                     Convert.ToInt32(Math.Ceiling((availableWorkers * 1.0) / ((numOfJobTrackers + KnownPmsUris.Count) * 1.0)));
