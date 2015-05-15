@@ -39,7 +39,7 @@ namespace PlatformCore
         /// <summary>
         /// List of all workers known by this worker.
         /// </summary>
-        public Dictionary<int, IWorker> WorkersList { get; set; }
+        public List<IWorker> WorkersList { get; set; }
 
         public Worker() {
             Status = WorkerStatus.Available;
@@ -49,7 +49,7 @@ namespace PlatformCore
             : this() {
             WorkerId = workerId;
             ServiceUrl = serviceUrl;
-            WorkersList = new Dictionary<int, IWorker>();
+            WorkersList = new List<IWorker>();
             PuppetMasterUri = puppetMasterServiceUri;
         }
 
@@ -62,18 +62,18 @@ namespace PlatformCore
             return null;
         }
 
-        public void UpdateAvailableWorkers(Dictionary<int, IWorker> availableWorkers) {
+        public void UpdateAvailableWorkers(List<IWorker> availableWorkers) {
             StateCheck();
             lock (workerMutex) {
-                WorkersList = new Dictionary<int, IWorker>(availableWorkers);
+                WorkersList = new List<IWorker>(availableWorkers);
             }
         }
 
-        public Dictionary<int, IWorker> GetIWorkerObjects(List<Uri> workersList) {
+        public List<IWorker> GetIWorkerObjects(List<Uri> workersList) {
             return workersList
                 .Select(RemotingHelper.GetRemoteObject<IWorker>)
                 .Where(wrk => wrk != null)
-                .ToDictionary(wrk => wrk.WorkerId);
+                .ToList();
         }
 
         public void NotifyWorkerJoin(Uri serviceUri) {
@@ -81,7 +81,7 @@ namespace PlatformCore
             var workerToAdd = RemotingHelper.GetRemoteObject<IWorker>(serviceUri);
             lock (workerMutex) {
                 try {
-                    WorkersList.Add(workerToAdd.WorkerId, workerToAdd);
+                    WorkersList.Add(workerToAdd);
 
                 } catch (System.Exception e) {
                     Trace.WriteLine(e.Message);
@@ -156,7 +156,7 @@ namespace PlatformCore
             }
         }
 
-        public Dictionary<int, IWorker> GetWorkersList() {
+        public List<IWorker> GetWorkersList() {
             lock (workerMutex) {
                 return WorkersList;
             }
@@ -336,13 +336,16 @@ namespace PlatformCore
 
         public void ReleaseWorkers() {
             try {
-                var ppm = RemotingHelper.GetRemoteObject<PuppetMasterService>(PuppetMasterService.ServiceUrl);
-                ppm.ReleaseWorkers(GetWorkersList().Keys.ToList());
+                foreach (var wrk in GetWorkersList()) {
+                    var ppm = RemotingHelper.GetRemoteObject<PuppetMasterService>(wrk.PuppetMasterUri);
+                    ppm.ReleaseWorker(wrk.ServiceUrl);
+                }
+
             } catch (System.Exception e) {
                 Trace.WriteLine(e.Message);
 
             }
-            UpdateAvailableWorkers(new Dictionary<int, IWorker>());
+            UpdateAvailableWorkers(new List<IWorker>());
         }
 
         public void Slow(int secs) {

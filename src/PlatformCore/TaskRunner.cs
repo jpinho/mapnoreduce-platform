@@ -31,8 +31,8 @@ namespace PlatformCore
 
             Worker.UpdateAvailableWorkers(
                 Worker.GetIWorkerObjects(
-                    state.Worker.WorkersList.ToList().ConvertAll(input => input.Value.ServiceUrl)
-                ));
+                    state.Worker.WorkersList.ConvertAll(input => input.ServiceUrl)
+                    ));
 
             InReplicaState = true;
             ReplicatedWorkerId = state.WorkerId;
@@ -43,15 +43,12 @@ namespace PlatformCore
             base.Run();
             Trace.WriteLine("TaskRunner starting CoordinationManager for fault tolerance.");
 
-            using (replicaManager = new CoordinationManager(this)) {
-                replicaManager.Start();
-                while (Enabled) {
-                    Thread.Sleep(100);
-                    TrackJobs();
-                    lock (TrackerMutex) {
-                        if (JobsQueue.Count == 0)
-                            return;
-                    }
+            while (Enabled) {
+                Thread.Sleep(100);
+                TrackJobs();
+                lock (TrackerMutex) {
+                    if (JobsQueue.Count == 0)
+                        return;
                 }
             }
         }
@@ -73,6 +70,8 @@ namespace PlatformCore
                 if (InReplicaState && isFistReplicationRun)
                     isFistReplicationRun = false;
 
+                replicaManager = new CoordinationManager(this);
+                replicaManager.Start();
                 Status = JobTrackerState.Busy;
             }
 
@@ -80,6 +79,8 @@ namespace PlatformCore
             thrScheduler.Start();
             thrScheduler.Join();
             Worker.ReleaseWorkers();
+            replicaManager.Dispose();
+
             lock (TrackerMutex) {
                 CurrentJob = null;
                 Status = JobTrackerState.Available;

@@ -19,6 +19,8 @@ namespace SharedTypes
 
         void UnfreezeCommunication(int workerId);
 
+        void ReleaseWorker(Uri workerServiceUri);
+
         Dictionary<int, IWorker> GetAvailableWorkers();
 
         List<Uri> GetWorkersShare(Uri taskRunnerUri);

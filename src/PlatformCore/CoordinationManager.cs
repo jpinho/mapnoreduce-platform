@@ -36,7 +36,7 @@ namespace PlatformCore
             Trace.WriteLine("CoordinatorManager picking replicas for fault tolerance.");
 
             var repsCount = GetWiseNumberForReplicas(tracker.Worker.GetWorkersList().Count);
-            var reps = (from wk in tracker.Worker.GetWorkersList().Take(repsCount) select wk.Value).ToList();
+            var reps = (from wk in tracker.Worker.GetWorkersList().Take(repsCount) select wk).ToList();
 
             Trace.WriteLine("CoordinatorManager just picked " + repsCount + " replicas from PuppetMaster.");
             return reps;
@@ -146,19 +146,22 @@ namespace PlatformCore
                 return false;
 
             Trace.WriteLine("Recovering crashed replica.");
-            var availableForReplication = tracker.Worker.GetWorkersList()
-                .Except(
-                    replicas.ConvertAll(input => new KeyValuePair<int, IWorker>(input.WorkerId, input))
-                ).Except(new List<KeyValuePair<int, IWorker>> {
-                    new KeyValuePair<int, IWorker>(tracker.Worker.WorkerId, tracker.Worker)
-                }).ToList();
+            var availableForReplication = tracker.Worker.GetWorkersList();
+
+            availableForReplication.RemoveAll(worker => {
+                return
+                    replicas.Exists(
+                        wk => wk.ServiceUrl == worker.ServiceUrl);
+            });
+
+            availableForReplication.RemoveAll(worker => worker.ServiceUrl == tracker.Worker.ServiceUrl);
 
             if (availableForReplication.Count == 0) {
                 Trace.WriteLine("RecoverCrashedReplica failed to acquire a new replica.");
                 return false;
             }
 
-            var reps = (from wk in availableForReplication.Take(1) select wk.Value).ToList();
+            var reps = (from wk in availableForReplication.Take(1) select wk).ToList();
             Trace.WriteLine("Crashed replica recovered.");
 
             var replica = reps.First();

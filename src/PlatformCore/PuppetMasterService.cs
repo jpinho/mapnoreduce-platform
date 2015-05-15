@@ -100,7 +100,7 @@ namespace PlatformCore
 
                 var remoteWorker = Worker.Run(workerId, serviceUri, GetServiceUri());
                 workersAvailable.Add(remoteWorker.WorkerId, remoteWorker);
-                remoteWorker.UpdateAvailableWorkers(workersAvailable);
+                remoteWorker.UpdateAvailableWorkers(workersAvailable.Values.ToList());
 
                 Trace.WriteLine(string.Format("New worker created: id '{0}', url '{1}'."
                     , workerId, serviceUri));
@@ -161,7 +161,7 @@ namespace PlatformCore
                     if (workers == null)
                         continue;
                     remoteShare = remoteShare.Concat(workers).ToList();
-                    if (remoteShare.Count == workersNeeded)
+                    if (remoteShare.Count >= workersNeeded)
                         break;
                 }
                 if (!(remoteShare.Count > workersNeeded)) {
@@ -262,6 +262,15 @@ namespace PlatformCore
 
         public Queue<Tuple<int, Uri>> GetJobTrackersWaitingQueue() {
             return jobTrackersWaitingQueue;
+        }
+
+        public void ReleaseWorker(Uri workerServiceUri) {
+            var wrk = RemotingHelper.GetRemoteObject<IWorker>(workerServiceUri);
+            lock (workersLock) {
+                GetWorkersInUse().Remove(wrk.WorkerId);
+                GetAvailableWorkers().Add(wrk.WorkerId, wrk);
+            }
+            ProcessPendingShares();
         }
 
         public Dictionary<int, IWorker> GetAvailableWorkers() {

@@ -51,8 +51,8 @@ namespace PlatformCore
                     // Selects from all online workers, those that are not busy.
                     var availableWorkers = new Queue<IWorker>((
                             from w in Tracker.Worker.GetWorkersList()
-                            where w.Value.GetStatus() == WorkerStatus.Available
-                            select w.Value
+                            where w.GetStatus() == WorkerStatus.Available
+                            select w
                         ).ToList());
                     SplitsDelivery(availableWorkers, CurrentJob);
                 } else
