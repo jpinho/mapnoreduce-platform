@@ -124,6 +124,12 @@ namespace PlatformCore
             return share;
         }
 
+		/// <summary>
+		/// Gets the workers share, that corresponds to the number of workers that a given worker should receive in order to 
+		/// preserve cluster availability.
+		/// </summary>
+		/// <param name="taskRunnerUri">Uri of the taskRunner</param>
+		/// <returns></returns>
         public List<Uri> GetWorkersShare(Uri taskRunnerUri) {
 
             var share = new List<Uri>();

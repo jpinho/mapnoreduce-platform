@@ -32,6 +32,7 @@ namespace PlatformCore
             statusUpdatesTimer = new Timer(StatusUpdate, 0, Timeout.Infinite, STATUS_UPDATE_TIMEOUT);
         }
 
+
         private List<IWorker> PickReplicas() {
             Trace.WriteLine("CoordinatorManager picking replicas for fault tolerance.");
 
@@ -42,6 +43,10 @@ namespace PlatformCore
             return reps;
         }
 
+		/// <summary>
+		/// Calculates how many replicas would be nice to have based on the logarithm of number of workers.
+		/// </summary>
+		/// <param name="workersCount"> number of workers</param>
         private static int GetWiseNumberForReplicas(int workersCount) {
             if (workersCount < 1)
                 return 0;
