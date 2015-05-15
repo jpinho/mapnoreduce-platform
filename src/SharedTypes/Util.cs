@@ -3,9 +3,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
-namespace SharedTypes {
-    public static class Util {
+namespace SharedTypes
+{
+    public static class Util
+    {
         public const string LOCALHOST = "localhost";
+        public const string LOCALHOST_REGEX = @"localhost|127\.0\.0\.1";
 
         public static int GetHostPort(string url) {
             return new Uri(url).Port;
