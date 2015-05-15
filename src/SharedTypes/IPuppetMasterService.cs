@@ -27,9 +27,9 @@ namespace SharedTypes
 
         Uri GetServiceUri();
 
-        void AnnouncePm(Uri newPuppetMasterUri, bool broadcast = false);
+        void BroadcastAnnouncePm(Uri newPuppetMasterUri);
 
-        void AnnouncePm(List<Uri> puppetMasterUrls, bool broadcast = false);
+        List<Uri> UpdatePmsList(List<Uri> puppetMasterUrls);
 
         List<Uri> GetWorkersSharePm(Uri pmUri);
     }

@@ -17,7 +17,7 @@ namespace PlatformCore
         private readonly Dictionary<int, IWorker> workersAvailable = new Dictionary<int, IWorker>();
         private readonly Dictionary<int, IWorker> workersInUse = new Dictionary<int, IWorker>();
         private readonly List<Uri> jobTrackersMaster = new List<Uri>();
-        private readonly List<Uri> knownPms = new List<Uri>();
+        private volatile List<Uri> knownPms = new List<Uri>();
         private readonly Queue<Tuple<int, Uri>> jobTrackersWaitingQueue = new Queue<Tuple<int, Uri>>();
 
         public static readonly string ServiceName = "PM";
@@ -42,39 +42,39 @@ namespace PlatformCore
             }
         }
 
-        public void AnnouncePm(Uri newPuppetMasterUri, bool broadcast = false) {
-            AnnouncePm(new List<Uri> { newPuppetMasterUri }, broadcast);
+        public void BroadcastAnnouncePm(Uri newPuppetMasterUri) {
+            // if not known add it to known list
+            if (!KnownPmsUris.Contains(newPuppetMasterUri))
+                KnownPmsUris.Add(newPuppetMasterUri);
+
+            var stateUpdate = true;
+            while (stateUpdate) {
+                stateUpdate = false;
+                var knownCount = KnownPmsUris.Count;
+
+                KnownPmsUris.ForEach(uri => {
+                    var remotePM = RemotingHelper.GetRemoteObject<IPuppetMasterService>(uri);
+                    UpdatePmsList(remotePM.UpdatePmsList(KnownPmsUris));
+
+                    if (knownCount < KnownPmsUris.Count)
+                        stateUpdate = true;
+                });
+            }
         }
 
-        public void AnnouncePm(List<Uri> puppetMasterUrls, bool broadcast = false) {
+        public List<Uri> UpdatePmsList(List<Uri> puppetMasterUrls) {
             var newPuppetMasters = (from pm in puppetMasterUrls
                                     where !KnownPmsUris.Contains(pm)
                                     select pm).ToList();
 
-            if (newPuppetMasters.Count != 0) {
-                KnownPmsUris.AddRange(newPuppetMasters);
-                newPuppetMasters.ForEach(uri => {
-                    Trace.WriteLine("New Puppet Master announced:" + uri);
-                });
-            }
+            if (newPuppetMasters.Count == 0)
+                return KnownPmsUris;
 
-            if (!broadcast)
-                return;
-
-            Trace.WriteLine("Broadcasting to known puppet masters.");
-            BroadCastPmsList();
-        }
-
-        private void BroadCastPmsList() {
-            if (KnownPmsUris.Count == 0)
-                return;
-
-            var remotePmObjs = from uri in KnownPmsUris
-                               select RemotingHelper.GetRemoteObject<IPuppetMasterService>(uri);
-
-            foreach (var pMaster in remotePmObjs) {
-                pMaster.AnnouncePm(KnownPmsUris);
-            }
+            KnownPmsUris.AddRange(newPuppetMasters);
+            newPuppetMasters.ForEach(uri => {
+                Trace.WriteLine("New Puppet Master announced:" + uri);
+            });
+            return KnownPmsUris;
         }
 
         public void CreateWorker(int workerId, string serviceUrl, string entryUrl) {
@@ -96,8 +96,9 @@ namespace PlatformCore
 
         public List<Uri> GetWorkersSharePm(Uri pmUri) {
             var share = new List<Uri>();
+            BroadcastAnnouncePm(pmUri);
+
             lock (workerShareLock) {
-                AnnouncePm(pmUri);
                 Trace.WriteLine("Get workers request from PuppetMaster : " + pmUri);
                 var fairShare = FairScheduler();
                 if (GetAvailableWorkers().Count >= FairScheduler()) {

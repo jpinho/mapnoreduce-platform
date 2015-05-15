@@ -15,7 +15,7 @@ namespace PuppetMasterLib.Commands
             var pMaster = (IPuppetMasterService)Activator.GetObject(
                 typeof(IPuppetMasterService),
                 Globals.LocalPuppetMasterUri.ToString());
-            pMaster.AnnouncePm(new Uri(PuppetMasterUrl));
+            pMaster.BroadcastAnnouncePm(new Uri(PuppetMasterUrl));
         }
 
         public override string ToString() {
