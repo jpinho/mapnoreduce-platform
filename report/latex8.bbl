@@ -1,0 +1,14 @@
+\begin{thebibliography}{1}\setlength{\itemsep}{-1ex}\small
+
+\bibitem{ex1}
+A.~Ching, R.~Murthy, D.~Molkov, R.~Vadali, and P.~Yang.
+\newblock Under the hood: Scheduling mapreduce jobs more efficiently with
+  corona.
+\newblock {\em Facebook Engineering}, November 2012.
+
+\bibitem{ex2}
+J.~Dean and S.~Ghemawat.
+\newblock Mapreduce: Simplified data processing on large clusters.
+\newblock {\em Communications ACM}, 51(1):107--113, January 2008.
+
+\end{thebibliography}
