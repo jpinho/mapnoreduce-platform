@@ -34,9 +34,13 @@ namespace PlatformCore
 
         private List<IWorker> PickReplicas() {
             Trace.WriteLine("CoordinatorManager picking replicas for fault tolerance.");
-
             var repsCount = GetWiseNumberForReplicas(tracker.Worker.GetWorkersList().Count);
-            var reps = (from wk in tracker.Worker.GetWorkersList().Take(repsCount) select wk).ToList();
+
+            var reps = (
+                from wk in tracker.Worker.GetWorkersList().Take(repsCount)
+                where wk.ServiceUrl != tracker.Worker.ServiceUrl
+                select wk
+            ).ToList();
 
             Trace.WriteLine("CoordinatorManager just picked " + repsCount + " replicas from PuppetMaster.");
             return reps;
