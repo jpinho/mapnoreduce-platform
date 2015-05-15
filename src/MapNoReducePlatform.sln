@@ -25,6 +25,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlatformCore", "PlatformCor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlatformCore.Tests", "PlatformCore.Tests\PlatformCore.Tests.csproj", "{5779EE89-98D8-4048-B3BF-11711B1532CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibMapperCharCount", "..\..\..\Downloads\MapperTransfer\MapperTransfer\LibMapper2\LibMapperCharCount.csproj", "{2D012EC4-B199-4802-A447-CFB320D5FE14}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibMapper", "..\..\..\Downloads\MapperTransfer\MapperTransfer\LibMapper\LibMapper.csproj", "{E70FBDBF-80B2-44D5-8E93-7C14D5D6D1BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibMapperParadiseCount", "..\..\..\Downloads\MapperTransfer\MapperTransfer\LibMapper3\LibMapperParadiseCount.csproj", "{F9189792-5B7F-4489-89D9-DCC1339D2E70}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CheckPointMappers", "CheckPointMappers", "{8C3FE419-5DDE-4B7E-81F3-DB3204C6B669}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +79,18 @@ Global
 		{5779EE89-98D8-4048-B3BF-11711B1532CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5779EE89-98D8-4048-B3BF-11711B1532CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5779EE89-98D8-4048-B3BF-11711B1532CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D012EC4-B199-4802-A447-CFB320D5FE14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D012EC4-B199-4802-A447-CFB320D5FE14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D012EC4-B199-4802-A447-CFB320D5FE14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D012EC4-B199-4802-A447-CFB320D5FE14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E70FBDBF-80B2-44D5-8E93-7C14D5D6D1BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E70FBDBF-80B2-44D5-8E93-7C14D5D6D1BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E70FBDBF-80B2-44D5-8E93-7C14D5D6D1BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E70FBDBF-80B2-44D5-8E93-7C14D5D6D1BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9189792-5B7F-4489-89D9-DCC1339D2E70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9189792-5B7F-4489-89D9-DCC1339D2E70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9189792-5B7F-4489-89D9-DCC1339D2E70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9189792-5B7F-4489-89D9-DCC1339D2E70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -79,5 +99,8 @@ Global
 		{084C9871-4ADC-4698-AF71-278A115B88E9} = {D3A6E2AB-034B-48AA-AC90-929FB996CB54}
 		{6B88C5D1-87B3-4861-9445-B87907F1E25E} = {D3A6E2AB-034B-48AA-AC90-929FB996CB54}
 		{5779EE89-98D8-4048-B3BF-11711B1532CF} = {D3A6E2AB-034B-48AA-AC90-929FB996CB54}
+		{2D012EC4-B199-4802-A447-CFB320D5FE14} = {8C3FE419-5DDE-4B7E-81F3-DB3204C6B669}
+		{E70FBDBF-80B2-44D5-8E93-7C14D5D6D1BA} = {8C3FE419-5DDE-4B7E-81F3-DB3204C6B669}
+		{F9189792-5B7F-4489-89D9-DCC1339D2E70} = {8C3FE419-5DDE-4B7E-81F3-DB3204C6B669}
 	EndGlobalSection
 EndGlobal
