@@ -23,7 +23,13 @@ namespace SharedTypes
 
         Dictionary<int, IWorker> GetAvailableWorkers();
 
-        List<Uri> GetWorkersShare(Uri taskRunnerUri);
+		/// <summary>
+		/// Gets the workers share, that corresponds to the number of workers that a given worker should receive in order to 
+		/// preserve cluster availability.
+		/// </summary>
+		/// <param name="taskRunnerUri">Uri of the taskRunner</param>
+		/// <returns></returns>
+		List<Uri> GetWorkersShare(Uri taskRunnerUri);
 
         void ReleaseWorkers(List<int> workersUsed);
 
