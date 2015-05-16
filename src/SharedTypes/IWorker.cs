@@ -41,7 +41,7 @@ namespace SharedTypes
         /// workers. Each worker processes a split of the given filePath (used as file ID), calling
         /// the Map method of the received class name of the assembly code.
         /// </summary>
-        /// <param name="task">The job to be processed.</param>
+        /// <param name="job">The job to be processed.</param>
         void ReceiveMapJob(IJobTask job);
 
         /// <summary>

@@ -300,7 +300,9 @@ namespace PlatformCore
                 foreach (var type in assembly.GetTypes()) {
                     if (!type.IsClass || !type.FullName.EndsWith("." + task.MapClassName, StringComparison.InvariantCultureIgnoreCase))
                         continue;
-
+#if DEBUG
+                    Thread.Sleep(5000);
+#endif
                     var mapperClassObj = Activator.CreateInstance(type);
                     object[] args = { data };
 
