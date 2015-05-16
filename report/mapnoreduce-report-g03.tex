@@ -1,8 +1,37 @@
 \documentclass[times, 10pt,twocolumn]{article} 
 \usepackage{mapnoreduce-report-g03}
 \usepackage{times}
+\usepackage{graphicx}
 \usepackage[utf8x]{inputenc}
 \usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{wasysym}
+\usepackage{amsfonts}%
+\usepackage{amssymb}%
+\usepackage{graphicx}
+\usepackage{fixltx2e}
+\usepackage{color} 
+\usepackage{colortbl}
+\usepackage{subfig}
+\usepackage{url}
+\usepackage{cite}
+\usepackage[portuguese, english]{babel} 
+\usepackage{threeparttable}
+\PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
+\usepackage[hyphens]{url}\hypersetup{breaklinks=true}
+\setcounter{secnumdepth}{3} 
+\usepackage[square,sort,comma,numbers]{natbib}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{chngpage}
+\usepackage{pdflscape}
+\usepackage[table]{xcolor}
+\definecolor{lightgray}{gray}{0.9}
+\usepackage{tikz}
+\usepackage[printonlyused,nolist]{acronym}
+\usepackage[toc]{multitoc}
+
 \pagestyle{empty}
 
 \begin{document}
@@ -35,7 +64,18 @@
 	
 	\section{MapNoReduce Architecture}
 		
+        MapNoReduce is a simplified implementation of the MapReduce middleware and programming model, focused on the Map part. On this simplified version, our work provides a solution to common problems related with the reference architecture of the MapReduce platform. Those problems are related with fault-tolerance, replication and performance and will be discussed in the next sections. Additionally, we added some features that enable the overall testing of the system, such as the ability to run scripts over one or more functional servers or the capacity to monitor the system state while running those scripts.
+        
+        \begin{figure}[!h]
+            \begin{center}
+                \includegraphics[width=0.48\textwidth]{pics/architecture.pdf}
+                \caption{We illustrate an example of the MapNoReduce architecture. We represent one cluster with two server nodes. Inside the processing node, one JobTracker coordinates with other TaskTrackers to process the client job.  }
+                \label{fig:basdatawarehouse}
+            \end{center}
+        \end{figure}
+        
     	\subsection{Worker}
+        
     
     	\subsection{JobTracker}
     	

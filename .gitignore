@@ -8,6 +8,7 @@ report/*.log
 report/*.pdf
 report/*.gz
 report/papers/
+report/*.out
 
 # User-specific files
 *.suo
