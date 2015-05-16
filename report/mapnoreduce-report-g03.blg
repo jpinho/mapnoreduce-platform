@@ -2,45 +2,45 @@ This is BibTeX, Version 0.99d (TeX Live 2013)
 Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: mapnoreduce-report-g03.aux
 The style file: mapnoreduce-report-g03.bst
-Database file #1: mapnoreduce-report-g03.bib
-You've used 2 entries,
+Database file #1: mapnoreduce-rpt-g03.bib
+You've used 3 entries,
             2118 wiz_defined-function locations,
-            510 strings with 4073 characters,
-and the built_in function-call counts, 680 in all, are:
-= -- 61
-> -- 41
-< -- 0
-+ -- 16
-- -- 14
-* -- 56
-:= -- 126
-add.period$ -- 6
-call.type$ -- 2
-change.case$ -- 13
+            520 strings with 4404 characters,
+and the built_in function-call counts, 1142 in all, are:
+= -- 113
+> -- 54
+< -- 1
++ -- 21
+- -- 18
+* -- 81
+:= -- 190
+add.period$ -- 9
+call.type$ -- 3
+change.case$ -- 18
 chr.to.int$ -- 0
-cite$ -- 2
-duplicate$ -- 21
-empty$ -- 45
-format.name$ -- 14
-if$ -- 132
+cite$ -- 3
+duplicate$ -- 43
+empty$ -- 80
+format.name$ -- 18
+if$ -- 239
 int.to.chr$ -- 0
-int.to.str$ -- 2
-missing$ -- 2
-newline$ -- 13
-num.names$ -- 4
-pop$ -- 11
+int.to.str$ -- 3
+missing$ -- 3
+newline$ -- 18
+num.names$ -- 6
+pop$ -- 16
 preamble$ -- 1
-purify$ -- 11
+purify$ -- 15
 quote$ -- 0
-skip$ -- 15
+skip$ -- 38
 stack$ -- 0
-substring$ -- 31
-swap$ -- 2
-text.length$ -- 0
+substring$ -- 76
+swap$ -- 14
+text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 8
+type$ -- 12
 warning$ -- 0
-while$ -- 5
-width$ -- 3
-write$ -- 23
+while$ -- 10
+width$ -- 4
+write$ -- 34

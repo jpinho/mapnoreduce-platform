@@ -1,14 +1,21 @@
 \begin{thebibliography}{1}\setlength{\itemsep}{-1ex}\small
 
-\bibitem{ex1}
+\bibitem{ChingFacebook2012}
 A.~Ching, R.~Murthy, D.~Molkov, R.~Vadali, and P.~Yang.
 \newblock Under the hood: Scheduling mapreduce jobs more efficiently with
   corona.
 \newblock {\em Facebook Engineering}, November 2012.
 
-\bibitem{ex2}
+\bibitem{GhemawatMR2008}
 J.~Dean and S.~Ghemawat.
 \newblock Mapreduce: Simplified data processing on large clusters.
 \newblock {\em Communications ACM}, 51(1):107--113, January 2008.
+
+\bibitem{Kalavri2013}
+V.~Kalavri and V.~Vlassov.
+\newblock {MapReduce: Limitations, optimizations and open issues}.
+\newblock {\em Proceedings - 12th IEEE International Conference on Trust,
+  Security and Privacy in Computing and Communications, TrustCom 2013}, pages
+  1031--1038, 2013.
 
 \end{thebibliography}

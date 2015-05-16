@@ -7,6 +7,7 @@ src/report/*.blg
 src/report/*.log
 src/report/*.pdf
 src/report/*.gz
+src/report/papers/
 
 # User-specific files
 *.suo
