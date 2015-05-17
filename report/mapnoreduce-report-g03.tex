@@ -46,9 +46,8 @@
 	\maketitle
 	\thispagestyle{empty}
 	
-    % region:acronyms { %
+    % region: acronyms %
     \acrodef{MNRP}{MapNoReduce Platform}
-    % } %
     
 	\begin{abstract}
 		This project consists in the design and implementation of \ac{MNRP}, a simplified implementation of the MapReduce middleware and programming model. This platform extracts the input key/value pairs from input files and distributes the Map calls, called Jobs, across multiple machines, the Workers. 
@@ -77,7 +76,6 @@
         \end{figure}
         
     	\subsection{Worker}
-        %What is it? Why is it necessary? What are their functions? Final conclusion, to close section.
         
         In \ac{MNRP}, workers are simple .NET Remoting Services that receive requests on a given endpoint, known as \emph{Service URI}. 
         
@@ -94,7 +92,6 @@
         In the \ac{MNRP}, to an entry worker responsible of managing the processing of a whole job we call, Task Runner and to a worker that reports progress to the Task Runner we call Task Tracker.
        
     	\subsection{Job Tracker}
-        %What is it? Why is it necessary? What are their functions? Final conclusion, to close section.
         
         The overall execution and progress tracking of a job is handled by Job Trackers. In \ac{MNRP} \emph{Job Trackers} can have two distinct roles: they could be responsible for the distribution of splits for a given job, or they could be responsible for reporting progress about the processing of a given split.        
                
@@ -108,12 +105,28 @@
             
             Finally, the processing of a job can take some time to complete, because of this, the \emph{Task Runner} delegates such processing to a dedicated thread and blocks itself waiting for it to terminate. Note that, the worker thread runs in separate of the \emph{Task Runner}, therefore while the \emph{Task Runner} is blocked its jobs queue can still be updated by the entry worker. The dedicated thread that processes a give job, also known as Job Scheduler is detailed on section \ref{job-scheduler}.
 
-            \subsubsection{Task Tracker}
+            \begin{figure}[h]
+                \begin{center}
+                    \includegraphics[width=0.48\textwidth]{pics/taskrunner-example.pdf}
+                    \caption{A set of jobs are sent to an entry worker. The worker invokes a \textit{TaskRunner}, to enqueue those jobs into a FIFO queue. Then it delegates the first job's execution to a \textit{JobScheduler}, that coordinates with a poll of workers to process the job's splits.}
+                    \label{fig:mnr-taskrunner-example}
+                \end{center}
+            \end{figure}
 
+            \subsubsection{Task Tracker}
             
-    
+           In the \ac{MNRP} every worker can process only one split at a time. Therefore, after receiving a split to process by a given \textit{TaskRunner}, the worker invokes a \textit{TaskTracker} responsible for sending alive signals to the \textit{TaskRunner} with the identifier of the worker that is currently processing a given split. This way the \textit{TaskRunner} can determine if the worker has crashed or if it is stalling the processing of the split — strangler node.
+
         	\subsubsection{Job Scheduler}\label{job-scheduler}
-        
+            
+            \textit{JobScheduler} is responsible for ensuring that all the splits of a given job are processed in order, even in the presence of failures or strangler nodes. To achieve it a \textit{JobScheduler} starts by gathering a set of available workers and distributes the splits among them, in order, i.e, given priority to the splits with a lower number. When a split is delegated to a worker, the scheduler starts tracking the alive signals from that worker and puts that slit in the \textit{SplitsBeingProcessed} queue.
+            
+            After the splits distribution procedure finishes, the scheduler computes for every split being processed the time difference, between the workers last alive signal and the current time. For a difference superior to 60 seconds, the worker is assumed to be in a \textit{``not responding''} state, if otherwise the worker is assumed to be processing normally.
+            
+            The split processing operation runs asynchronously, i.e, the scheduler delegates the processing of the split to a worker and waits on an asynchronous task, for its response. After completion, the \textit{async} task removes the split from the \textit{SplitsBeingProcessed} queue and marks the worker status as \textit{``available"} for processing more splits.
+            
+            For crashed workers or workers that are simply taking too long to send alive signals, either because they have just crashed or simply because their network segment is functioning with high latencies, the scheduler retracts the split delegation from the failing worker and automatically assigns it to a new one if possible, otherwise it gets postpone in a waiting queue.
+            
         \subsection{Replication}
         
         	\subsubsection{Coordination Manager}
