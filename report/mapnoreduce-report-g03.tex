@@ -20,7 +20,6 @@
 \usepackage{threeparttable}
 \PassOptionsToPackage{hyphens}{url}\usepackage{hyperref}
 \usepackage[hyphens]{url}\hypersetup{breaklinks=true}
-\setcounter{secnumdepth}{3} 
 \usepackage[square,sort,comma,numbers]{natbib}
 \usepackage{tabularx}
 \usepackage{booktabs}
@@ -30,7 +29,6 @@
 \definecolor{lightgray}{gray}{0.9}
 \usepackage{tikz}
 \usepackage[printonlyused,nolist]{acronym}
-\usepackage[toc]{multitoc}
 
 \pagestyle{empty}
 
@@ -38,9 +36,9 @@
 	\title{MapNoReduce Platform}
 	
 	\author{
-        João Pinho\\jpepinho@gmail.com\and Diogo Rosa\\
-        diogomcrosa@hotmail.com\and Cláudia Filipe\\
-        claudiapbfilipe@gmail.com\\\\		 
+        João Pinho\\jpe.pinho@gmail.com\and Diogo Rosa\\
+        diogo.m.c.rosa@gmail.com\and Cláudia Filipe\\
+        claudia.p.b.filipe@gmail.com\\\\		 
 		Instituto Superior Técnico\\
         Middleware for Distributed Internet Applications\\
         Lisbon, Portugal
@@ -70,40 +68,45 @@
             \begin{center}
                 \includegraphics[width=0.48\textwidth]{pics/architecture.pdf}
                 \caption{We illustrate an example of the MapNoReduce architecture. We represent one cluster with two server nodes. Inside the processing node, one JobTracker coordinates with other TaskTrackers to process the client job.  }
-                \label{fig:basdatawarehouse}
+                \label{fig:mnr-architecture}
             \end{center}
         \end{figure}
         
     	\subsection{Worker}
+    
+    	\subsection{Job Tracker}
+    	
+        \subsubsection{Task Runner}
+
+        \subsubsection{Task Tracker}
+
+    	\subsubsection{Job Scheduler}
         
-    
-    	\subsection{JobTracker}
+        \subsection{Replication}
+        
+        	\subsubsection{Coordination Manager}
+        	
+        	\subsubsection{Slave Replica}
     	
-    	\subsection{CoordinationManager}
+    	\subsection{Cluster Resource Management}
     	
-    	\subsection{DefaultJobScheduler}
-    	
-    	\subsection{TaskTracker}
-    	
-    	\subsection{TaskRunner}
-    	
-    	\subsection{SlaveReplica}
-    	
-    	\subsection{Distribution manner}
-    	
+            \subsubsection{Fair Share Scheduler}
+        
     	\subsection{Puppet Master}
-    
-    	\subsubsection{Status}
-    		
-    	\subsubsection{Create worker}
-    	
-    	\subsubsection{Wait}
-    	
-    	\subsubsection{Slow worker}
-    	
-    	\subsubsection{Freeze/unfreeze worker}
-    	
-    	\subsubsection{Freeze/unfreeze communication}
+        
+            \subsubsection{Management Interface}
+            
+            \subsubsection{Create Worker}
+            
+            \subsubsection{Status}
+                	
+            \subsubsection{Wait}
+            
+            \subsubsection{Slow Worker}
+            
+            \subsubsection{Freeze/Unfreeze Worker}
+            
+            \subsubsection{Freeze/Unfreeze Communication}
 	
 	\section{Evaluation}
 	
