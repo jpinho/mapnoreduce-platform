@@ -75,8 +75,8 @@
         \end{figure}
         
     	\subsection{Worker}
-        
-    
+    	A worker is a machine that can help to process a job. It has a Status and is accessible through a known ServiceUrl. A worker is associated to the PuppetMaster that has created it and knows another workers.
+	    When the client submits a job, he indicates which worker would receive that job through its ServiceUrl. This worker plays the role of Master and is responsible for distributing the job along the others workers. This task is performed by a JobTracker component named TaskRunner. On the other hand, a worker that receives a split to process has a TaskTracker component, the other specialization of JobTracker.
     	\subsection{JobTracker}
     	
     	\subsection{CoordinationManager}
