@@ -112,18 +112,34 @@
             \subsubsection{Fair Share Scheduler}
         
     	\subsection{Puppet Master}
-        
+	      %What is it? Why is it necessary? What are their functions?        
+	      Puppet Master is a component developed for testing \ac{MNRP}. To fully understand the potential of this system, we needed a tool, first to monitoring all the system, second to induce some delays and failures to see how the system behaves. The Puppet Master allows to create workers and get the overall status of the system. Additionally, allows to induce some delay on the whole system or only in some workers and even to simulate some failures freezing workers or its communication, ie, the Job Tracker component.
             \subsubsection{Management Interface}
-            
+            The interface of Puppet Master it is provided of a script parsing system, which allows the user to introduce some commands through script which can be processed in batch or step-by-step. The user can load and save his scripts. The interface also has an Help menu that helps to build commands providing the syntax, and for the monitoring it shows up a list of the components of the system, their status and a log window, that was pretty useful on the developing phase and helps to track every action on the system.
             \subsubsection{Create Worker}
+            The create worker command instantiates a Worker with a given \textit{ID} and registers it on a given \textit{Service URI} associated to the given \textit{Puppet Master URL}. The full command syntax is: 
             
+            \textit{WORKER ID PUPPETMASTER-URL SERVICE-URL ENTRY-URL} 
+            
+            The last parameter, the \textit{Entry URL}, specifies either if this new worker creation should be notified to the other workers, by calling the worker listening in this URI, or not, if it is left in blank.
+            The worker creation also implies the update of the list of available workers of this Puppet Master.
             \subsubsection{Status}
-                	
+            
+            The status command,  
+            
+            \textit{STATUS}
+            
+            prints the \textit{ID} and \textit{Status} of all workers. This \textit{Status} can be  \textit{Busy} if the worker is processing a job, \textit{Available} if is ready to receive a job, \textit{Frozen} if a Freeze Worker command has been used (see section \ref{freeze}), or \textit{Offline}.
+            
+            This information is available on the Monitoring tab of the Management Interface. 
+            
+            \subsubsection{Submit}    
+            	
             \subsubsection{Wait}
             
             \subsubsection{Slow Worker}
             
-            \subsubsection{Freeze/Unfreeze Worker}
+            \subsubsection{Freeze/Unfreeze Worker} \label{freeze}
             
             \subsubsection{Freeze/Unfreeze Communication}
 	
