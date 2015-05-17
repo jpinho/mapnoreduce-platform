@@ -128,33 +128,70 @@
 	      %What is it? Why is it necessary? What are their functions?        
 	      Puppet Master is a component developed for testing \ac{MNRP}. To fully understand the potential of this system, we needed a tool, first to monitoring all the system, second to induce some delays and failures to see how the system behaves. The Puppet Master allows to create workers and get the overall status of the system. Additionally, allows to induce some delay on the whole system or only in some workers and even to simulate some failures freezing workers or its communication, ie, the Job Tracker component.
             \subsubsection{Management Interface}
-            The interface of Puppet Master it is provided of a script parsing system, which allows the user to introduce some commands through script which can be processed in batch or step-by-step. The user can load and save his scripts. The interface also has an Help menu that helps to build commands providing the syntax, and for the monitoring it shows up a list of the components of the system, their status and a log window, that was pretty useful on the developing phase and helps to track every action on the system.
+            The interface of Puppet Master it is provided of a script parsing system, which allows the user to introduce some commands through script that can be processed in batch or step-by-step. The user can load and save his scripts. The interface also has an Help menu that helps to build commands providing their syntax, and for the monitoring it shows up a list of the components of the system, their status and a log window, that was pretty useful on the developing phase and helps to track every action on the system.
             \subsubsection{Create Worker}
-            The create worker command instantiates a Worker with a given \textit{ID} and registers it on a given \textit{Service URI} associated to the given \textit{Puppet Master URL}. The full command syntax is: 
+            The create worker command instantiates a Worker with a given \emph{ID} and registers it on a given \emph{Service URI} associated to the given \emph{Puppet Master URL}. The full command syntax is: 
             
-            \textit{WORKER ID PUPPETMASTER-URL SERVICE-URL ENTRY-URL} 
+            \emph{WORKER ID PUPPETMASTER-URL SERVICE-URL ENTRY-URL} 
             
-            The last parameter, the \textit{Entry URL}, specifies either if this new worker creation should be notified to the other workers, by calling the worker listening in this URI, or not, if it is left in blank.
+            The last parameter, the \emph{Entry URL}, specifies either if this new worker creation should be notified to the other workers, by calling the worker listening in this URI, or not, if it is left in blank.
             The worker creation also implies the update of the list of available workers of this Puppet Master.
             \subsubsection{Status}
             
             The status command,  
             
-            \textit{STATUS}
+            \emph{STATUS}
             
-            prints the \textit{ID} and \textit{Status} of all workers. This \textit{Status} can be  \textit{Busy} if the worker is processing a job, \textit{Available} if is ready to receive a job, \textit{Frozen} if a Freeze Worker command has been used (see section \ref{freeze}), or \textit{Offline}.
+            prints the \emph{ID} and \emph{Status} of all workers. This \emph{Status} can be  \emph{Busy} if the worker is processing a job, \emph{Available} if is ready to receive a job, \emph{Frozen} if a Freeze Worker command has been used (see section \ref{freeze}), or \emph{Offline}.
             
             This information is available on the Monitoring tab of the Management Interface. 
+                   	
+            \subsubsection{Wait and Slow Worker}
+			The Wait command allows to induce some delay to the whole system of some given seconds:
             
-            \subsubsection{Submit}    
-            	
-            \subsubsection{Wait}
+            \emph{WAIT SECS}
             
-            \subsubsection{Slow Worker}
+            and it's used to give some time between two commands, for example. Note that this command is only a emph{Thread.Sleep} to the main thread of Puppet Master. 
+            
+            As well, the Slow Worker command induces a delay of some seconds to the given worker, 
+            
+            \emph{SLOWW ID SECS}
+            
+			using the emph{Thread.Sleep} to the main thread of that worker. This is used to simulated some slow machines that may delay the whole job processing.
             
             \subsubsection{Freeze/Unfreeze Worker} \label{freeze}
+            The Freeze command is used to simulate some machine that fails, helping us testing the system in a suppose real life scenario. This command: 
             
+            \emph{FREEZEW ID}
+            
+            disables all the worker components and pauses the processing of requests.
+            It was implemented attributing a emph{ManualResetEvent} to every request that is received by the worker, which are set to emph{WaitOne} when a freeze command arrives.
+            
+            Only when a unfreeze command is received:
+            
+            \emph{UNFREEZEW ID}
+            
+            the frozen requests are emph{Set} and the worker returns to work.
+
             \subsubsection{Freeze/Unfreeze Communication}
+            To freeze the communication is to simulate the failure of the JobTracker component, since it is the responsible for it. When a freeze communication command is received
+            
+	        \emph{FREEZEC ID}
+	        
+	        it is used a emph{RemotingServices.Disconect} to avoid the component to receive any messages, as if it has failed.
+	        
+	        To recovery this component it's used the command
+	        
+	        \emph{UNFREEZEC ID}
+	        
+	        which reconnects the component, emph{RemotingServices.Marshal}, and returns to process the frozen requests.
+            
+            \subsubsection{Submit}   
+            Last but not least, the Submit command is the one who allows to simulate the interaction with the client. When a submit command is performed
+            
+            \emph{SUBMIT ENTRY-URL FILE OUTPUT S MAP DLL}
+            
+            
 	
 	\section{Evaluation}
 	
