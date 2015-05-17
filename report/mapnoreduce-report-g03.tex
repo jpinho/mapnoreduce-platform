@@ -115,7 +115,7 @@
 
             \subsubsection{Task Tracker}
             
-           In the \ac{MNRP} every worker can process only one split at a time. Therefore, after receiving a split to process by a given \textit{TaskRunner}, the worker invokes a \textit{TaskTracker} responsible for sending alive signals to the \textit{TaskRunner} with the identifier of the worker that is currently processing a given split. This way the \textit{TaskRunner} can determine if the worker has crashed or if it is stalling the processing of the split—strangler node.
+           In the \ac{MNRP} every worker can process only one split at a time. Therefore, after receiving a split to process by a given \textit{TaskRunner}, the worker invokes a \textit{TaskTracker} responsible for sending alive signals to the \textit{TaskRunner} with the identifier of the worker that is currently processing the split. This way the \textit{TaskRunner} can determine if the worker has crashed or if it is stalling the processing of the split—strangler node.
 
         	\subsubsection{Job Scheduler}\label{job-scheduler}
             
@@ -125,17 +125,19 @@
             
             The split processing operation runs asynchronously, i.e, the scheduler delegates the processing of the split to a worker and waits on an asynchronous task, for its response. After completion, the \textit{async} task removes the split from the \textit{SplitsBeingProcessed} queue and marks the worker status as \textit{``available"} for processing more splits.
             
-            For crashed workers or workers that are simply taking too long to send alive signals, either because they have just crashed or simply because their network segment is functioning with high latencies, the scheduler retracts the split delegation from the failing worker and automatically assigns it to a new one if possible, otherwise it gets postpone in a waiting queue.
+            For crashed workers or workers that are simply taking too long to send alive signals, either because they have just crashed or simply because their network segment is functioning with high latencies, the scheduler retracts the split delegation from the failing worker. After that the split is automatically assigned to a new worker if possible, otherwise it gets postponed in a waiting queue.
             
         \subsection{Replication}
         
             In the MapReduce base implementation, the \textit{Master JobTracker}—TaskRunner in our case—is a single point of failure, which means that if it fails the job processing fails and the client must re-execute the entire job again. In our solution we try to address this issue by providing replication functionality to our \textit{TaskRunners}. 
             
-            When a \textit{TaskRunner} is created, a service called \textit{CoordinationManager} is also instantiated. It is responsible for the selection of N workers, to became replicas of the current \textit{TaskRunner}. On those workers side, a worker thread—separated from the worker's main thread—is responsible for hosting the \textit{Slave Replica} execution. The \textit{Slave Replica} is responsible for the storage of the \textit{TaskRunner} replicated state.
+            When a \textit{TaskRunner} is created, a service called \textit{CoordinationManager} is also instantiated. It is responsible for the selection of a precomputed number of workers, that will be used as replicas of the current \textit{TaskRunner}. On those workers side, a worker thread—separated from the worker's main thread—is responsible for hosting the \textit{Slave Replica} execution logic, as we will see on \ref{slave-replica}.
          
-        	\subsubsection{Coordination Manager}
+        	\subsubsection{Coordination Manager}\label{coord-man}
+            
+            
         	
-        	\subsubsection{Slave Replica}
+        	\subsubsection{Slave Replica}\label{slave-replica}
     	
     	\subsection{Cluster Resource Management}
     	
