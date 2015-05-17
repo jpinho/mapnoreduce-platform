@@ -77,29 +77,42 @@
         \end{figure}
         
     	\subsection{Worker}
-        %What is it? Why is it necessary? What are their functions?
+        %What is it? Why is it necessary? What are their functions? Final conclusion, to close section.
         
-        In \ac{MNRP}, workers are simple .NET Remoting Services that receive requests on a given endpoint, known as \textit{Service URI}. 
+        In \ac{MNRP}, workers are simple .NET Remoting Services that receive requests on a given endpoint, known as \emph{Service URI}. 
         
-        Every time a job gets submitted to the \ac{MNRP}, an entry worker gets selected to handle its processing. Workers are therefore, available working units that in a given \textit{Server Node} represent its work capacity. This is, for a given server node with 10 workers, such server node has capacity to parallelize work to 10 workers.
+        Every time a job gets submitted to the \ac{MNRP}, an entry worker gets selected to handle its processing. Workers are therefore, available working units that in a given \emph{Server Node} represent its work capacity. This is, for a given server node with 10 workers, such node has capacity to parallelize work to 10 workers.
         
-        The \textit{Service URI} of a worker is composed by 4 parts, starting with the protocol, followed by the hostname, the hostport, and finally the worker identifier. An example of such a \textit{Service URI} would be something like \textit{tcp://192.168.1.74:20001/W1}, representing the endpoint for the worker 1 in the server node.
+        The \emph{Service URI} of a worker is composed by 4 parts, starting with the protocol, followed by the \emph{host name}, the \emph{host port}, and finally the worker identifier. An example of such a \emph{Service URI} would be something like \emph{{\small tcp://192.168.1.74:20001/W1}}, representing the endpoint for the worker 1 in the server node.
         
-        It is also worth mentioning that, since a worker is no more than a thread waiting for requests on a given server node—represented by a physical machine, —workers share the same machine resources among them when running in parallel, if all located in the same server node obviously.
+        It is also worth mentioning that, since a worker is no more than a thread waiting for requests on a given server node — represented by a physical machine, — workers share the same machine resources among them when running in parallel, if all located in the same server node obviously.
         
-        When a worker get selected by the a client application as entry worker, it is made responsible for the correct processing of that job. This means that it must keep track of all the splits that must be processed for that job, what is their status, whose worker is processing each split and in case of a failure it must reassign the lost split to another worker, re-executing the job split if necessary.
+        When a worker gets selected by a client application as entry worker, it is made responsible for the correct processing of that job. This means that it must keep track of all the splits that must be processed for that job, what is their status, whose worker is processing each split and in case of a failure it must reassign the lost split to another worker, re-executing the job split if necessary.
         
         On the other end, each worker that receives the job of processing a given job's split, must report progress to the entry worker in regular intervals, to let it know that the job split is being processed without any problems.
         
         In the \ac{MNRP}, to an entry worker responsible of managing the processing of a whole job we call, Task Runner and to a worker that reports progress to the Task Runner we call Task Tracker.
        
     	\subsection{Job Tracker}
-    	
-        \subsubsection{Task Runner}
+        %What is it? Why is it necessary? What are their functions? Final conclusion, to close section.
+        
+        The overall execution and progress tracking of a job is handled by Job Trackers. In \ac{MNRP} \emph{Job Trackers} can have two distinct roles: they could be responsible for the distribution of splits for a given job, or they could be responsible for reporting progress about the processing of a given split.        
+               
+            \subsubsection{Task Runner}
+            
+            When an entry worker receives a job, it is forced to split between two functions: {\it (i)} keep listening for requests for processing new jobs, and {\it (ii)} keep track of the job just received. To achieve the point in {\it (ii)}, the worker creates a \emph{Task Runner} on a new thread, enabling it to keep processing requests without getting blocked while the Task Runner is active.
+            
+            Conversely, while the \emph{Task Runner} is actively managing a job, there is no guarantee that no other job arrives during its execution. To avoid blocking incoming requests, we use a FIFO queue, to postpone the execution of jobs received while a job is being handled. 
+            
+            A \emph{Task Runner} is continuously polling the jobs queue, to check whether it should terminate or process a new job from the queue. In our solution, we decided to terminate the \emph{Task Runner} when there are no jobs, to avoid having a thread wasting resources without any purpose. Because of this, whenever a worker receives a new job it must first determine if it needs to invoke a new \emph{Task Runner} to process the job.
+            
+            Finally, the processing of a job can take some time to complete, because of this, the \emph{Task Runner} delegates such processing to a dedicated thread and blocks itself waiting for it to terminate. Note that, the worker thread runs in separate of the \emph{Task Runner}, therefore while the \emph{Task Runner} is blocked its jobs queue can still be updated by the entry worker. The dedicated thread that processes a give job, also known as Job Scheduler is detailed on section \ref{job-scheduler}.
 
-        \subsubsection{Task Tracker}
+            \subsubsection{Task Tracker}
 
-    	\subsubsection{Job Scheduler}
+            
+    
+        	\subsubsection{Job Scheduler}\label{job-scheduler}
         
         \subsection{Replication}
         
