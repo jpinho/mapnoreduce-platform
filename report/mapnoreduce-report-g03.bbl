@@ -1,14 +1,22 @@
-\begin{thebibliography}{1}\setlength{\itemsep}{-1ex}\small
+\begin{thebibliography}{1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+
+\bibitem{Facebook2012}
+Facebook: {Under the Hood: Scheduling MapReduce jobs more efficiently with
+  Corona} (2012), \url{https://www.facebook.com/notes/facebook-
+  engineering/under-the-hood-scheduling- mapreduce- jobs- more- efficiently-
+  with- corona/ 10151142560538920}
 
 \bibitem{Kalavri2013}
-V.~Kalavri and V.~Vlassov.
-\newblock {MapReduce: Limitations, optimizations and open issues}.
-\newblock {\em Proceedings - 12th IEEE International Conference on Trust,
-  Security and Privacy in Computing and Communications, TrustCom 2013}, pages
-  1031--1038, 2013.
+Kalavri, V., Vlassov, V.: {MapReduce: Limitations, optimizations and open
+  issues}. Proceedings - 12th IEEE International Conference on Trust, Security
+  and Privacy in Computing and Communications, TrustCom 2013 pp. 1031--1038
+  (2013)
 
 \bibitem{FrancescoSalbaroli2008}
-F.~Salbaroli.
-\newblock {Enhancing the Hadoop MapReduce framework by adding fault}, 2008.
+Salbaroli, F.: {Enhancing the Hadoop MapReduce framework by adding fault}
+  (2008), \url{https://issues.apache.org/jira/secure/attachment/
+  12393292/FaultTolerantHadoop.pdf}
 
 \end{thebibliography}

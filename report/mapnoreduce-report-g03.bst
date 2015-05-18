@@ -1,3 +1,28 @@
+
+% ---------------------------------------------------------------
+%
+% $Id: latex8.bst,v 1.1 1995/09/15 15:13:49 ienne Exp $
+%
+% by Paolo.Ienne@di.epfl.ch
+%
+
+% ---------------------------------------------------------------
+%
+% no guarantee is given that the format corresponds perfectly to 
+% IEEE 8.5" x 11" Proceedings, but most features should be ok.
+%
+% ---------------------------------------------------------------
+%
+% `latex8' from BibTeX standard bibliography style `abbrv'
+% version 0.99a for BibTeX versions 0.99a or later, LaTeX version 2.09.
+% Copyright (C) 1985, all rights reserved.
+% Copying of this file is authorized only if either
+% (1) you make absolutely no changes to your copy, including name, or
+% (2) if you do make changes, you name it something other than
+% btxbst.doc, plain.bst, unsrt.bst, alpha.bst, and abbrv.bst.
+% This restriction helps ensure that all standard styles are identical.
+% The file btxbst.doc has the documentation for this style.
+
 ENTRY
   { address
     author
@@ -1091,5 +1116,9 @@ FUNCTION {end.bib}
 }
 
 EXECUTE {end.bib}
+
+% end of file latex8.bst
+% ---------------------------------------------------------------
+
 
 
