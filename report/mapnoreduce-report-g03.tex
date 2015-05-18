@@ -44,7 +44,7 @@
 	\author{
         João Pinho\\jpe.pinho@gmail.com\and Diogo Rosa\\
         diogo.m.c.rosa@gmail.com\and Cláudia Filipe\\
-        claudia.p.b.filipe@gmail.com\\\\
+        claudiapbfilipe@gmail.com\\\\
 		Instituto Superior Técnico\\
         Middleware for Distributed Internet Applications\\
         Lisbon, Portugal
@@ -57,12 +57,12 @@
 
 	\begin{abstract}
 		This project consists in the design and implementation of \ac{MNRP}, a simplified implementation of the MapReduce middleware and programming model. This platform extracts the input key/value pairs from input files and distributes the Map calls, called Jobs, across multiple machines, the Workers.
-		Also, the platform ensures a good performance by monitoring job's progress, detecting faulty or slow machines and rescheduling their tasks on idle machines. That is assured by Job Trackers, which are distributed in this platform, in contrast to the original implementation of MapReduce, where they are centralized. This mechanism was implemented inspired in Facebook's solution—Corona~\cite{ChingFacebook2012}.
+		Also, the platform ensures a good performance by monitoring job's progress, detecting faulty or slow machines and rescheduling their tasks on idle machines. That is assured by Job Trackers, which are distributed in this platform, in contrast to the original implementation of MapReduce, where they are centralized. This mechanism was implemented inspired in Facebook's solution—Corona~\cite{Facebook2012}.
 		Additionally, in order to test the platform it was developed a PuppetMaster component which allows to control the platform, and also to induce some delays and faults to the system in order to perform some tests and evaluation.
 	\end{abstract}
 
 	\section{Introduction}
-	MapReduce was introduced by Google in 2004~\cite{GhemawatMR2008} and is currently one of the most popular approaches for large scale data analytics - also thanks to the availability of high quality open-source implementations. When using the MapReduce paradigm, the computation takes a set of input key/value pairs, and produces a set of output key/value pairs. MapReduce users express the computation as two functions: Map and Reduce.
+	MapReduce was introduced by Google in 2004~\cite{Dean2008} and is currently one of the most popular approaches for large scale data analytics - also thanks to the availability of high quality open-source implementations. When using the MapReduce paradigm, the computation takes a set of input key/value pairs, and produces a set of output key/value pairs. MapReduce users express the computation as two functions: Map and Reduce.
 	This project focuses only the Map part, which uses a Map function given by the user and an input set of key/value pairs to produce a set of key/value pairs.
 	In \ac{MNRP} the keys are the numbers of the line of the file being read and the values are the content of those lines.
     The Map invocations, called Jobs, are distributed across multiple machines by automatically partitioning the input data into a set of splits of size S. The input splits can be processed in parallel by those machines, named Workers. The system ensures that for each job submitted, all the input data is processed with a good performance through the monitoring of jobs' progress, fault or slow machines detection and reschedule of idle machine's tasks.
@@ -123,17 +123,17 @@
 
             \subsubsection{Task Tracker}
 
-           In the \ac{MNRP} every worker can process only one split at a time. Therefore, after receiving a split to process by a given \textit{TaskRunner}, the worker invokes a \textit{TaskTracker} responsible for sending alive signals to the \textit{TaskRunner} with the identifier of the worker that is currently processing a given split. This way the \textit{TaskRunner} can determine if the worker has crashed or if it is stalling the processing of the split—strangler node.
+           In the \ac{MNRP} every worker can process only one split at a time. Therefore, after receiving a split to process by a given \textit{TaskRunner}, the worker invokes a \textit{TaskTracker} responsible for sending alive signals to the \textit{TaskRunner} with the identifier of the worker that is currently processing a given split. This way the \textit{TaskRunner} can determine if the worker has crashed or if it is stalling the processing of the split-strangler node.
 
         	\subsubsection{Job Scheduler}\label{job-scheduler}
 
-            \textit{JobScheduler} is responsible for ensuring that all the splits of a given job are processed in order, even in the presence of failures or strangler nodes. To achieve it a \textit{JobScheduler} starts by gathering a set of available workers and distributes the splits among them, in order, i.e, given priority to the splits with a lower number. When a split is delegated to a worker, the scheduler starts tracking the alive signals from that worker and puts that slit in the \textit{SplitsBeingProcessed} queue.
+            \textit{JobScheduler} is responsible for ensuring that all the splits of a given job are processed in order, even in the presence of failures or strangler nodes. To achieve it a \textit{JobScheduler} starts by gathering a set of available workers and distributes the splits among them, in order, i.e, given priority to the splits with a lower number. When a split is delegated to a worker, the scheduler starts tracking the alive signals from that worker and puts that split in the \textit{SplitsBeingProcessed} queue.
 
             After the splits distribution procedure finishes, the scheduler computes for every split being processed the time difference, between the workers last alive signal and the current time. For a difference superior to 60 seconds, the worker is assumed to be in a \textit{``not responding''} state, if otherwise the worker is assumed to be processing normally.
 
             The split processing operation runs asynchronously, i.e, the scheduler delegates the processing of the split to a worker and waits on an asynchronous task, for its response. After completion, the \textit{async} task removes the split from the \textit{SplitsBeingProcessed} queue and marks the worker status as \textit{``available"} for processing more splits.
             
-            For crashed workers or workers that are simply taking too long to send alive signals, either because they have just crashed or simply because their network segment is functioning with high latencies, the scheduler retracts the split delegation from the failing worker. After that the split is automatically assigned to a new worker if possible, otherwise it gets postponed in a waiting queue.
+            For crashed workers or workers that are simply taking too long to send alive signals, either because they have just crashed or simply because their network segment is functioning with high latencies, the scheduler retracts the split delegation from the failing worker. After that, the split is automatically assigned to a new worker if possible, otherwise it gets postponed in a waiting queue.
             
         \subsection{Replication}
         
@@ -187,7 +187,7 @@
                 
             \end{itemize}
             
-            Its worth noting that, because recovered replicas are always added to the end of the replication chain and the list of active replicas is periodically updated to all replicas, if a master replica fails, the next replica in the chain is automatically promoted to master replica. Therefore, enabling fault-tolerance even over the fault-tolerance mechanism.
+            It's worth noting that, because recovered replicas are always added to the end of the replication chain and the list of active replicas is periodically updated to all replicas, if a master replica fails, the next replica in the chain is automatically promoted to master replica. Therefore, enabling fault-tolerance even over the fault-tolerance mechanism.
         	
         	\subsubsection{Slave Replica}\label{slave-replica}
             
@@ -195,32 +195,32 @@
             
             During the recover procedure the master replica, waits for all replicas to report the last received state of their \textit{TaskRunner}. And when it receives all states, the most up-to-date gets selected by the master replica. With the most recent state, the master replica promotes itself to master with the latest state received by all replicas.
             
-            After taking the crashed \textit{TaskRunner's} place, the replicas detect the \textit{TaskRunner} is online again, an start sending heartbeats to it, like if nothing had happened. Any current job splits sent during the failure are assumed to have been lost due to their workers failure, and are reassigned to new workers. Therefore enabling the job processing to proceed without noticing any failure.
+            After taking the crashed \textit{TaskRunner's} place, the replicas detect that the \textit{TaskRunner} is online again, and start sending heartbeats to it, like if nothing had happened. Any current job splits sent during the failure are assumed to have been lost due to their workers failure, and are reassigned to new workers. Therefore enabling the job processing to proceed without noticing any failure.
     	
-    	\subsection{Cluster Resource Management}
+    	\subsection{Cluster Resource Management} \label{cluster-man}
             Our solution for resource management was built based on a simpler version of Facebook Corona~\cite{Facebook2012}.
-            We developed it by implementing a Fair Share Scheduler, detailed in Section~\ref{fairshare}. The basic idea is ,
+            We developed it by implementing a Fair Share Scheduler, detailed in Section~\ref{fairshare}. The basic idea is,
             if there are no Job Tracker executing on the \ac{MNRP}, the first Job Tracker gets a share containing all the available workers on
-            the server node were it is located. Subsequent Job Trackers that arrive at the system, ask for an equal share to process their jobs,
+            the server node where it is located. Subsequent Job Trackers that arrive at the system, ask for an equal share to process their jobs,
             i.e, if there are four Job Trackers, one forth of the workers should be given to each Job Tracker. When this isn't possible, due to lack
             of available workers at the Job Tracker's server node, the Job Tracker borrows workers from other server nodes, to process its job's.
-            Finally, if there are not enough workers available in all server nodes to complete the share a Job Tracker requires, that Job Tracker is put
+            Finally, if there are not enough workers available in all server nodes to complete the share required by a Job Tracker, that Job Tracker is put
             on a waiting queue, until there are enough resources for it to operate.
         
             \subsubsection{Fair Share Scheduler}\label{fairshare}
-            The Fair-Share algorithm provides a very balanced solution, both on efficiency and time taken to develop it. In our algorithm implementation
+            The Fair-Share algorithm provides a very balanced solution, both on efficiency and time taken to develop it. In our algorithm implementation,
             for resource attribution it was taken into account the known PuppetMaster and Task Runners. The algorithm is simple, and works as follows: on resources
-            request the number of available workers is divided by the number of know PuppetMaster's plus the numbers of TaskRunners. This way requests issued from one
+            request, the number of available workers is divided by the number of know PuppetMaster's plus the numbers of TaskRunners. This way requests issued from one
             cluster to another, enables the requester to be given the same amount of resources as a worker, regarding the Fair-Share algorithm. This way the distributed
             resources request is answered with a larger amount of resources, that it would be, if were taken into account the workers inside de issuing cluster.
 
     	\subsection{Puppet Master}
         
-	      Puppet Master is a component developed for testing \ac{MNRP}. To fully understand the potential of this system, we needed a tool, first to monitoring all the system, second to induce some delays and failures to see how the system behaves. The Puppet Master allows to create workers and get the overall status of the system. Additionally, allows to induce some delay on the whole system or only in some workers and even to simulate some failures freezing workers or its communication, ie, the Job Tracker component.
+	      Puppet Master is a component developed for testing \ac{MNRP}. To fully understand the potential of this system, we needed a tool, first to monitoring all the system, second to induce some delays and failures to see how the system behaves. The Puppet Master allows to create workers and get the overall status of the system. Additionally, allows to induce some delay on the whole system or only in some workers and even to simulate some failures freezing workers or its communication, i.e., the Job Tracker component.
           
             \subsubsection{Management Interface}
             
-            The interface of Puppet Master it is provided of a script parsing system, which allows the user to introduce some commands through script that can be processed in batch or step-by-step. The user can load and save his scripts. The interface also has an Help menu that helps to build commands providing their syntax, and for the monitoring it shows up a list of the components of the system, their status and a log window, that was useful on the developing phase and helps to track every action on the system.
+            The interface of Puppet Master it is provided of a script parsing system, which allows the user to introduce some commands through script that can be processed in batch or step-by-step. The user can load and save his scripts. The interface also has an Help menu that helps to build commands providing their syntax and for the monitoring it shows up a list of the components of the system, their status and a log window, that was useful on the developing phase and helps to track every action on the system.
             
             \subsubsection{Create Worker}
             
@@ -232,19 +232,24 @@
 
             \subsubsection{Wait and Slow Worker}
             
-            The Wait command allows to induce some delay to the whole system of some given seconds and it's used to give some time between two commands, for example. Note that this command is only a \emph{Thread.Sleep} to the main thread of Puppet Master. As well, the Slow Worker command induces a delay of some seconds to the given worker, \emph{SLOWW ID SECS} using the emph{Thread.Sleep} to the main thread of that worker. This is used to simulated some slow machines that may delay the whole job processing.
+            The Wait command allows to induce some delay to the whole system of some given seconds and it's used to give some time between two commands, for example. Note that this command is only a \emph{Thread.Sleep} to the main thread of Puppet Master. As well, the Slow Worker command induces a delay of some seconds to the given worker using the emph{Thread.Sleep} to the main thread of that worker. This is used to simulated some slow machines that may delay the whole job processing.
 
             \subsubsection{Freeze/Unfreeze Worker} \label{freeze}
             
-            The Freeze command is used to simulate some machine that fails, helping us testing the system in a suppose real life scenario. \emph{FREEZEW ID} disables all the worker components and pauses the processing of requests. It was implemented attributing a \emph{ManualResetEvent} to every request that is received by the worker, which are set to \emph{WaitOne} when a freeze command arrives. Only when a unfreeze command is received the frozen requests are \emph{Set} and the worker returns to work.
+            The freeze command is used to simulate some machine that fails, helping us testing the system in a suppose real life scenario. It disables all the worker components and pauses the processing of requests. It was implemented attributing a \emph{ManualResetEvent} to every request that is received by the worker, which are set to \emph{WaitOne} when a freeze command arrives. Only when a unfreeze command is received the frozen requests are \emph{Set} and the worker returns to work.
 
           \subsubsection{Freeze/Unfreeze Communication}
           
-          To freeze the communication is to simulate the failure of the JobTracker component, since it is the responsible for it. When a freeze communication command is received \emph{FREEZEC} it is used a \emph{RemotingServices.Disconect} to avoid the component to receive any messages, as if it has failed. To recovery this component it's used the command \emph{UNFREEZEC} command.
+          To freeze the communication is to simulate the failure of the JobTracker component, since it is the responsible for it. When a freeze communication command is received, it is used a \emph{RemotingServices.Disconect} to avoid the component to receive any messages, as if it has failed. To recovery this component it's used a \emph{RemotingServices.Marshal} to reactivate the worker's communication.
 
             \subsubsection{Submit}
             
-            The Submit command enables to simulate the interaction with the client. When a submit command is performed it simulates the request of a client to apply a Map function to a set of data. The client requests to a specific worker, given by the \emph{Entry Url}, to process the data contained in the \emph{File}, dividing it into \emph{S} splits which should be distributed along some workers. The map class is given by the parameter \emph{MAP} which implements the \emph{IMapper} interface whose class library location is given by the \emph{DLL}. In the end, the output files should be in the \emph{OUTPUT} folder. When a Submit command is performed, the system runs an \emph{UserApplicationSample}. This application instantiates a \emph{ClientService} to run the\emph{Submit} method. When a \emph{ClientService} is instantiated, actually two different services are available: {\it (i)} \emph{ClientSplitProviderService} {\it (ii)} \emph{ClientOutputReceiverService}. The \emph{ClientSplitProviderService} is the service that will provide the splits to the workers. The \emph{ClientOutputReceiverService} is the service that will receive the results of the map function in the end of the job processing.
+            The Submit command enables to simulate the interaction with the client. When a submit command is performed it simulates the request of a client to apply a Map function to a set of data. The client requests to a specific worker, given by the \emph{Entry Url}, to process the data contained in the \emph{File}, dividing it into \emph{S} splits which should be distributed along some workers. The map class is given by the parameter \emph{Map} which implements the \emph{IMapper} interface whose class library location is given by the \emph{Dll}. In the end, the output files should be in the give \emph{Output} folder. When a Submit command is performed, the system runs an \emph{UserApplicationSample}. This application instantiates a \emph{ClientService} to run the\emph{Submit} method. When a \emph{ClientService} is instantiated, actually two different services are available: {\it (i)} \emph{ClientSplitProviderService} {\it (ii)} \emph{ClientOutputReceiverService}. The \emph{ClientSplitProviderService} is the service that will provide the splits to the workers. The \emph{ClientOutputReceiverService} is the service that will receive the results of the map function in the end of the job processing.
+            After the \emph{ClientService} instantiation and the call of \emph{Submit} method with the given parameters, the client does the \emph{SplitAndSave} of the file to process and saves it to a list that will be also send to the worker, that will be the Master Worker.
+            There is a third service in the client side, {\it (iii)} \emph{OutputReadyListener} that will be waiting until the job processing is completed.
+            On the Master Worker side, when a job is received it is triggered the Task Runner and the \emph{ScheduleJob} method puts the job into the queue. The Task Runner triggers the \emph{DefaultJobScheduler} which is finally the one who dequeues the job, looks at the splits, looks for the available workers and does the \emph{SplitsDelivery}.
+            Each available worker will receive a split to apply the map function. When a worker receives a split, it triggers the Task Tracker which changes the worker's status to Busy and shows that it's alive, asks to the \emph{ClientSplitProviderService} the necessary data to process the split and loads the assembly of the map function. With everything ready, the worker applies the map function to the data, accesses the \emph{ClientOutputReceiverService} and sends the result of its processing.
+            Back to the client side, the \emph{OutputReadyListener} that was waiting is \emph{Set} when all the splits' result arrive and those results are written to disk in the \emph{OUTPUT} folder. The job was successfully processed.
 
 	\section{Evaluation}
 
@@ -252,7 +257,7 @@
 
     In this work we implemented and evaluated a design that solved the JobTracker fault tolerance and scalability problems in a way that did not significantly affect the overall system performance.
     
-    The proposed design is based on saving the JobTracker state into a set of slave replicas. The JobTracker is started in the platform as a distributed task, and in case the node where it runs fails, the platform performs the JobTracker automatic failover on some other, healthy node. Upon a restart, the JobTracker loads the stored state and continues with the normal operation. During the failover, TaskTrackers can continue executing the running jobs normally and the Clients and TaskTrackers automatically reconnect to the JobTracker upon the restart. In addition, the system is available for users to submit new jobs all the time.
+    The proposed design is based on saving the JobTracker state into a set of slave replicas. The JobTracker is started in the platform as a distributed task, and in case the node where it runs fails, the platform performs the JobTracker automatic failover on some other healthy node. Upon a restart, the JobTracker loads the stored state and continues with the normal operation. During the failover, TaskTrackers can continue executing the running jobs normally and the Clients and TaskTrackers automatically reconnect to the JobTracker upon the restart. In addition, the system is available for users to submit new jobs all the time.
     
     The evaluation showed that the solution does not make significant a impact on the system performance. The state saving overhead is negligible when running simple jobs and grows slowly when increasing the number and complexity of jobs. The scalability part of the solution showed performance improvements under specific deployment settings when compared to the original distribution, which is mainly the result of the improved jobs scheduling.
 
