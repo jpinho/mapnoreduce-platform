@@ -96,9 +96,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\pentagon2.ico" />
-    <Content Include="Resources\LibMapper.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Resources\LibMapperCharCount.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -119,24 +116,9 @@
     </Content>
     <Content Include="Resources\LibMapperCharCount.dll" />
     <Content Include="Resources\LibMapperParadiseCount.dll" />
-    <Content Include="Resources\LibPADIMapNoReduce.dll" />
-    <Content Include="Resources\pl.txt" />
     <Content Include="Resources\pl10.txt" />
-    <Content Include="Resources\SharedTypes.dll" />
     <Content Include="Resources\UserMappersLib.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\pl.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\pl10.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\pl100.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\pl2000.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\UserMappersLib.dll">

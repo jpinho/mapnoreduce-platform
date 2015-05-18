@@ -2,6 +2,11 @@
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\urlprefix}{URL }
 
+\bibitem{Dean2008}
+Dean, J., Ghemawat, S.: {MapReduce : Simplified Data Processing on Large
+  Clusters}. Communications of the ACM  51(1),  1--13 (2008),
+  \url{http://portal.acm.org/citation.cfm?id=1327492}
+
 \bibitem{Facebook2012}
 Facebook: {Under the Hood: Scheduling MapReduce jobs more efficiently with
   Corona} (2012), \url{https://www.facebook.com/notes/facebook-

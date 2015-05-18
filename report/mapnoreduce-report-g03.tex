@@ -252,6 +252,60 @@
 
 	\section{Evaluation}
 
+    All the experiments presented here have been performed in accordance to requirements presented in the Architecture section in order to show the level of their fulfillment.
+    
+    Our evaluation addresses the following aspects of the solution:
+    
+    \begin{itemize}
+        \item Robustness of the fault tolerant solution and the Job-Tracker restart time
+        \vspace{-5pt}
+        \item State saving overhead
+        \vspace{-5pt}
+        \item Message exchange overhead
+        \vspace{-5pt}
+        \item Scalability of the solution
+    \end{itemize}
+
+    Within our limited time frame, we had time to setup two tests scenarios \textit{(i)} the first tests the execution the job ``pl10.txt'' with a distributed load between two machines on the same network, and \textit{(ii)} we tests the same scenario in presence of a failure of the job tracker.
+    
+    The results acquired are presented on tables 1 and 2.
+
+    \begin{table}
+        \centering
+        \label{eval1}
+        \caption{Failure-free Test Scenario w/ 10 Workers}
+    \begin{tabular}{l | c}
+        \toprule
+        Metrics & Statistics\\
+        \midrule
+        Mapper & Char Count \\ 
+        Execution Time & 33 secs \\ 
+        \# Messages & 3.742 \\ 
+        Messages Total Size & 2.937.361 \\ 
+        Result size in bytes & 100 bytes \\
+        Result pairs count & 10 \\
+        \bottomrule
+    \end{tabular} 
+    \end{table}
+
+    \begin{table}
+        \centering
+        \label{eval2}
+        \caption{Test Scenario w/ Job Tracker Failure}
+        \begin{tabular}{l | c}
+            \toprule
+            Metrics & Statistics\\
+            \midrule
+            Mapper & Char Count \\ 
+            Execution Time & 43 secs \\ 
+            \# Messages & 9.158 \\ 
+            Messages Total Size & 7.532.600 \\ 
+            Result size in bytes & 100 bytes \\
+            Result pairs count & 10 \\
+            \bottomrule
+            \end{tabular} 
+            \end{table}
+    
 	\section{Conclusions}
 
     In this work we implemented and evaluated a design that solved the JobTracker fault tolerance and scalability problems in a way that did not significantly affect the overall system performance.

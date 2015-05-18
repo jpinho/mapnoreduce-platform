@@ -3,47 +3,44 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: mapnoreduce-report-g03.aux
 The style file: splncs03.bst
 Database file #1: mapnoreduce-report-g03.bib
-Warning--I didn't find a database entry for "ChingFacebook2012"
-Warning--I didn't find a database entry for "GhemawatMR2008"
-You've used 3 entries,
+You've used 4 entries,
             2785 wiz_defined-function locations,
-            606 strings with 5213 characters,
-and the built_in function-call counts, 1250 in all, are:
-= -- 103
-> -- 26
-< -- 1
-+ -- 11
-- -- 8
-* -- 69
-:= -- 165
-add.period$ -- 1
-call.type$ -- 3
-change.case$ -- 13
+            613 strings with 5361 characters,
+and the built_in function-call counts, 1785 in all, are:
+= -- 149
+> -- 38
+< -- 3
++ -- 16
+- -- 12
+* -- 106
+:= -- 232
+add.period$ -- 2
+call.type$ -- 4
+change.case$ -- 18
 chr.to.int$ -- 0
-cite$ -- 3
-duplicate$ -- 107
-empty$ -- 126
-format.name$ -- 9
-if$ -- 274
+cite$ -- 4
+duplicate$ -- 157
+empty$ -- 173
+format.name$ -- 14
+if$ -- 390
 int.to.chr$ -- 0
-int.to.str$ -- 3
-missing$ -- 19
-newline$ -- 14
-num.names$ -- 6
-pop$ -- 47
+int.to.str$ -- 4
+missing$ -- 29
+newline$ -- 17
+num.names$ -- 8
+pop$ -- 60
 preamble$ -- 1
-purify$ -- 10
+purify$ -- 14
 quote$ -- 0
-skip$ -- 42
+skip$ -- 57
 stack$ -- 0
-substring$ -- 79
-swap$ -- 51
-text.length$ -- 1
+substring$ -- 111
+swap$ -- 83
+text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 12
+type$ -- 16
 warning$ -- 0
-while$ -- 12
-width$ -- 4
-write$ -- 30
-(There were 2 warnings)
+while$ -- 18
+width$ -- 5
+write$ -- 41
