@@ -220,15 +220,15 @@
           
             \subsubsection{Management Interface}
             
-            The interface of Puppet Master it is provided of a script parsing system, which allows the user to introduce some commands through script that can be processed in batch or step-by-step. The user can load and save his scripts. The interface also has an Help menu that helps to build commands providing their syntax and for the monitoring it shows up a list of the components of the system, their status and a log window, that was useful on the developing phase and helps to track every action on the system.
+            The interface of Puppet Master it is provided of a script parsing system, which allows the user to introduce some commands through script that can be processed in batch or step-by-step. The user can load and save his scripts. The interface also has an Help menu that helps to build commands providing their syntax and for the monitoring it shows up a list of the components of the system, their status and a log window.
             
             \subsubsection{Create Worker}
             
-            The create worker command instantiates a Worker with a given \emph{ID} and registers it on a given \emph{Service URI} associated to the given \emph{Puppet Master URL}. The parameter \emph{Entry URL}, specifies either if this new worker creation should be notified to the other workers, by calling the worker listening in this URI, or not, if it is left in blank. The worker creation also implies the update of the list of available workers of this Puppet Master.
+            The create worker command instantiates a Worker with a given \emph{ID} and registers it on a given \emph{Service URI} associated to the given \emph{Puppet Master URL}. The parameter \emph{Entry URL}, specifies either if this new worker creation should be notified to the other workers, by calling the worker listening in this URI, or not, if it is left in blank.
             
             \subsubsection{Status}
 
-            The status command \emph{STATUS} prints the \emph{ID} and \emph{Status} of all workers. This \emph{Status} can be  \emph{Busy} if the worker is processing a job, \emph{Available} if is ready to receive a job, \emph{Frozen} if a Freeze Worker command has been used (see section \ref{freeze}), or \emph{Offline}. This information is available on the Monitoring tab of the Management Interface.
+            The status command \emph{STATUS} prints the \emph{ID} and \emph{Status} of all workers. This \emph{Status} can be  \emph{Busy} if the worker is processing a job, \emph{Available} if is ready to receive a job, \emph{Frozen} if a Freeze Worker command has been used (see section \ref{freeze}), or \emph{Offline}. 
 
             \subsubsection{Wait and Slow Worker}
             
@@ -236,7 +236,7 @@
 
             \subsubsection{Freeze/Unfreeze Worker} \label{freeze}
             
-            The freeze command is used to simulate some machine that fails, helping us testing the system in a suppose real life scenario. It disables all the worker components and pauses the processing of requests. It was implemented attributing a \emph{ManualResetEvent} to every request that is received by the worker, which are set to \emph{WaitOne} when a freeze command arrives. Only when a unfreeze command is received the frozen requests are \emph{Set} and the worker returns to work.
+            The freeze command is used to simulate some machine that fails, helping us testing the system in a suppose real life scenario. It disables all the worker components and pauses the processing of requests. It was implemented attributing a \emph{ManualResetEvent} to every request that is received by the worker, which are set to \emph{WaitOne} when a freeze command arrives.
 
           \subsubsection{Freeze/Unfreeze Communication}
           
@@ -248,31 +248,28 @@
             After that, the client does the \emph{SplitAndSave} of the file to process and saves it to a list that will be also send to the Master worker.
             There is a third service in the client side, {\it (iii)} \emph{OutputReadyListener} that will be waiting until the job processing is completed.
             On the Master Worker side, it is done the \emph{SplitsDelivery} through some workers and each of them asks for the data, executes the task and gives its result to the client.
-            Back to the client side, the \emph{OutputReadyListener} that was waiting is \emph{Set} when all the splits' result arrive and those results are written to the \emph{Output} folder. The job was successfully processed.
+            Back to the client side, the \emph{OutputReadyListener} that was waiting is \emph{Set} when all the splits' result arrive and those results are written to the \emph{Output} folder. 
 
 	\section{Evaluation}
 
-    All the experiments presented here have been performed in accordance to requirements presented in the Architecture section in order to show the level of their fulfillment.
-    
-    Our evaluation addresses the following aspects of the solution:
+    All the experiments presented here have been performed in accordance to requirements presented in the Architecture section in order to show the level of their fulfillment. Our evaluation addresses the following aspects of the solution:
     
     \begin{itemize}
+        \vspace{-3pt}
         \item Robustness of the fault tolerant solution and the Job-Tracker restart time
-        \vspace{-5pt}
-        \item State saving overhead
-        \vspace{-5pt}
-        \item Message exchange overhead
-        \vspace{-5pt}
+        \vspace{-6pt}
+        \item State saving and message exchange overhead
+        \vspace{-6pt}
         \item Scalability of the solution
+                \vspace{-3pt}
     \end{itemize}
 
-    Within our limited time frame, we had time to setup two tests scenarios \textit{(i)} the first tests the execution the job ``pl10.txt'' with a distributed load between two machines on the same network, and \textit{(ii)} we tests the same scenario in presence of a failure of the job tracker.
-    
-    The results acquired are presented on tables 1 and 2.
+    Within our limited time frame, we had time to setup two tests scenarios \textit{(i)} the first tests the execution the job ``pl10.txt'' with a distributed load between two machines on the same network, and \textit{(ii)} we tests the same scenario in presence of a failure of the job tracker. The results acquired are presented on tables 1 and 2.
 
     \begin{table}
         \centering
         \label{eval1}
+                                                \vspace{-10pt}
         \caption{Failure-free Test Scenario w/ 10 Workers}
     \begin{tabular}{l | c}
         \toprule
@@ -285,12 +282,14 @@
         Result size in bytes & 100 bytes \\
         Result pairs count & 10 \\
         \bottomrule
-    \end{tabular} 
+    \end{tabular}
+                                        \vspace{-10pt} 
     \end{table}
 
     \begin{table}
         \centering
         \label{eval2}
+                                                \vspace{-10pt}
         \caption{Test Scenario w/ Job Tracker Failure}
         \begin{tabular}{l | c}
             \toprule
@@ -304,15 +303,15 @@
             Result pairs count & 10 \\
             \bottomrule
             \end{tabular} 
+                                    \vspace{-10pt}
             \end{table}
-    
 	\section{Conclusions}
 
     In this work we implemented and evaluated a design that solved the JobTracker fault tolerance and scalability problems in a way that did not significantly affect the overall system performance.
     
     The proposed design is based on saving the JobTracker state into a set of slave replicas. The JobTracker is started in the platform as a distributed task, and in case the node where it runs fails, the platform performs the JobTracker automatic failover on some other healthy node. Upon a restart, the JobTracker loads the stored state and continues with the normal operation. During the failover, TaskTrackers can continue executing the running jobs normally and the Clients and TaskTrackers automatically reconnect to the JobTracker upon the restart. In addition, the system is available for users to submit new jobs all the time.
     
-    The evaluation showed that the solution does not make significant a impact on the system performance. The state saving overhead is negligible when running simple jobs and grows slowly when increasing the number and complexity of jobs. The scalability part of the solution showed performance improvements under specific deployment settings when compared to the original distribution, which is mainly the result of the improved jobs scheduling.
+    The evaluation showed that the solution does not make significant a impact on the system performance. The state saving overhead is negligible when running simple jobs and grows slowly when increasing the number and complexity of jobs.
 
 	\bibliographystyle{splncs03}
 	\bibliography{mapnoreduce-report-g03}
