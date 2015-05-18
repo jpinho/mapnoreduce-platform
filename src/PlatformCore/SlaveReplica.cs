@@ -83,7 +83,7 @@ namespace PlatformCore
                     replicaStatesWaitCycles++;
                     recoverJobTrackerEvent.WaitOne(RECOVERY_ATTEMPT_DELAY);
                 }
-
+                
                 Worker.PromoteToMaster(MasterJobTrackerState.Item1);
                 isMasterRecovered = true;
             }
@@ -115,6 +115,7 @@ namespace PlatformCore
             } finally {
                 if (error) {
                     if (++failedHeartbeatAttempts >= MAX_FAILED_HEARTBEATS_BEF_RECOVER && !inRecovery) {
+                        failedHeartbeatAttempts=0;
                         Trace.WriteLine("SlaveReplica '" + Worker.WorkerId + "' starting recovery procedure.");
                         inRecovery = true;
                         masterRecovery.Change(0, RECOVERY_ATTEMPT_DELAY);
