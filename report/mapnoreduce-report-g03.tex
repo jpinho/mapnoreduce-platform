@@ -198,10 +198,21 @@
             After taking the crashed \textit{TaskRunner's} place, the replicas detect the \textit{TaskRunner} is online again, an start sending heartbeats to it, like if nothing had happened. Any current job splits sent during the failure are assumed to have been lost due to their workers failure, and are reassigned to new workers. Therefore enabling the job processing to proceed without noticing any failure.
     	
     	\subsection{Cluster Resource Management}
-            Our solution for resource management was built based on a simpler version of Facebook Corona~\cite{Facebook2012}. We developed it by implementing a Fair Share Scheduler, detailed in Section~\ref{fairshare}. The basic idea is that, if there are no Job Tracker executing on the \ac{MNRP}, the first Job Tracker gets a share containing all the available workers on the server node were it is located. Subsequent Job Trackers that arrive at the system, ask for an equal share to process their jobs, i.e, if there are four Job Trackers, one forth of the workers should be given to each Job Tracker. When this is not possible, due to lack of available workers at the Job Tracker's server node, the Job Tracker borrows workers from other server nodes, to process its job's. Finally, if there are not enough workers available in all server nodes to complete the share a Job Tracker requires, that Job Tracker is put on a waiting queue, until there are enough resources for it to operate.
+            Our solution for resource management was built based on a simpler version of Facebook Corona~\cite{Facebook2012}.
+            We developed it by implementing a Fair Share Scheduler, detailed in Section~\ref{fairshare}. The basic idea is ,
+            if there are no Job Tracker executing on the \ac{MNRP}, the first Job Tracker gets a share containing all the available workers on
+            the server node were it is located. Subsequent Job Trackers that arrive at the system, ask for an equal share to process their jobs,
+            i.e, if there are four Job Trackers, one forth of the workers should be given to each Job Tracker. When this isn't possible, due to lack
+            of available workers at the Job Tracker's server node, the Job Tracker borrows workers from other server nodes, to process its job's.
+            Finally, if there are not enough workers available in all server nodes to complete the share a Job Tracker requires, that Job Tracker is put
+            on a waiting queue, until there are enough resources for it to operate.
         
             \subsubsection{Fair Share Scheduler}\label{fairshare}
-            The Fair-Share algorithm provides a very balanced solution, both on efficiency and time taken to develop it. In our algorithm implementation for resource attribution it was taken into account the known PuppetMaster and Task Runners. The algorithm is simple, and works as follows: on resources request the number of available workers is divided by the number of know PuppetMaster's plus the numbers of TaskRunners. This way requests issued from one cluster to another, enables the requester to be given the same amount of resources as a worker, regarding the Fair-Share algorithm. This way the distributed resources request is answered with a larger amount of resources, that it would be, if were taken into account the workers inside de issuing cluster.
+            The Fair-Share algorithm provides a very balanced solution, both on efficiency and time taken to develop it. In our algorithm implementation
+            for resource attribution it was taken into account the known PuppetMaster and Task Runners. The algorithm is simple, and works as follows: on resources
+            request the number of available workers is divided by the number of know PuppetMaster's plus the numbers of TaskRunners. This way requests issued from one
+            cluster to another, enables the requester to be given the same amount of resources as a worker, regarding the Fair-Share algorithm. This way the distributed
+            resources request is answered with a larger amount of resources, that it would be, if were taken into account the workers inside de issuing cluster.
 
     	\subsection{Puppet Master}
         
