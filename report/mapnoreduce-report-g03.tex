@@ -4,11 +4,12 @@
 \usepackage{graphicx}
 \usepackage[utf8x]{inputenc}
 \usepackage{enumitem}
-\usepackage{amsmath}
+\usepackage{mathtools}
 \usepackage{bm}
+\usepackage{breqn}
 \usepackage{wasysym}
-\usepackage{amsfonts}%
-\usepackage{amssymb}%
+\usepackage{amsfonts}
+\usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{fixltx2e}
 \usepackage{color} 
@@ -90,6 +91,8 @@
         On the other end, each worker that receives the job of processing a given job's split, must report progress to the entry worker in regular intervals, to let it know that the job split is being processed without any problems.
         
         In the \ac{MNRP}, to an entry worker responsible of managing the processing of a whole job we call, Task Runner and to a worker that reports progress to the Task Runner we call Task Tracker.
+        
+        Note that, on a real world setup, ideally workers would be distributed by various machines within a cluster. In our work we opted to segment those workers differently within threads, were each machine running our solution acts like a cluster with multiples workers. This decision enabled us to test the system with few resources, since we do not have a cluster of machines at our disposal.
        
     	\subsection{Job Tracker}
         
@@ -135,11 +138,61 @@
          
         	\subsubsection{Coordination Manager}\label{coord-man}
             
+            In our implementation, we followed a Master-Slave replication model, similar to the one proposed by Francesco Salbaroli~\cite{FrancescoSalbaroli2008}. In this approach, the \textit{CoordinationManager} is responsible for coordinating state updates of the \textit{TaskRunner} with a set of slave replicas. Each replica is able to save the latest state update of their \textit{TaskRunner}. On the other hand, those replicas periodically, send alive signals to the \textit{TaskRunner} in order to let both parties know about each other failures. This way, when a replica crashes, the \textit{CoordinationManager} can attempt to recover it, by electing a new worker to receive state updates of the \textit{TaskRunner}. And likewise, the replica can try to recover a crashed \textit{TaskRunner} if it is unable to communicate with it. To achieve this, the \textit{CoordinationManager} performs a set o steps, detailed bellow:
             
+            \begin{itemize}
+                
+                \item[] {\bfseries Initialization:} During the initialization step the \textit{CoordinationManager} picks a set of replicas from the workers assigned to its \textit{TaskRunner}—workers assignment to a given \textit{JobTracker} will be better explained on Section~\ref{cluster-man}. After electing the workers that will be receiving state updates, known as Slave Replicas, the \textit{CoordinationManager} initializes the Slave Replica component on each worker and assigns them a priority number. These numbers define an hierarchy among those replicas, in an ascending order. 
+                
+                During a failure those numbers, are used to identify whose replica should attempt to recover the crashed \textit{TaskRunner} first. Along with a priority number, each replica is also given a list of their sibling replicas, used during the recovery of a \textit{TaskRunner} to enable the coordination of the process among them.
+                
+                \item[] {\bfseries Pick Replicas:} The replica picking process involves selecting a determined number of replicas not known \textit{a priori}. The problem faced in this selection is the following: if the amount of workers assigned to a given \textit{TaskRunner} is large—bigger than 5K, —the number of replicas is expected to be proportional to that number, but not directly, i.e, we don't want to depend on a relative measure like a percentage. If we do, for a 5K workers we would have 2.5K replicas which is absurd. Instead we used a function that enabled us to acquire a more balanced number of replicas, independently of the amount of workers involved, and which provides an ideal number of replicas when we have just one worker—the \textit{TaskRunner}— case in which we expect the number of replicas to be zero, since in that case we don't have resources to provide replication. Although, it is a very rare scenario, the properties of your formula holds and contemplates this without any added complexity. 
+                
+                Therefore, to find the optimum number of replicas we use the formula bellow:
+                 \begingroup
+                 \small  
+                 \begin{equation*}
+                 \begin{aligned}
+                    min( & workersCount, \\ & round( ceiling(\log{workersCount})) * r\_factor))
+                 \end{aligned}
+                 \end{equation*}
+                 \endgroup
+            
+                The table bellow illustrates some examples of the number of replicas required for a \textit{TaskRunner} using our equation:
+            
+                \begin{table}[!h]
+                    \centering
+                    \begin{tabular}{c c c}
+                        \toprule \# workers & \# replicas & \textit{r\_~factor} \\
+                        \midrule\vspace{-8pt} \\
+                        1 & 0 & 1.0\\ 
+                        \textless 100 & 2 & 1.0 \\ 
+                        \textless 1000 & 3 & 1.0 \\ 
+                        \textless 10.000 & 4 & 1.0 \\ 
+                        \textless 100.000 & 5 & 1.0 \\ 
+                        \bottomrule 
+                    \end{tabular} 
+                \end{table}
+                
+                \item[] {\bfseries State Updates:} In the state update procedure the \textit{CoordinatorManager} performs 3 actions \textit{(i)} it sends a list containing the current active replicas to all other replicas, so that in case of a replica failure, all replicas are informed, \textit{(ii)} the current state of the \textit{TaskRunner} is sent to all active replicas, and \textit{(iii)} the \textit{CoordinatorManager} checks whether there are replicas that stopped communicating with it. On \textit{(iii)}, when a replica failure is detected, the \textit{CoordinatorManager} fires a new thread to handle the replica recovery on a separate context, to avoid blocking the current thread, responsible for communicating state updates to other replicas.
+                
+                \item[] {\bfseries Alive Signals Listening:} Replicas communicate periodically with the \textit{TaskRunner} reporting they are up and running normally. This enables the \textit{TaskRunner} to keep track of crashed replicas and vice-versa.
+                
+                \item[] {\bfseries Crashed Replica Recoveries:} When a replica stops communicating with the \textit{TaskRunner} for more than 15 seconds, the \textit{CoordinatorManager} triggers the replica recovery procedure. That consists of selecting a new replica from the current available workers that are not already serving as replicas. The new replica receives a priority number equal to the last replica's priority number plus one. Which puts it in the end of the replication chain.
+                
+            \end{itemize}
+            
+            Its worth noting that, because recovered replicas are always added to the end of the replication chain and the list of active replicas is periodically updated to all replicas, if a master replica fails, the next replica in the chain is automatically promoted to master replica. Therefore, enabling fault-tolerance even over the fault-tolerance mechanism.
         	
         	\subsubsection{Slave Replica}\label{slave-replica}
+            
+            A slave replica main functions consists of receiving state updates from its \textit{TaskRunner} and sending heartbeats to it every 5 seconds. When a slave replica fails to communicate with its \textit{TaskRunner} it starts incrementing a counter of failed attempts. When that counter reaches a certain threshold the \textit{Master JobTracker} procedure is initiated.
+            
+            During the recover procedure the master replica, waits for all replicas to report the last received state of their \textit{TaskRunner}. And when it receives all states, the most up-to-date gets selected by the master replica. With the most recent state, the master replica promotes itself to master with the latest state received by all replicas.
+            
+            After taking the crashed \textit{TaskRunner's} place, the replicas detect the \textit{TaskRunner} is online again, an start sending heartbeats to it, like if nothing had happened. Any current job splits sent during the failure are assumed to have been lost due to their workers failure, and are reassigned to new workers. Therefore enabling the job processing to proceed without noticing any failure.
     	
-    	\subsection{Cluster Resource Management}
+    	\subsection{Cluster Resource Management}\label{cluster-man}
     	
             \subsubsection{Fair Share Scheduler}
         
@@ -217,5 +270,5 @@
 	\section{Conclusions}
 	
 	\bibliographystyle{mapnoreduce-report-g03}
-	\bibliography{mapnoreduce-rpt-g03}
+	\bibliography{mapnoreduce-report-g03}
 \end{document}
