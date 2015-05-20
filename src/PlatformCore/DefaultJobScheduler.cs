@@ -144,7 +144,7 @@ namespace PlatformCore
                         Trace.WriteLine("Split " + split + " removed from splits queue.");
 
                         Tracker.WorkerAliveSignals[remoteWorker.WorkerId] = DateTime.Now;
-                        splitsBeingProcessed.Add(split, remoteWorker.WorkerId);
+                        splitsBeingProcessed[split] = remoteWorker.WorkerId;
                     }
                 } catch (RemotingException ex) {
                     Trace.WriteLine(ex.GetType().FullName + " - " + ex.Message
