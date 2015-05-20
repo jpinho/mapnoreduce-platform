@@ -65,7 +65,11 @@ namespace PlatformCore
 
                     KnownPmsUris.ForEach(uri => {
                         var remotePM = RemotingHelper.GetRemoteObject<IPuppetMasterService>(uri);
-                        UpdatePmsList(remotePM.UpdatePmsList(KnownPmsUris));
+
+                        var broadcastPms = KnownPmsUris;
+                        broadcastPms.Add(ServiceUrl);
+
+                        UpdatePmsList(remotePM.UpdatePmsList(broadcastPms));
                         Trace.WriteLine("Updating PM at '" + uri + "' of my known PMs.");
 
                         if (knownCount < KnownPmsUris.Count) {
