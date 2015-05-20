@@ -9,6 +9,8 @@ report/*.pdf
 report/*.gz
 report/papers/
 report/*.out
+*pl100.txt
+*pl2000.txt
 
 # User-specific files
 *.suo
