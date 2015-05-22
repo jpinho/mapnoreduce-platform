@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.Remoting;
 using System.Threading;
 using SharedTypes;
+using System.Threading.Tasks;
 
 namespace PlatformCore
 {
@@ -23,6 +24,7 @@ namespace PlatformCore
 		private SlaveReplica replicaTracker;
 		public enum State { Running, Failed, Frozen };
 		public delegate bool ExecuteMapJobDelegate(JobTask task);
+		public Task ExecutionTask { get; set; }
 
 		/// <summary>
 		/// This worker id.

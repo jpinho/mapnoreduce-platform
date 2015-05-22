@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SharedTypes
 {
@@ -23,6 +24,11 @@ namespace SharedTypes
         /// This worker id.
         /// </summary>
         int WorkerId { get; set; }
+
+		/// <summary>
+		/// The thread that executes the job. Usefull for freeze and slow.
+		/// </summary>
+		Task ExecutionTask { get; set; }
 
         /// <summary>
         /// List of all workers known by this worker.

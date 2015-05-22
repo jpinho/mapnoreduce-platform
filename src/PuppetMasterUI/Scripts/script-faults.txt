@@ -1,0 +1,34 @@
+%WORKER 1 tcp://localhost:20001/PM tcp://localhost:30001/W tcp://localhost:30001/W
+%WORKER 2 tcp://localhost:20001/PM tcp://localhost:30002/W tcp://localhost:30001/W
+%WORKER 3 tcp://localhost:20001/PM tcp://localhost:30003/W tcp://localhost:30001/W
+%WORKER 4 tcp://localhost:20001/PM tcp://localhost:30004/W tcp://localhost:30001/W
+%WORKER 5 tcp://localhost:20001/PM tcp://localhost:30005/W tcp://localhost:30001/W
+WORKER 6 tcp://localhost:20001/PM tcp://localhost:30006/W tcp://localhost:30001/W
+WORKER 7 tcp://localhost:20001/PM tcp://localhost:30007/W tcp://localhost:30001/W
+WORKER 8 tcp://localhost:20001/PM tcp://localhost:30008/W tcp://localhost:30001/W
+WORKER 9 tcp://localhost:20001/PM tcp://localhost:30009/W tcp://localhost:30001/W
+STATUS
+%check clock for start time
+SUBMIT tcp://localhost:30003/W time60.txt result 16 TimeMapper ./LibMapperTime.dll
+%check clock for end time
+STATUS
+% fail / recover
+FREEZEW 4
+WAIT 1
+UNFREEZEW 4
+WAIT 3
+STATUS
+FREEZEC 1
+FREEZEW 9
+WAIT 3
+STATUS
+FREEZEC 2
+FREEZEW 8
+WAIT 3
+STATUS
+FREEZEC 3
+FREEZEW 7
+WAIT 3
+STATUS
+
+

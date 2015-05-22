@@ -128,8 +128,11 @@ namespace PlatformCore
 							job.MapClassName, job.MapFunctionAssembly, job.OutputReceiverUrl, job.SplitProviderUrl);
 					});
 
+					remoteWorker.ExecutionTask = asyncTask;
+
 					asyncTask.GetAwaiter().OnCompleted(() => {
 						lock (schedulerMutex) {
+							remoteWorker.ExecutionTask = null; 
 							splitsBeingProcessed.Remove(split);
 						}
 
