@@ -127,17 +127,21 @@ namespace PlatformCore
                         remoteWorker.ExecuteMapJob(split, job.FileName, job.FileSplits, job.JobTrackerUri,
                             job.MapClassName, job.MapFunctionAssembly, job.OutputReceiverUrl, job.SplitProviderUrl);
                     });
-
+			 
+					remoteWorker.ExecutionTask = asyncTask;
+					
                     asyncTask.GetAwaiter().OnCompleted(() => {
                         lock (schedulerMutex) {
                             splitsBeingProcessed.Remove(split);
                         }
-
                         remoteWorker.SetStatus(WorkerStatus.Available);
                         Trace.WriteLine(string.Format("Worker '{0}' finished processing split number '{1}'."
                             , remoteWorker.ServiceUrl, split));
                     });
+
                     asyncTask.Start();
+
+					remoteWorker.ExecutionTask = null; 
 
                     lock (schedulerMutex) {
                         splitsQueue.Dequeue();

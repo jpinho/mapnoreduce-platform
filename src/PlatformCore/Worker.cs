@@ -7,6 +7,7 @@ using System.Runtime.Remoting;
 using System.Threading;
 using PlatformCore.Properties;
 using SharedTypes;
+using System.Threading.Tasks;
 
 namespace PlatformCore
 {
@@ -35,6 +36,7 @@ namespace PlatformCore
         public Uri ServiceUrl { get; set; }
         public Uri PuppetMasterUri { get; set; }
         public WorkerStatus Status { get; set; }
+		public Task ExecutionTask { get; set; }
 
         /// <summary>
         /// List of all workers known by this worker.
