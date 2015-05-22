@@ -74,18 +74,13 @@ namespace PuppetMasterLib
 							throw new CommandInvalidParameterException(string.Format(COMMAND_TYPE_EXCEPTION, keyWords[0], keyWords[4], "Integer"), e);
 						}
 
-						var runAsync = false;
-						if (keyWords.Length >= 8)
-							bool.TryParse(keyWords[7], out runAsync);
-
 						parsedCommands.Add(new Commands.SubmitJob() {
 							EntryUrl = keyWords[1].Trim(),
 							FilePath = keyWords[2].Trim(),
 							OutputPath = keyWords[3].Trim(),
 							Splits = splits,
 							MapClassName = keyWords[5].Trim(),
-							AssemblyFilePath = keyWords[6].Trim(),
-							RunAsync = runAsync
+							AssemblyFilePath = keyWords[6].Trim()
 						});
 
 						break;

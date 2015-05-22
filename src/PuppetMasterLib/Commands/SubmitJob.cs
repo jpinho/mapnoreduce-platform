@@ -14,8 +14,6 @@ namespace PuppetMasterLib.Commands
 		public int Splits { get; set; }
 		public string MapClassName { get; set; }
 		public string AssemblyFilePath { get; set; }
-		public bool RunAsync { get; set; }
-
 		public void Execute() {
 			MethodInvoker execJob = () => {
 				UserApplicationSample.Program.ExecuteMapJob(
@@ -23,10 +21,7 @@ namespace PuppetMasterLib.Commands
 					MapClassName, AssemblyFilePath);
 			};
 
-			if (RunAsync)
-				new Thread(new ThreadStart(execJob)).Start();
-			else
-				execJob();
+			new Thread(new ThreadStart(execJob)).Start();
 		}
 
 		public override string ToString() {

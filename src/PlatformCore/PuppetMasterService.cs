@@ -46,8 +46,8 @@ namespace PlatformCore
 
 		public void BroadcastAnnouncePm(Uri newPuppetMasterUri) {
 			if (newPuppetMasterUri.Host == Util.GetHostIpAddress() || newPuppetMasterUri == ServiceUrl) {
-				Trace.WriteLine("You are announcing yourself to yourself, please specify the "
-					+ "target to be informed of your existence.");
+				//Trace.WriteLine("You are announcing yourself to yourself, please specify the "
+				//	+ "target to be informed of your existence.");
 				return;
 			}
 
@@ -60,23 +60,23 @@ namespace PlatformCore
 				while (stateUpdate) {
 					stateUpdate = false;
 					var knownCount = KnownPmsUris.Count;
-					Trace.WriteLine("Known PMs Count: " + knownCount);
-					Trace.WriteLine("Broadcasting known PMs list to known PMs.");
+					//Trace.WriteLine("Known PMs Count: " + knownCount);
+					//Trace.WriteLine("Broadcasting known PMs list to known PMs.");
 
 					KnownPmsUris.ForEach(uri => {
 						var remotePM = RemotingHelper.GetRemoteObject<IPuppetMasterService>(uri);
 
 						UpdatePmsList(remotePM.UpdatePmsList(new List<Uri>(KnownPmsUris) { ServiceUrl }));
-						Trace.WriteLine("Updating PM at '" + uri + "' of my known PMs.");
+						//Trace.WriteLine("Updating PM at '" + uri + "' of my known PMs.");
 
 						if (knownCount < KnownPmsUris.Count) {
-							Trace.WriteLine("My known PMs list got updated when contacting PM at '" + uri + "'.");
+							//Trace.WriteLine("My known PMs list got updated when contacting PM at '" + uri + "'.");
 							stateUpdate = true;
 						}
 					});
 
-					if (stateUpdate)
-						Trace.WriteLine("Comunicating changes back again to all known PMs");
+					//if (stateUpdate)
+					//	Trace.WriteLine("Comunicating changes back again to all known PMs");
 				}
 			}
 		}
@@ -378,7 +378,7 @@ namespace PlatformCore
 		}
 
 		private static void NotifyWorkerCreation(Uri workerServiceUri, String entryUrl) {
-			Trace.WriteLine("Sends notification to worker at ENTRY_URL informing worker creation.");
+			//Trace.WriteLine("Sends notification to worker at ENTRY_URL informing worker creation.");
 
 			var masterWorker = RemotingHelper.GetRemoteObject<IWorker>(entryUrl);
 			masterWorker.NotifyWorkerJoin(workerServiceUri);
